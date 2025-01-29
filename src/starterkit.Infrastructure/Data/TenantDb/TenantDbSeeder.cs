@@ -41,12 +41,20 @@ namespace starterkit.Infrastructure.Data.TenantDb
                     throw new Exception($"Tenant {_tenantId} not found in root database");
                 }
 
-                // Create tenant admin in tenant database
-                var tenantAdmin = new User
+                // Get root admin from root database
+                var rootAdmin = await _rootContext.GlobalUsers.FirstOrDefaultAsync(u => u.UserType == UserType.RootAdmin);
+                if (rootAdmin == null)
                 {
-                    Email = $"admin@{tenant.Name.ToLower()}.com",
-                    FullName = $"{tenant.Name} Admin",
-                    PasswordHash = _passwordHashService.HashPassword("Admin@123"), // Use proper password hashing
+                    throw new Exception("Root admin not found in root database");
+                }
+
+                // Create root admin in tenant database with same ID
+                var rootAdminInTenant = new User
+                {
+                    Id = rootAdmin.Id, // Use the same ID as in root database
+                    Email = rootAdmin.Email,
+                    FullName = $"{rootAdmin.FirstName} {rootAdmin.LastName}",
+                    PasswordHash = rootAdmin.PasswordHash,
                     Status = UserStatus.Active,
                     CreatedBy = Guid.Empty, // System
                     Profile = new UserProfile
@@ -55,31 +63,49 @@ namespace starterkit.Infrastructure.Data.TenantDb
                     }
                 };
 
-                await _context.Users.AddAsync(tenantAdmin);
+                await _context.Users.AddAsync(rootAdminInTenant);
                 await _context.SaveChangesAsync();
 
-                // Create global user for tenant admin
-                var globalUser = new GlobalUser
+                // First create the global user for tenant admin
+                var globalTenantAdmin = new GlobalUser
                 {
-                    Email = tenantAdmin.Email,
+                    Email = $"admin@{tenant.Name.ToLower()}.com",
                     FirstName = tenant.Name,
                     LastName = "Admin",
-                    PasswordHash = tenantAdmin.PasswordHash,
+                    PasswordHash = _passwordHashService.HashPassword("Admin@123"),
                     UserType = UserType.TenantAdmin,
                     Status = UserStatus.Active,
-                    CreatedBy = Guid.Empty // System
+                    CreatedBy = rootAdmin.Id
                 };
 
-                await _rootContext.GlobalUsers.AddAsync(globalUser);
+                await _rootContext.GlobalUsers.AddAsync(globalTenantAdmin);
                 await _rootContext.SaveChangesAsync();
+
+                // Then create tenant admin in tenant database with same ID
+                var tenantAdmin = new User
+                {
+                    Id = globalTenantAdmin.Id, // Use the same ID as the global user
+                    Email = globalTenantAdmin.Email,
+                    FullName = $"{globalTenantAdmin.FirstName} {globalTenantAdmin.LastName}",
+                    PasswordHash = globalTenantAdmin.PasswordHash,
+                    Status = UserStatus.Active,
+                    CreatedBy = rootAdminInTenant.Id,
+                    Profile = new UserProfile
+                    {
+                        CreatedBy = rootAdminInTenant.Id
+                    }
+                };
+
+                await _context.Users.AddAsync(tenantAdmin);
+                await _context.SaveChangesAsync();
 
                 // Create tenant-user mapping in root database
                 var mapping = new TenantUserMapping
                 {
                     TenantId = tenant.Id,
-                    UserId = globalUser.Id,
+                    UserId = globalTenantAdmin.Id,
                     Role = "Admin",
-                    CreatedBy = Guid.Empty // System
+                    CreatedBy = rootAdmin.Id
                 };
 
                 await _rootContext.Set<TenantUserMapping>().AddAsync(mapping);

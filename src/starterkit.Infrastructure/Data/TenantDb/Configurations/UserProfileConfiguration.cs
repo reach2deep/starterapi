@@ -22,6 +22,12 @@ namespace starterkit.Infrastructure.Data.TenantDb.Configurations
             // AddressId is optional
             builder.Property(p => p.AddressId)
                 .IsRequired(false);
+
+            // Configure one-to-one relationship with Address
+            builder.HasOne(p => p.Address)
+                .WithOne()
+                .HasForeignKey<UserProfile>(p => p.AddressId)
+                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 } 
