@@ -103,6 +103,7 @@ builder.Services.AddScoped<ITenantAuthService, TenantAuthService>();
 builder.Services.AddScoped<IPasswordHashService, PasswordHashService>();
 builder.Services.AddScoped<IDataSeeder, RootDbSeeder>();
 builder.Services.AddScoped<ITenantDatabaseInitializer, TenantDatabaseInitializer>();
+builder.Services.AddScoped<ITenantResolver, TenantResolver>();
 
 var app = builder.Build();
 
