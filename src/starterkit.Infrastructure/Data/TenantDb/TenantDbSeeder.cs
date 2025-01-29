@@ -2,21 +2,21 @@ using Microsoft.EntityFrameworkCore;
 using starterkit.Core.Entities.Global;
 using starterkit.Core.Entities.Tenant;
 using starterkit.Core.Enums;
-using starterkit.Infrastructure.Data.RootDb;
+using starterkit.Core.Interfaces.Data;
 using starterkit.Infrastructure.Services;
 
 namespace starterkit.Infrastructure.Data.TenantDb
 {
     public class TenantDbSeeder : IDataSeeder
     {
-        private readonly TenantDbContext _context;
-        private readonly RootDbContext _rootContext;
+        private readonly ITenantDbContext _context;
+        private readonly IRootDbContext _rootContext;
         private readonly IPasswordHashService _passwordHashService;
         private readonly string _tenantId;
 
         public TenantDbSeeder(
-            TenantDbContext context, 
-            RootDbContext rootContext,
+            ITenantDbContext context, 
+            IRootDbContext rootContext,
             IPasswordHashService passwordHashService,
             string tenantId)
         {
@@ -28,9 +28,15 @@ namespace starterkit.Infrastructure.Data.TenantDb
 
         public async Task SeedAsync()
         {
-            // Ensure database is recreated with latest schema
-            //await _context.Database.EnsureDeletedAsync();
-            await _context.Database.MigrateAsync();
+            // For seeding, we need to cast to DbContext to use migrations
+            var dbContext = _context as DbContext;
+            if (dbContext == null)
+            {
+                throw new InvalidOperationException("Context must be a DbContext for migrations");
+            }
+
+            // Ensure database is migrated
+            await dbContext.Database.MigrateAsync();
 
             if (!await _context.Users.AnyAsync())
             {
@@ -51,20 +57,20 @@ namespace starterkit.Infrastructure.Data.TenantDb
                 // Create root admin in tenant database with same ID
                 var rootAdminInTenant = new User
                 {
-                    Id = rootAdmin.Id, // Use the same ID as in root database
+                    Id = rootAdmin.Id, // Use the same ID as the global user
                     Email = rootAdmin.Email,
                     FullName = $"{rootAdmin.FirstName} {rootAdmin.LastName}",
                     PasswordHash = rootAdmin.PasswordHash,
                     Status = UserStatus.Active,
-                    CreatedBy = Guid.Empty, // System
+                    CreatedBy = rootAdmin.Id,
                     Profile = new UserProfile
                     {
-                        CreatedBy = Guid.Empty // System
+                        CreatedBy = rootAdmin.Id
                     }
                 };
 
                 await _context.Users.AddAsync(rootAdminInTenant);
-                await _context.SaveChangesAsync();
+                await ((DbContext)_context).SaveChangesAsync();
 
                 // First create the global user for tenant admin
                 var globalTenantAdmin = new GlobalUser
@@ -79,7 +85,7 @@ namespace starterkit.Infrastructure.Data.TenantDb
                 };
 
                 await _rootContext.GlobalUsers.AddAsync(globalTenantAdmin);
-                await _rootContext.SaveChangesAsync();
+                await ((DbContext)_rootContext).SaveChangesAsync();
 
                 // Then create tenant admin in tenant database with same ID
                 var tenantAdmin = new User
@@ -97,7 +103,7 @@ namespace starterkit.Infrastructure.Data.TenantDb
                 };
 
                 await _context.Users.AddAsync(tenantAdmin);
-                await _context.SaveChangesAsync();
+                await ((DbContext)_context).SaveChangesAsync();
 
                 // Create tenant-user mapping in root database
                 var mapping = new TenantUserMapping
@@ -108,8 +114,8 @@ namespace starterkit.Infrastructure.Data.TenantDb
                     CreatedBy = rootAdmin.Id
                 };
 
-                await _rootContext.Set<TenantUserMapping>().AddAsync(mapping);
-                await _rootContext.SaveChangesAsync();
+                await _rootContext.TenantUserMappings.AddAsync(mapping);
+                await ((DbContext)_rootContext).SaveChangesAsync();
 
                 // Add some sample data for the tenant
                 await SeedSampleDataAsync(tenantAdmin.Id);

@@ -8,6 +8,7 @@ using starterkit.Application.Services.Tenant;
 using starterkit.Infrastructure.Data;
 using starterkit.Infrastructure.Data.RootDb;
 using starterkit.Infrastructure.Data.TenantDb;
+using starterkit.Infrastructure.Extensions;
 using starterkit.Infrastructure.MultiTenancy.Stores;
 using starterkit.Infrastructure.Services;
 using System.Text;
@@ -27,6 +28,9 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Starter Kit API", Version = "v1" });
+    
+    // Configure schema IDs to use full type names
+    c.CustomSchemaIds(type => type.FullName);
     
     // Add JWT Authentication
     var securityScheme = new OpenApiSecurityScheme
@@ -62,6 +66,9 @@ builder.Services.AddMemoryCache();
 
 // Add HTTP context accessor
 builder.Services.AddHttpContextAccessor();
+
+// Add tenant services
+builder.Services.AddTenantServices(builder.Configuration);
 
 // Add JWT Authentication
 builder.Services.AddAuthentication(options =>

@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using starterkit.Application.DTOs.Tenant;
+using starterkit.Core.DTOs.Tenant;
 using starterkit.Core.Entities.Tenant;
 using starterkit.Infrastructure.Data.TenantDb;
 

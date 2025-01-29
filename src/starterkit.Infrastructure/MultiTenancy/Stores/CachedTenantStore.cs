@@ -1,19 +1,19 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
-using starterkit.Infrastructure.Data.RootDb;
+using starterkit.Core.Interfaces.Data;
 using starterkit.Infrastructure.MultiTenancy.Models;
 
 namespace starterkit.Infrastructure.MultiTenancy.Stores
 {
     public class CachedTenantStore : ITenantStore
     {
-        private readonly RootDbContext _context;
+        private readonly IRootDbContext _context;
         private readonly IMemoryCache _cache;
-        private const string ALL_TENANTS_KEY = "all_tenants";
-        private const string TENANT_KEY_PREFIX = "tenant_";
         private readonly TimeSpan _cacheDuration = TimeSpan.FromMinutes(10);
+        private const string TENANT_KEY_PREFIX = "tenant_";
+        private const string ALL_TENANTS_KEY = "all_tenants";
 
-        public CachedTenantStore(RootDbContext context, IMemoryCache cache)
+        public CachedTenantStore(IRootDbContext context, IMemoryCache cache)
         {
             _context = context;
             _cache = cache;
@@ -21,7 +21,7 @@ namespace starterkit.Infrastructure.MultiTenancy.Stores
 
         public async Task<TenantInfo> GetTenantAsync(string identifier)
         {
-            var cacheKey = $"{TENANT_KEY_PREFIX}{identifier}";
+            var cacheKey = $"{TENANT_KEY_PREFIX}{identifier.ToLower()}";
 
             return await _cache.GetOrCreateAsync(cacheKey, async entry =>
             {

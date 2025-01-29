@@ -1,14 +1,15 @@
 using Microsoft.EntityFrameworkCore;
 using starterkit.Core.Entities.Tenant;
+using starterkit.Core.Interfaces.Data;
 using starterkit.Core.Interfaces.Repositories.Tenant;
 
 namespace starterkit.Infrastructure.Data.TenantDb.Repositories
 {
     public class UserProfileRepository : IUserProfileRepository
     {
-        private readonly TenantDbContext _context;
+        private readonly ITenantDbContext _context;
 
-        public UserProfileRepository(TenantDbContext context)
+        public UserProfileRepository(ITenantDbContext context)
         {
             _context = context;
         }
@@ -36,11 +37,17 @@ namespace starterkit.Infrastructure.Data.TenantDb.Repositories
 
         public async Task<UserProfile> UpdateAsync(UserProfile profile)
         {
-            _context.Entry(profile).State = EntityState.Modified;
+            _context.Set<UserProfile>().Update(profile);
             if (profile.Address != null)
             {
-                _context.Entry(profile.Address).State = profile.Address.Id == Guid.Empty ? 
-                    EntityState.Added : EntityState.Modified;
+                if (profile.Address.Id == Guid.Empty)
+                {
+                    _context.Set<Address>().Add(profile.Address);
+                }
+                else
+                {
+                    _context.Set<Address>().Update(profile.Address);
+                }
             }
             await _context.SaveChangesAsync();
             return profile;

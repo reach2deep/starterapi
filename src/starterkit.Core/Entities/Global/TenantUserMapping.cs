@@ -7,7 +7,7 @@ namespace starterkit.Core.Entities.Global
         public Guid TenantId { get; set; }
         public Guid UserId { get; set; }
         public string Role { get; set; }
-        public bool IsActive { get; set; } = true;
+        public new bool IsActive { get; set; } = true;
 
         // Navigation properties
         public Tenant Tenant { get; set; }
