@@ -3,20 +3,21 @@ using starterkit.Core.Entities.Global;
 using starterkit.Core.Entities.Tenant;
 using starterkit.Core.Enums;
 using starterkit.Core.Interfaces.Data;
+using starterkit.Infrastructure.Data.RootDb;
 using starterkit.Infrastructure.Services;
 
 namespace starterkit.Infrastructure.Data.TenantDb
 {
     public class TenantDbSeeder : IDataSeeder
     {
-        private readonly ITenantDbContext _context;
-        private readonly IRootDbContext _rootContext;
+        private readonly TenantDbContext _context;
+        private readonly RootDbContext _rootContext;
         private readonly IPasswordHashService _passwordHashService;
         private readonly string _tenantId;
 
         public TenantDbSeeder(
-            ITenantDbContext context, 
-            IRootDbContext rootContext,
+            TenantDbContext context,
+            RootDbContext rootContext,
             IPasswordHashService passwordHashService,
             string tenantId)
         {
@@ -28,138 +29,160 @@ namespace starterkit.Infrastructure.Data.TenantDb
 
         public async Task SeedAsync()
         {
-            // For seeding, we need to cast to DbContext to use migrations
-            var dbContext = _context as DbContext;
-            if (dbContext == null)
+            try
             {
-                throw new InvalidOperationException("Context must be a DbContext for migrations");
-            }
+                // Ensure database is migrated
+                await _context.Database.MigrateAsync();
 
-            // Ensure database is migrated
-            await dbContext.Database.MigrateAsync();
-
-            if (!await _context.Users.AnyAsync())
-            {
-                // Get tenant info from root database
-                var tenant = await _rootContext.Tenants.FirstOrDefaultAsync(t => t.DatabaseName == _tenantId);
-                if (tenant == null)
+                if (!await _context.Users.AnyAsync())
                 {
-                    throw new Exception($"Tenant {_tenantId} not found in root database");
-                }
-
-                // Get root admin from root database
-                var rootAdmin = await _rootContext.GlobalUsers.FirstOrDefaultAsync(u => u.UserType == UserType.RootAdmin);
-                if (rootAdmin == null)
-                {
-                    throw new Exception("Root admin not found in root database");
-                }
-
-                // Create root admin in tenant database with same ID
-                var rootAdminInTenant = new User
-                {
-                    Id = rootAdmin.Id, // Use the same ID as the global user
-                    Email = rootAdmin.Email,
-                    FullName = $"{rootAdmin.FirstName} {rootAdmin.LastName}",
-                    PasswordHash = rootAdmin.PasswordHash,
-                    Status = UserStatus.Active,
-                    CreatedBy = rootAdmin.Id,
-                    Profile = new UserProfile
+                    // Get tenant info from root database
+                    var tenant = await _rootContext.Tenants
+                        .FirstOrDefaultAsync(t => t.DatabaseName == _tenantId);
+                    if (tenant == null)
                     {
+                        throw new Exception($"Tenant {_tenantId} not found in root database");
+                    }
+
+                    // Get root admin from root database
+                    var rootAdmin = await _rootContext.GlobalUsers
+                        .FirstOrDefaultAsync(u => u.UserType == UserType.RootAdmin);
+                    if (rootAdmin == null)
+                    {
+                        throw new Exception("Root admin not found in root database");
+                    }
+
+                    // Create root admin in tenant database with same ID
+                    var rootAdminInTenant = new User
+                    {
+                        Id = rootAdmin.Id,
+                        Email = rootAdmin.Email,
+                        FullName = $"{rootAdmin.FirstName} {rootAdmin.LastName}",
+                        PasswordHash = rootAdmin.PasswordHash,
+                        Status = UserStatus.Active,
+                        CreatedBy = rootAdmin.Id,
+                        Profile = new UserProfile
+                        {
+                            CreatedBy = rootAdmin.Id
+                        }
+                    };
+
+                    await _context.Users.AddAsync(rootAdminInTenant);
+                    await _context.SaveChangesAsync();
+
+                    // Create tenant admin
+                    var tenantAdmin = new User
+                    {
+                        Email = $"admin@{tenant.Name.ToLower()}.com",
+                        FullName = $"{tenant.Name} Admin",
+                        PasswordHash = _passwordHashService.HashPassword("Admin@123"),
+                        Status = UserStatus.Active,
+                        CreatedBy = rootAdminInTenant.Id,
+                        Profile = new UserProfile
+                        {
+                            CreatedBy = rootAdminInTenant.Id
+                        }
+                    };
+
+                    await _context.Users.AddAsync(tenantAdmin);
+                    await _context.SaveChangesAsync();
+
+                    // Create tenant-user mapping in root database
+                    var mapping = new TenantUserMapping
+                    {
+                        TenantId = tenant.Id,
+                        UserId = tenantAdmin.Id,
+                        Role = "Admin",
                         CreatedBy = rootAdmin.Id
-                    }
-                };
+                    };
 
-                await _context.Users.AddAsync(rootAdminInTenant);
-                await ((DbContext)_context).SaveChangesAsync();
+                    await _rootContext.TenantUserMappings.AddAsync(mapping);
+                    await _rootContext.SaveChangesAsync();
 
-                // First create the global user for tenant admin
-                var globalTenantAdmin = new GlobalUser
-                {
-                    Email = $"admin@{tenant.Name.ToLower()}.com",
-                    FirstName = tenant.Name,
-                    LastName = "Admin",
-                    PasswordHash = _passwordHashService.HashPassword("Admin@123"),
-                    UserType = UserType.TenantAdmin,
-                    Status = UserStatus.Active,
-                    CreatedBy = rootAdmin.Id
-                };
-
-                await _rootContext.GlobalUsers.AddAsync(globalTenantAdmin);
-                await ((DbContext)_rootContext).SaveChangesAsync();
-
-                // Then create tenant admin in tenant database with same ID
-                var tenantAdmin = new User
-                {
-                    Id = globalTenantAdmin.Id, // Use the same ID as the global user
-                    Email = globalTenantAdmin.Email,
-                    FullName = $"{globalTenantAdmin.FirstName} {globalTenantAdmin.LastName}",
-                    PasswordHash = globalTenantAdmin.PasswordHash,
-                    Status = UserStatus.Active,
-                    CreatedBy = rootAdminInTenant.Id,
-                    Profile = new UserProfile
-                    {
-                        CreatedBy = rootAdminInTenant.Id
-                    }
-                };
-
-                await _context.Users.AddAsync(tenantAdmin);
-                await ((DbContext)_context).SaveChangesAsync();
-
-                // Create tenant-user mapping in root database
-                var mapping = new TenantUserMapping
-                {
-                    TenantId = tenant.Id,
-                    UserId = globalTenantAdmin.Id,
-                    Role = "Admin",
-                    CreatedBy = rootAdmin.Id
-                };
-
-                await _rootContext.TenantUserMappings.AddAsync(mapping);
-                await ((DbContext)_rootContext).SaveChangesAsync();
-
-                // Add some sample data for the tenant
-                await SeedSampleDataAsync(tenantAdmin.Id);
+                    // Add some sample data
+                    //await SeedSampleDataAsync(tenantAdmin.Id, tenant.Id, rootAdmin.Id);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error seeding tenant database {_tenantId}: {ex.Message}", ex);
             }
         }
 
-        private async Task SeedSampleDataAsync(Guid createdBy)
+        private async Task SeedSampleDataAsync(Guid createdBy, Guid tenantId, Guid rootAdminId)
         {
-            // Add sample addresses if needed
-            if (!await _context.Addresses.AnyAsync())
+            // First create global users
+            var globalUsers = new List<GlobalUser>
             {
-                var sampleAddresses = new[]
+                new GlobalUser
                 {
-                    new Address
+                    Email = $"user1@{_tenantId}.com",
+                    FirstName = "Sample",
+                    LastName = "User 1",
+                    PasswordHash = _passwordHashService.HashPassword("User@123"),
+                    UserType = UserType.User,
+                    Status = UserStatus.Active,
+                    CreatedBy = rootAdminId
+                },
+                new GlobalUser
+                {
+                    Email = $"user2@{_tenantId}.com",
+                    FirstName = "Sample",
+                    LastName = "User 2",
+                    PasswordHash = _passwordHashService.HashPassword("User@123"),
+                    UserType = UserType.User,
+                    Status = UserStatus.Active,
+                    CreatedBy = rootAdminId
+                }
+            };
+
+            await _rootContext.GlobalUsers.AddRangeAsync(globalUsers);
+            await _rootContext.SaveChangesAsync();
+
+            // Then create tenant users with the same IDs
+            var users = new List<User>();
+            foreach (var globalUser in globalUsers)
+            {
+                var user = new User
+                {
+                    Id = globalUser.Id, // Use same ID as global user
+                    Email = globalUser.Email,
+                    FullName = $"{globalUser.FirstName} {globalUser.LastName}",
+                    PasswordHash = globalUser.PasswordHash,
+                    Status = UserStatus.Active,
+                    CreatedBy = createdBy,
+                    Profile = new UserProfile
                     {
-                        StreetAddress = "123 Main St",
-                        City = "Sample City",
-                        Country = "Sample Country",
-                        PostalCode = "12345",
-                        State = "Sample State",
-                        CreatedBy = createdBy
-                    },
-                    new Address
-                    {
-                        StreetAddress = "456 Oak Ave",
-                        City = "Another City",
-                        Country = "Another Country",
-                        PostalCode = "67890",
-                        State = "Another State",
-                        CreatedBy = createdBy
+                        DateOfBirth = DateTime.UtcNow.AddYears(-25 - users.Count * 5), // Different ages
+                        CreatedBy = createdBy,
+                        Address = new Address
+                        {
+                            StreetAddress = $"{123 + users.Count * 333} Main St",
+                            City = $"Sample City {users.Count + 1}",
+                            State = $"State {users.Count + 1}",
+                            Country = $"Country {users.Count + 1}",
+                            PostalCode = $"{12345 + users.Count * 55555}",
+                            CreatedBy = createdBy
+                        }
                     }
                 };
-
-                await _context.Addresses.AddRangeAsync(sampleAddresses);
-                await _context.SaveChangesAsync();
-
-                // Update some user profiles with addresses
-                var profiles = await _context.UserProfiles.Take(2).ToListAsync();
-                for (int i = 0; i < profiles.Count && i < sampleAddresses.Length; i++)
-                {
-                    profiles[i].AddressId = sampleAddresses[i].Id;
-                }
-                await _context.SaveChangesAsync();
+                users.Add(user);
             }
+
+            await _context.Users.AddRangeAsync(users);
+            await _context.SaveChangesAsync();
+
+            // Create tenant-user mappings
+            var mappings = users.Select(u => new TenantUserMapping
+            {
+                TenantId = tenantId,
+                UserId = u.Id,
+                Role = "User",
+                CreatedBy = createdBy
+            }).ToList();
+
+            await _rootContext.TenantUserMappings.AddRangeAsync(mappings);
+            await _rootContext.SaveChangesAsync();
         }
     }
 } 
