@@ -1,0 +1,95 @@
+using Microsoft.EntityFrameworkCore;
+using starterkit.Core.Entities.Global;
+using starterkit.Core.Enums;
+using starterkit.Infrastructure.Services;
+
+namespace starterkit.Infrastructure.Data.RootDb
+{
+    public class RootDbSeeder : IDataSeeder
+    {
+        private readonly RootDbContext _context;
+        private readonly IPasswordHashService _passwordHashService;
+    
+        public RootDbSeeder(
+            RootDbContext context,
+            IPasswordHashService passwordHashService)
+        {
+            _context = context;
+            _passwordHashService = passwordHashService;
+        }
+
+        public async Task SeedAsync()
+        {
+            // Apply pending migrations
+            await _context.Database.MigrateAsync();
+
+            GlobalUser rootAdmin = null;
+            if (!await _context.GlobalUsers.AnyAsync())
+            {
+                // Add root admin
+                rootAdmin = new GlobalUser
+                {
+                    Email = "rootadmin@example.com",
+                    FirstName = "Root",
+                    LastName = "Admin",
+                    PasswordHash = _passwordHashService.HashPassword("Admin@123"),
+                    UserType = UserType.RootAdmin,
+                    Status = UserStatus.Active,
+                    CreatedBy = Guid.Empty // System
+                };
+
+                await _context.GlobalUsers.AddAsync(rootAdmin);
+                await _context.SaveChangesAsync(); // Save to generate Id
+            }
+            else
+            {
+                rootAdmin = await _context.GlobalUsers.FirstOrDefaultAsync(u => u.UserType == UserType.RootAdmin);
+            }
+
+            if (!await _context.Tenants.AnyAsync())
+            {
+                // Add default tenants
+                var tenants = new[]
+                {
+                    new Tenant
+                    {
+                        Name = "Alpha",
+                        DatabaseName = "alpha_db",
+                        ConnectionString = "Server=localhost;Database=alpha_db;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;MultipleActiveResultSets=true;",
+                        Status = TenantStatus.Active,
+                        CreatedBy = Guid.Empty // System
+                    },
+                    new Tenant
+                    {
+                        Name = "Beta",
+                        DatabaseName = "beta_db",
+                        ConnectionString = "Server=localhost;Database=beta_db;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;MultipleActiveResultSets=true;",
+                        Status = TenantStatus.Active,
+                        CreatedBy = Guid.Empty // System
+                    }
+                };
+
+                await _context.Tenants.AddRangeAsync(tenants);
+                await _context.SaveChangesAsync(); // Save to generate Ids
+
+                // Create tenant-user mappings for root admin
+                if (rootAdmin != null)
+                {
+                    foreach (var tenant in tenants)
+                    {
+                        var mapping = new TenantUserMapping
+                        {
+                            TenantId = tenant.Id,
+                            UserId = rootAdmin.Id,
+                            Role = "Admin", // Root admin gets admin role in all tenants
+                            CreatedBy = Guid.Empty // System
+                        };
+                        await _context.Set<TenantUserMapping>().AddAsync(mapping);
+                    }
+                }
+            }
+
+            await _context.SaveChangesAsync();
+        }
+    }
+} 

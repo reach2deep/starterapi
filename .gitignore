@@ -1,0 +1,77 @@
+# Build Folders
+bin/
+obj/
+out/
+
+# User-specific files
+*.user
+*.rsuser
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Logs
+*.log
+*.tlog
+
+# IDE Specific
+.vscode/
+.idea/
+.ionide/
+
+# Visual Studio working folder
+.vs/
+
+# ASP.NET Scaffolding
+.scaffolding/
+
+# Configurations
+appsettings*.json
+app.config
+web.config
+secrets.json
+
+# Generated files
+*.generated.cs
+*.designer.cs
+
+# Packages
+packages/
+*.nupkg
+*.snupkg
+
+# NPM modules (if using for front-end)
+node_modules/
+
+# Dependency caches
+.project/
+.razor/
+.yarn/
+
+# Test Results
+TestResults/
+*.trx
+*.coverage
+*.coveragejson
+*.coveragexml
+
+# Azure Deployment
+.scm/
+*.azure.*
+
+# Backup & Crash Reports
+*.bak
+*.swp
+*.tmp
+*.bak.*
+
+# OS Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Others
+*.lock.json
+*.lock
+*.pid
+*.session
