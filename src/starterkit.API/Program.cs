@@ -116,12 +116,12 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// Add tenant middleware before authentication
-app.UseTenantMiddleware();
-
-// Add authentication & authorization
+// Add authentication & authorization first
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Then add tenant middleware
+app.UseTenantMiddleware();
 
 app.MapControllers();
 
