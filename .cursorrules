@@ -1,0 +1,155 @@
+name: "Multi-tenant Starter Kit"
+description: "Rules for implementing a multi-tenant C# Web API project following clean architecture"
+
+rules:
+  # Naming Conventions
+  - name: "Class Naming"
+    pattern: "*.cs"
+    rules:
+      - "Interfaces should start with 'I'"
+      - "DTOs should end with 'Dto'"
+      - "Controllers should end with 'Controller'"
+      - "Services should end with 'Service'"
+      - "Repositories should end with 'Repository'"
+      - "Database contexts should end with 'DbContext'"
+
+  # Architecture Rules
+  - name: "Layer Dependencies"
+    description: "Enforce clean architecture dependencies"
+    rules:
+      - "Core layer should not depend on other layers"
+      - "Application layer can only depend on Core layer"
+      - "Infrastructure layer can depend on Core and Application layers"
+      - "API layer can depend on all layers"
+
+  # Multi-tenancy Rules
+  - name: "Multi-tenancy Implementation"
+    pattern: "*.cs"
+    rules:
+      - "Global entities must be in Core/Entities/Global namespace"
+      - "Tenant entities must be in Core/Entities/Tenant namespace"
+      - "TenantId must be included in all tenant-specific entities"
+      - "Use TenantMiddleware for tenant resolution"
+      - "Tenant context must be validated in all tenant-specific operations"
+
+  # Code Organization
+  - name: "Project Structure"
+    folders:
+      - src/starterkit.API:
+          - "Controllers/V1/Global for tenant-agnostic endpoints"
+          - "Controllers/V1/Tenant for tenant-specific endpoints"
+          - "Middlewares must include TenantMiddleware"
+      
+      - src/starterkit.Core:
+          - "Separate Global and Tenant entities"
+          - "Define interfaces for all services and repositories"
+          - "Keep domain logic tenant-aware"
+      
+      - src/starterkit.Application:
+          - "Separate DTOs for Global and Tenant operations"
+          - "Implement service interfaces"
+          - "Handle tenant context in services"
+      
+      - src/starterkit.Infrastructure:
+          - "Maintain separate RootDb and TenantDb contexts"
+          - "Implement tenant resolution and connection management"
+          - "Handle tenant data isolation"
+
+  # Database Rules
+  - name: "Database Contexts"
+    pattern: "*/Data/*DbContext.cs"
+    rules:
+      - "RootDbContext for global operations"
+      - "TenantDbContext for tenant-specific operations"
+      - "Use separate connection strings per tenant"
+      - "Implement proper tenant data isolation"
+
+  # Authentication Rules
+  - name: "Authentication"
+    pattern: "*/Auth/*.cs"
+    rules:
+      - "Implement two-step authentication (global then tenant)"
+      - "Include tenant information in JWT tokens"
+      - "Validate tenant access in authorization"
+      - "Handle tenant-specific refresh tokens"
+
+  # Service Implementation
+  - name: "Services"
+    pattern: "*/Services/*.cs"
+    rules:
+      - "Inject ITenantResolver in tenant-specific services"
+      - "Validate tenant context before operations"
+      - "Use proper tenant-specific repositories"
+      - "Handle cross-tenant operations properly"
+
+  # Repository Rules
+  - name: "Repositories"
+    pattern: "*/Repositories/*.cs"
+    rules:
+      - "Implement tenant filtering in queries"
+      - "Use proper DbContext for operation type"
+      - "Ensure data isolation between tenants"
+      - "Handle tenant-specific transactions"
+
+  # API Endpoints
+  - name: "API Controllers"
+    pattern: "*/Controllers/*.cs"
+    rules:
+      - "Use [TenantAuthorize] for tenant-specific endpoints"
+      - "Validate tenant context in requests"
+      - "Return proper error responses for tenant issues"
+      - "Document tenant requirements in swagger"
+
+  # Error Handling
+  - name: "Error Handling"
+    pattern: "*.cs"
+    rules:
+      - "Handle tenant-specific exceptions"
+      - "Provide clear error messages for tenant issues"
+      - "Log tenant context in errors"
+      - "Maintain proper error separation between tenants"
+
+  # Testing
+  - name: "Testing"
+    pattern: "*/Tests/*.cs"
+    rules:
+      - "Test both global and tenant-specific scenarios"
+      - "Mock tenant context in unit tests"
+      - "Use test tenants in integration tests"
+      - "Verify tenant isolation in tests"
+
+  # Security
+  - name: "Security"
+    pattern: "*.cs"
+    rules:
+      - "Encrypt tenant connection strings"
+      - "Validate tenant access in all operations"
+      - "Prevent cross-tenant data access"
+      - "Implement proper tenant user management"
+
+  # Performance
+  - name: "Performance"
+    rules:
+      - "Cache tenant configurations"
+      - "Optimize tenant resolution"
+      - "Use connection pooling per tenant"
+      - "Monitor tenant-specific metrics"
+
+file_templates:
+  - template: "tenant_entity"
+    path: "src/starterkit.Core/Entities/Tenant/*.cs"
+    content: |
+      public class {name} : BaseEntity
+      {
+          public Guid TenantId { get; set; }
+          // Additional properties
+      }
+
+  - template: "tenant_service"
+    path: "src/starterkit.Application/Services/Tenant/*.cs"
+    content: |
+      public class {name}Service : I{name}Service
+      {
+          private readonly ITenantResolver _tenantResolver;
+          // Implementation
+      }
