@@ -1,10 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using starterkit.Core.Entities.Global;
+using starterkit.Core.Interfaces.Data;
 using starterkit.Infrastructure.Data.RootDb.Configurations;
 
 namespace starterkit.Infrastructure.Data.RootDb
 {
-    public class RootDbContext : DbContext
+    public class RootDbContext : DbContext, IRootDbContext
     {
         public RootDbContext(DbContextOptions<RootDbContext> options) : base(options)
         {

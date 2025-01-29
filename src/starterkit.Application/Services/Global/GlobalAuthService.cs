@@ -3,7 +3,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using starterkit.Application.DTOs.Global.Auth;
 using starterkit.Core.Entities.Global;
-using starterkit.Infrastructure.Data.RootDb;
+using starterkit.Core.Interfaces.Data;
+
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -19,10 +20,10 @@ namespace starterkit.Application.Services.Global
 
     public class GlobalAuthService : IGlobalAuthService
     {
-        private readonly RootDbContext _context;
+        private readonly IRootDbContext _context;
         private readonly IConfiguration _configuration;
 
-        public GlobalAuthService(RootDbContext context, IConfiguration configuration)
+        public GlobalAuthService(IRootDbContext context, IConfiguration configuration)
         {
             _context = context;
             _configuration = configuration;
@@ -39,7 +40,7 @@ namespace starterkit.Application.Services.Global
             }
 
             // Get user's tenant mappings
-            var tenantMappings = await _context.Set<TenantUserMapping>()
+            var tenantMappings = await _context.TenantUserMappings
                 .Include(t => t.Tenant)
                 .Where(t => t.UserId == user.Id && t.IsActive && t.Tenant.Status == Core.Enums.TenantStatus.Active)
                 .ToListAsync();
