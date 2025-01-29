@@ -85,15 +85,15 @@ builder.Services.AddDbContext<RootDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("RootConnection")));
 
 // Configure Tenant Database (Scoped factory)
-builder.Services.AddScoped<Func<string, TenantDbContext>>(serviceProvider => tenantId =>
+builder.Services.AddScoped<Func<string, TenantDbContext>>(serviceProvider => databaseName =>
 {
-    var tenant = serviceProvider.GetService<ITenantStore>()?.GetTenantAsync(tenantId).Result;
+    var tenant = serviceProvider.GetService<ITenantStore>()?.GetTenantAsync(databaseName).Result;
     if (tenant == null)
-        throw new Exception($"Tenant {tenantId} is not found");
+        throw new Exception($"Tenant with database name '{databaseName}' is not found");
 
     var optionsBuilder = new DbContextOptionsBuilder<TenantDbContext>();
     optionsBuilder.UseSqlServer(tenant.ConnectionString);
-    return new TenantDbContext(optionsBuilder.Options, tenantId);
+    return new TenantDbContext(optionsBuilder.Options, databaseName);
 });
 
 // Register services
@@ -102,6 +102,7 @@ builder.Services.AddScoped<IGlobalAuthService, GlobalAuthService>();
 builder.Services.AddScoped<ITenantAuthService, TenantAuthService>();
 builder.Services.AddScoped<IPasswordHashService, PasswordHashService>();
 builder.Services.AddScoped<IDataSeeder, RootDbSeeder>();
+builder.Services.AddScoped<ITenantDatabaseInitializer, TenantDatabaseInitializer>();
 
 var app = builder.Build();
 
@@ -126,8 +127,20 @@ app.MapControllers();
 // Seed the root database
 using (var scope = app.Services.CreateScope())
 {
+    // Seed root database
     var seeder = scope.ServiceProvider.GetRequiredService<IDataSeeder>();
     await seeder.SeedAsync();
+
+    // Initialize tenant databases
+    var tenantStore = scope.ServiceProvider.GetRequiredService<ITenantStore>();
+    var databaseInitializer = scope.ServiceProvider.GetRequiredService<ITenantDatabaseInitializer>();
+
+    // Get all tenants and initialize their databases
+    var tenants = await tenantStore.GetAllTenantsAsync();
+    foreach (var tenant in tenants)
+    {
+        await databaseInitializer.InitializeTenantDatabaseAsync(tenant.DatabaseName);
+    }
 }
 
 app.Run();

@@ -302,3 +302,21 @@ Password: Admin@123
 Beta Tenant Admin:
 Email: admin@beta.com
 Password: Admin@123
+
+
+cd src/starterkit.Infrastructure
+
+Root migrations
+dotnet ef migrations add InitialRootSchema -c RootDbContext -p src/starterkit.Infrastructure -s src/starterkit.API -o Data/RootDb/Migrations
+
+Tenant migrations
+dotnet ef migrations add InitialTenantSchema -c TenantDbContext -p src/starterkit.Infrastructure -s src/starterkit.API -o Data/TenantDb/Migrations
+
+  # Make sure you're in the Infrastructure project directory
+cd src/StarterApi.Infrastructure
+
+# Create Root DB migration
+dotnet ef migrations add InitialRootSchema --context RootDbContext --output-dir Persistence/Migrations/RootDb
+
+# Create Tenant DB migration
+dotnet ef migrations add InitialTenantSchema --context TenantDbContext --output-dir Persistence/Migrations/TenantDb

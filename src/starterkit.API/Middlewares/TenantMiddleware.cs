@@ -12,7 +12,10 @@ namespace starterkit.API.Middlewares
             _next = next;
         }
 
-        public async Task InvokeAsync(HttpContext context, ITenantResolver tenantResolver)
+        public async Task InvokeAsync(
+            HttpContext context, 
+            ITenantResolver tenantResolver,
+            ITenantDatabaseInitializer databaseInitializer)
         {
             // Skip tenant resolution for root-level endpoints
             if (IsRootLevelEndpoint(context))
@@ -37,8 +40,11 @@ namespace starterkit.API.Middlewares
                 return;
             }
 
+            // Initialize tenant database if needed
+            await databaseInitializer.InitializeTenantDatabaseAsync(tenant.DatabaseName);
+
             // Store tenant info in HttpContext items
-            context.Items["Tenant"] = tenant;
+            context.Items["Tenant"] = tenant.DatabaseName;
 
             await _next(context);
         }
@@ -49,7 +55,8 @@ namespace starterkit.API.Middlewares
             return path != null && (
                 path.StartsWith("/api/v1/global") ||
                 path.StartsWith("/api/auth/login") ||
-                path.StartsWith("/health")
+                path.StartsWith("/health") ||
+                path.StartsWith("/swagger")
             );
         }
     }

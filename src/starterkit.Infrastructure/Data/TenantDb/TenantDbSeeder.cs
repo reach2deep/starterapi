@@ -28,7 +28,8 @@ namespace starterkit.Infrastructure.Data.TenantDb
 
         public async Task SeedAsync()
         {
-            // Apply pending migrations
+            // Ensure database is recreated with latest schema
+            //await _context.Database.EnsureDeletedAsync();
             await _context.Database.MigrateAsync();
 
             if (!await _context.Users.AnyAsync())
@@ -91,30 +92,40 @@ namespace starterkit.Infrastructure.Data.TenantDb
 
         private async Task SeedSampleDataAsync(Guid createdBy)
         {
-            // Add sample user profiles if needed
-            if (!await _context.UserProfiles.AnyAsync(p => p.Address != null))
+            // Add sample addresses if needed
+            if (!await _context.Addresses.AnyAsync())
             {
-                var sampleProfiles = new[]
+                var sampleAddresses = new[]
                 {
-                    new UserProfile
+                    new Address
                     {
-                        Address = "123 Main St",
+                        StreetAddress = "123 Main St",
                         City = "Sample City",
                         Country = "Sample Country",
                         PostalCode = "12345",
+                        State = "Sample State",
                         CreatedBy = createdBy
                     },
-                    new UserProfile
+                    new Address
                     {
-                        Address = "456 Oak Ave",
+                        StreetAddress = "456 Oak Ave",
                         City = "Another City",
                         Country = "Another Country",
                         PostalCode = "67890",
+                        State = "Another State",
                         CreatedBy = createdBy
                     }
                 };
 
-                await _context.UserProfiles.AddRangeAsync(sampleProfiles);
+                await _context.Addresses.AddRangeAsync(sampleAddresses);
+                await _context.SaveChangesAsync();
+
+                // Update some user profiles with addresses
+                var profiles = await _context.UserProfiles.Take(2).ToListAsync();
+                for (int i = 0; i < profiles.Count && i < sampleAddresses.Length; i++)
+                {
+                    profiles[i].AddressId = sampleAddresses[i].Id;
+                }
                 await _context.SaveChangesAsync();
             }
         }

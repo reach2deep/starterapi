@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using starterkit.Core.Entities.Global;
+using starterkit.Infrastructure.Data.RootDb.Configurations;
 
 namespace starterkit.Infrastructure.Data.RootDb
 {
@@ -11,13 +12,16 @@ namespace starterkit.Infrastructure.Data.RootDb
 
         public DbSet<Tenant> Tenants { get; set; }
         public DbSet<GlobalUser> GlobalUsers { get; set; }
+        public DbSet<TenantUserMapping> TenantUserMappings { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            // Apply configurations
-            modelBuilder.ApplyConfigurationsFromAssembly(typeof(RootDbContext).Assembly);
+            // Apply only root database configurations
+            modelBuilder.ApplyConfiguration(new GlobalUserConfiguration());
+            modelBuilder.ApplyConfiguration(new TenantConfiguration());
+            modelBuilder.ApplyConfiguration(new TenantUserMappingConfiguration());
         }
     }
 } 
