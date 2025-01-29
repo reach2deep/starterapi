@@ -1,10 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using starterkit.Core.Entities.Tenant;
+using starterkit.Core.Interfaces.Data;
 using starterkit.Infrastructure.Data.TenantDb.Configurations;
 
 namespace starterkit.Infrastructure.Data.TenantDb
 {
-    public class TenantDbContext : DbContext
+    public class TenantDbContext : DbContext, ITenantDbContext
     {
         private readonly string _tenantId;
 

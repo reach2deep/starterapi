@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using starterkit.Application.DTOs.Tenant;
 using starterkit.Core.Entities.Tenant;
 using starterkit.Infrastructure.Data.TenantDb;
 
@@ -23,104 +24,131 @@ namespace starterkit.API.Controllers.V1.Tenant
         }
 
         [HttpGet("me")]
-        public async Task<ActionResult<UserProfile>> GetMyProfile()
+        public async Task<ActionResult<UserProfileResponseDto>> GetMyProfile()
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            if (userId == null)
+            try
             {
-                return Unauthorized();
+                var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                if (userId == null)
+                {
+                    return Unauthorized(new { error = "User not authenticated" });
+                }
+
+                using var context = _tenantDbFactory(_tenantId);
+                var profile = await context.UserProfiles
+                    .Include(p => p.Address)
+                    .FirstOrDefaultAsync(p => p.UserId == Guid.Parse(userId));
+
+                if (profile == null)
+                {
+                    return NotFound(new { error = "Profile not found" });
+                }
+
+                return Ok(MapToResponseDto(profile));
             }
-
-            using var context = _tenantDbFactory(_tenantId);
-            var profile = await context.UserProfiles
-                .Include(p => p.Address)
-                .FirstOrDefaultAsync(p => p.UserId == Guid.Parse(userId));
-
-            if (profile == null)
+            catch (Exception ex)
             {
-                return NotFound();
+                return StatusCode(500, new { error = "An error occurred while retrieving the profile", details = ex.Message });
             }
-
-            return Ok(profile);
         }
 
         [HttpPut("me")]
-        public async Task<IActionResult> UpdateMyProfile([FromBody] UserProfileUpdateModel model)
+        public async Task<ActionResult<UserProfileResponseDto>> UpdateMyProfile([FromBody] UpdateUserProfileRequestDto request)
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            if (userId == null)
+            try
             {
-                return Unauthorized();
-            }
-
-            using var context = _tenantDbFactory(_tenantId);
-            var existingProfile = await context.UserProfiles
-                .Include(p => p.Address)
-                .FirstOrDefaultAsync(p => p.UserId == Guid.Parse(userId));
-
-            if (existingProfile == null)
-            {
-                return NotFound();
-            }
-
-            // Update address if provided
-            if (model.Address != null)
-            {
-                if (existingProfile.Address == null)
+                var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                if (userId == null)
                 {
-                    existingProfile.Address = new Address();
+                    return Unauthorized(new { error = "User not authenticated" });
                 }
 
-                existingProfile.Address.StreetAddress = model.Address.StreetAddress;
-                existingProfile.Address.City = model.Address.City;
-                existingProfile.Address.Country = model.Address.Country;
-                existingProfile.Address.PostalCode = model.Address.PostalCode;
-                existingProfile.Address.State = model.Address.State;
-                existingProfile.Address.UpdatedBy = Guid.Parse(userId);
-                existingProfile.Address.UpdatedAt = DateTime.UtcNow;
+                using var context = _tenantDbFactory(_tenantId);
+                var existingProfile = await context.UserProfiles
+                    .Include(p => p.Address)
+                    .FirstOrDefaultAsync(p => p.UserId == Guid.Parse(userId));
+
+                if (existingProfile == null)
+                {
+                    return NotFound(new { error = "Profile not found" });
+                }
+
+                // Update address if provided
+                if (request.Address != null)
+                {
+                    if (existingProfile.Address == null)
+                    {
+                        existingProfile.Address = new Address();
+                    }
+
+                    existingProfile.Address.StreetAddress = request.Address.StreetAddress;
+                    existingProfile.Address.City = request.Address.City;
+                    existingProfile.Address.Country = request.Address.Country;
+                    existingProfile.Address.PostalCode = request.Address.PostalCode;
+                    existingProfile.Address.State = request.Address.State;
+                    existingProfile.Address.UpdatedBy = Guid.Parse(userId);
+                    existingProfile.Address.UpdatedAt = DateTime.UtcNow;
+                }
+
+                // Update profile fields
+                existingProfile.DateOfBirth = request.DateOfBirth;
+                existingProfile.ProfilePictureUrl = request.ProfilePictureUrl;
+                existingProfile.UpdatedBy = Guid.Parse(userId);
+                existingProfile.UpdatedAt = DateTime.UtcNow;
+
+                await context.SaveChangesAsync();
+                return Ok(MapToResponseDto(existingProfile));
             }
-
-            // Update profile fields
-            existingProfile.DateOfBirth = model.DateOfBirth;
-            existingProfile.ProfilePictureUrl = model.ProfilePictureUrl;
-            existingProfile.UpdatedBy = Guid.Parse(userId);
-            existingProfile.UpdatedAt = DateTime.UtcNow;
-
-            await context.SaveChangesAsync();
-            return Ok(existingProfile);
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = "An error occurred while updating the profile", details = ex.Message });
+            }
         }
 
         [HttpGet("{id}")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<UserProfile>> GetProfile(Guid id)
+        public async Task<ActionResult<UserProfileResponseDto>> GetProfile(Guid id)
         {
-            using var context = _tenantDbFactory(_tenantId);
-            var profile = await context.UserProfiles
-                .Include(p => p.Address)
-                .FirstOrDefaultAsync(p => p.Id == id);
-
-            if (profile == null)
+            try
             {
-                return NotFound();
+                using var context = _tenantDbFactory(_tenantId);
+                var profile = await context.UserProfiles
+                    .Include(p => p.Address)
+                    .FirstOrDefaultAsync(p => p.Id == id);
+
+                if (profile == null)
+                {
+                    return NotFound(new { error = "Profile not found" });
+                }
+
+                return Ok(MapToResponseDto(profile));
             }
-
-            return Ok(profile);
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = "An error occurred while retrieving the profile", details = ex.Message });
+            }
         }
-    }
 
-    public class UserProfileUpdateModel
-    {
-        public AddressUpdateModel? Address { get; set; }
-        public DateTime? DateOfBirth { get; set; }
-        public string? ProfilePictureUrl { get; set; }
-    }
-
-    public class AddressUpdateModel
-    {
-        public string StreetAddress { get; set; }
-        public string City { get; set; }
-        public string Country { get; set; }
-        public string PostalCode { get; set; }
-        public string? State { get; set; }
+        private static UserProfileResponseDto MapToResponseDto(UserProfile profile)
+        {
+            return new UserProfileResponseDto
+            {
+                Id = profile.Id,
+                UserId = profile.UserId,
+                DateOfBirth = profile.DateOfBirth,
+                ProfilePictureUrl = profile.ProfilePictureUrl,
+                CreatedAt = profile.CreatedAt,
+                UpdatedAt = profile.UpdatedAt,
+                Address = profile.Address == null ? null : new AddressDto
+                {
+                    Id = profile.Address.Id,
+                    StreetAddress = profile.Address.StreetAddress,
+                    City = profile.Address.City,
+                    Country = profile.Address.Country,
+                    PostalCode = profile.Address.PostalCode,
+                    State = profile.Address.State
+                }
+            };
+        }
     }
 } 

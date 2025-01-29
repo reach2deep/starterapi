@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\starterkit.Core\starterkit.Core.csproj" />
+    <ProjectReference Include="..\starterkit.Application\starterkit.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>
