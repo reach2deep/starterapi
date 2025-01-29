@@ -24,12 +24,20 @@ namespace starterkit.API.Middlewares
                 return;
             }
 
+            // For tenant-specific endpoints, ensure we have authentication
+            if (context.Request.Path.StartsWithSegments("/api/v1/tenant") && context.User?.Identity?.IsAuthenticated != true)
+            {
+                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                await context.Response.WriteAsJsonAsync(new { error = "Authentication required" });
+                return;
+            }
+
             var tenant = await tenantResolver.ResolveTenantAsync(context);
             
             if (tenant == null)
             {
                 context.Response.StatusCode = StatusCodes.Status400BadRequest;
-                await context.Response.WriteAsJsonAsync(new { error = "Invalid or missing tenant identifier" });
+                await context.Response.WriteAsJsonAsync(new { error = "Invalid or missing tenant identifier. Please ensure tenant ID is provided in the X-Tenant-ID header or JWT token." });
                 return;
             }
 

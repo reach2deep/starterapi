@@ -29,6 +29,7 @@ namespace starterkit.Infrastructure.MultiTenancy.Stores
 
                 var tenant = await _context.Tenants
                     .FirstOrDefaultAsync(t => 
+                        t.Id.ToString().ToLower() == identifier.ToLower() ||
                         t.Name.ToLower() == identifier.ToLower() || 
                         t.DatabaseName.ToLower() == identifier.ToLower());
 
