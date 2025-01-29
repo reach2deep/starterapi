@@ -7,7 +7,7 @@ namespace starterkit.Core.DTOs.Tenant
         public DateTime? DateOfBirth { get; set; }
         public string? ProfilePictureUrl { get; set; }
         public DateTime CreatedAt { get; set; }
-        public DateTime UpdatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
         public AddressDto? Address { get; set; }
     }
 

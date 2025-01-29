@@ -2,7 +2,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using starterkit.Core.Entities.Tenant;
-using starterkit.Infrastructure.Data.TenantDb;
+using starterkit.Core.Interfaces.Data;
+
 using System.Security.Claims;
 
 namespace starterkit.Application.Services.Tenant
@@ -16,12 +17,12 @@ namespace starterkit.Application.Services.Tenant
 
     public class TenantAuthService : ITenantAuthService
     {
-        private readonly Func<string, TenantDbContext> _tenantDbFactory;
+        private readonly Func<string, ITenantDbContext> _tenantDbFactory;
         private readonly IConfiguration _configuration;
         private readonly string _tenantId;
 
         public TenantAuthService(
-            Func<string, TenantDbContext> tenantDbFactory,
+            Func<string, ITenantDbContext> tenantDbFactory,
             IConfiguration configuration,
             IHttpContextAccessor httpContextAccessor)
         {
@@ -33,7 +34,7 @@ namespace starterkit.Application.Services.Tenant
         public async Task<(string AccessToken, string RefreshToken)> RefreshTokenAsync(string refreshToken)
         {
             using var context = _tenantDbFactory(_tenantId);
-            var storedRefreshToken = await context.Set<RefreshToken>()
+            var storedRefreshToken = await context.RefreshTokens
                 .Include(r => r.User)
                 .FirstOrDefaultAsync(r => r.Token == refreshToken);
 
@@ -64,7 +65,7 @@ namespace starterkit.Application.Services.Tenant
                 CreatedBy = storedRefreshToken.UserId
             };
 
-            await context.AddAsync(newRefreshTokenEntity);
+            context.RefreshTokens.Add(newRefreshTokenEntity);
             await context.SaveChangesAsync();
 
             return (newAccessToken, newRefreshToken);
@@ -73,7 +74,7 @@ namespace starterkit.Application.Services.Tenant
         public async Task RevokeTokenAsync(string refreshToken)
         {
             using var context = _tenantDbFactory(_tenantId);
-            var storedRefreshToken = await context.Set<RefreshToken>()
+            var storedRefreshToken = await context.RefreshTokens
                 .FirstOrDefaultAsync(r => r.Token == refreshToken);
 
             if (storedRefreshToken != null && !storedRefreshToken.IsRevoked)

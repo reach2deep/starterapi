@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using starterkit.Infrastructure.Data;
-using starterkit.Infrastructure.Data.TenantDb;
+using starterkit.Core.Interfaces.Data;
 
 namespace starterkit.Infrastructure.Services
 {
@@ -22,20 +21,18 @@ namespace starterkit.Infrastructure.Services
         public async Task InitializeTenantDatabaseAsync(string tenantId)
         {
             using var scope = _scopeFactory.CreateScope();
-            var tenantDbFactory = scope.ServiceProvider.GetRequiredService<Func<string, TenantDbContext>>();
+            var tenantDbFactory = scope.ServiceProvider.GetRequiredService<Func<string, ITenantDbContext>>();
             var tenantContext = tenantDbFactory(tenantId);
 
+            // For migrations, we need to cast to DbContext
+            var dbContext = tenantContext as DbContext;
+            if (dbContext == null)
+            {
+                throw new InvalidOperationException("Context must be a DbContext for migrations");
+            }
+
             // Create database if it doesn't exist and apply migrations
-            await tenantContext.Database.MigrateAsync();
-
-            // Get the seeder and run it
-            var seeder = ActivatorUtilities.CreateInstance<TenantDbSeeder>(
-                scope.ServiceProvider,
-                tenantContext,
-                tenantId
-            );
-
-            await seeder.SeedAsync();
+            await dbContext.Database.MigrateAsync();
         }
     }
 } 
