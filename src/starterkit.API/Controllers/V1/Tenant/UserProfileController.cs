@@ -12,7 +12,7 @@ namespace starterkit.API.Controllers.V1.Tenant
     public class UserProfileController : ControllerBase
     {
         private readonly Func<string, TenantDbContext> _tenantDbFactory;
-        private readonly string _tenantId;
+        private readonly string? _tenantId;
 
         public UserProfileController(
             Func<string, TenantDbContext> tenantDbFactory,
@@ -33,6 +33,7 @@ namespace starterkit.API.Controllers.V1.Tenant
 
             using var context = _tenantDbFactory(_tenantId);
             var profile = await context.UserProfiles
+                .Include(p => p.Address)
                 .FirstOrDefaultAsync(p => p.UserId == Guid.Parse(userId));
 
             if (profile == null)
@@ -44,7 +45,7 @@ namespace starterkit.API.Controllers.V1.Tenant
         }
 
         [HttpPut("me")]
-        public async Task<IActionResult> UpdateMyProfile([FromBody] UserProfile profile)
+        public async Task<IActionResult> UpdateMyProfile([FromBody] UserProfileUpdateModel model)
         {
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             if (userId == null)
@@ -54,6 +55,7 @@ namespace starterkit.API.Controllers.V1.Tenant
 
             using var context = _tenantDbFactory(_tenantId);
             var existingProfile = await context.UserProfiles
+                .Include(p => p.Address)
                 .FirstOrDefaultAsync(p => p.UserId == Guid.Parse(userId));
 
             if (existingProfile == null)
@@ -61,13 +63,26 @@ namespace starterkit.API.Controllers.V1.Tenant
                 return NotFound();
             }
 
-            // Update only allowed fields
-            existingProfile.Address = profile.Address;
-            existingProfile.City = profile.City;
-            existingProfile.Country = profile.Country;
-            existingProfile.PostalCode = profile.PostalCode;
-            existingProfile.DateOfBirth = profile.DateOfBirth;
-            existingProfile.ProfilePictureUrl = profile.ProfilePictureUrl;
+            // Update address if provided
+            if (model.Address != null)
+            {
+                if (existingProfile.Address == null)
+                {
+                    existingProfile.Address = new Address();
+                }
+
+                existingProfile.Address.StreetAddress = model.Address.StreetAddress;
+                existingProfile.Address.City = model.Address.City;
+                existingProfile.Address.Country = model.Address.Country;
+                existingProfile.Address.PostalCode = model.Address.PostalCode;
+                existingProfile.Address.State = model.Address.State;
+                existingProfile.Address.UpdatedBy = Guid.Parse(userId);
+                existingProfile.Address.UpdatedAt = DateTime.UtcNow;
+            }
+
+            // Update profile fields
+            existingProfile.DateOfBirth = model.DateOfBirth;
+            existingProfile.ProfilePictureUrl = model.ProfilePictureUrl;
             existingProfile.UpdatedBy = Guid.Parse(userId);
             existingProfile.UpdatedAt = DateTime.UtcNow;
 
@@ -81,6 +96,7 @@ namespace starterkit.API.Controllers.V1.Tenant
         {
             using var context = _tenantDbFactory(_tenantId);
             var profile = await context.UserProfiles
+                .Include(p => p.Address)
                 .FirstOrDefaultAsync(p => p.Id == id);
 
             if (profile == null)
@@ -90,5 +106,21 @@ namespace starterkit.API.Controllers.V1.Tenant
 
             return Ok(profile);
         }
+    }
+
+    public class UserProfileUpdateModel
+    {
+        public AddressUpdateModel? Address { get; set; }
+        public DateTime? DateOfBirth { get; set; }
+        public string? ProfilePictureUrl { get; set; }
+    }
+
+    public class AddressUpdateModel
+    {
+        public string StreetAddress { get; set; }
+        public string City { get; set; }
+        public string Country { get; set; }
+        public string PostalCode { get; set; }
+        public string? State { get; set; }
     }
 } 

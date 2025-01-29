@@ -28,7 +28,9 @@ namespace starterkit.Infrastructure.MultiTenancy.Stores
                 entry.AbsoluteExpirationRelativeToNow = _cacheDuration;
 
                 var tenant = await _context.Tenants
-                    .FirstOrDefaultAsync(t => t.Name.ToLower() == identifier.ToLower());
+                    .FirstOrDefaultAsync(t => 
+                        t.Name.ToLower() == identifier.ToLower() || 
+                        t.DatabaseName.ToLower() == identifier.ToLower());
 
                 if (tenant == null)
                     return null;

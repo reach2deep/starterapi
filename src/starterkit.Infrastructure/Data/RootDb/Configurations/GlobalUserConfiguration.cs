@@ -25,6 +25,7 @@ namespace starterkit.Infrastructure.Data.RootDb.Configurations
                 .HasMaxLength(100);
 
             builder.Property(u => u.MobileNumber)
+                .IsRequired(false)
                 .HasMaxLength(20);
 
             builder.Property(u => u.PasswordHash)

@@ -20,7 +20,8 @@ namespace starterkit.Infrastructure.Data.RootDb
 
         public async Task SeedAsync()
         {
-            // Apply pending migrations
+            // Ensure database is recreated with latest schema
+            //await _context.Database.EnsureDeletedAsync();
             await _context.Database.MigrateAsync();
 
             GlobalUser rootAdmin = null;
@@ -54,16 +55,16 @@ namespace starterkit.Infrastructure.Data.RootDb
                     new Tenant
                     {
                         Name = "Alpha",
-                        DatabaseName = "alpha_db",
-                        ConnectionString = "Server=localhost;Database=alpha_db;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;MultipleActiveResultSets=true;",
+                        DatabaseName = "alpha_tenant",
+                        ConnectionString = "Server=localhost;Database=alpha_tenant;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;MultipleActiveResultSets=true;",
                         Status = TenantStatus.Active,
                         CreatedBy = Guid.Empty // System
                     },
                     new Tenant
                     {
                         Name = "Beta",
-                        DatabaseName = "beta_db",
-                        ConnectionString = "Server=localhost;Database=beta_db;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;MultipleActiveResultSets=true;",
+                        DatabaseName = "beta_tenant",
+                        ConnectionString = "Server=localhost;Database=beta_tenant;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;MultipleActiveResultSets=true;",
                         Status = TenantStatus.Active,
                         CreatedBy = Guid.Empty // System
                     }

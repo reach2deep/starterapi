@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using starterkit.Core.Entities.Tenant;
+using starterkit.Infrastructure.Data.TenantDb.Configurations;
 
 namespace starterkit.Infrastructure.Data.TenantDb
 {
@@ -14,13 +15,18 @@ namespace starterkit.Infrastructure.Data.TenantDb
 
         public DbSet<User> Users { get; set; }
         public DbSet<UserProfile> UserProfiles { get; set; }
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
+        public DbSet<Address> Addresses { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            // Apply configurations
-            modelBuilder.ApplyConfigurationsFromAssembly(typeof(TenantDbContext).Assembly);
+            // Apply only tenant database configurations
+            modelBuilder.ApplyConfiguration(new UserConfiguration());
+            modelBuilder.ApplyConfiguration(new UserProfileConfiguration());
+            modelBuilder.ApplyConfiguration(new RefreshTokenConfiguration());
+            modelBuilder.ApplyConfiguration(new AddressConfiguration());
         }
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
