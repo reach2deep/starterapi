@@ -288,6 +288,11 @@ Here's a detailed approach for implementing multi-tenancy with a root database s
    - Data isolation violations
 
 
+{
+  "email": "rootadmin@example.com",
+  "password": "Admin@123"
+}
+
 So for testing, you can use these credentials:
 F
 or Root Admin:
