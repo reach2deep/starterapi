@@ -237,7 +237,7 @@ namespace starterkit.Infrastructure.Data.TenantDb.Migrations
             modelBuilder.Entity("starterkit.Core.Entities.Tenant.UserProfile", b =>
                 {
                     b.HasOne("starterkit.Core.Entities.Tenant.Address", "Address")
-                        .WithOne("UserProfile")
+                        .WithOne()
                         .HasForeignKey("starterkit.Core.Entities.Tenant.UserProfile", "AddressId")
                         .OnDelete(DeleteBehavior.SetNull);
 
@@ -250,12 +250,6 @@ namespace starterkit.Infrastructure.Data.TenantDb.Migrations
                     b.Navigation("Address");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("starterkit.Core.Entities.Tenant.Address", b =>
-                {
-                    b.Navigation("UserProfile")
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("starterkit.Core.Entities.Tenant.User", b =>

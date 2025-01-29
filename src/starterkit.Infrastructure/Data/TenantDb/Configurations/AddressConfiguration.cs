@@ -30,12 +30,6 @@ namespace starterkit.Infrastructure.Data.TenantDb.Configurations
 
             builder.Property(a => a.State)
                 .HasMaxLength(100);
-
-            // Configure one-to-one relationship with UserProfile
-            builder.HasOne(a => a.UserProfile)
-                .WithOne(p => p.Address)
-                .HasForeignKey<UserProfile>(p => p.AddressId)
-                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 } 
