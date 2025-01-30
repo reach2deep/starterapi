@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using starterkit.API.Controllers;
 using starterkit.Core.DTOs.Tenant;
 using starterkit.Core.Interfaces.Services.Tenant;
 using starterkit.Core.Models;
@@ -9,10 +10,9 @@ namespace starterkit.API.Controllers.V1.Tenant
     /// <summary>
     /// Controller for managing user profiles in tenant context
     /// </summary>
-    [ApiController]
     [Route("api/v1/tenant/profiles")]
     [Authorize]
-    public class UserProfileController : ControllerBase
+    public class UserProfileController : BaseApiController
     {
         private readonly IUserProfileService _userProfileService;
 
@@ -27,16 +27,13 @@ namespace starterkit.API.Controllers.V1.Tenant
         [HttpGet("me")]
         public async Task<ActionResult<ApiResponse<UserProfileResponseDto>>> GetMyProfile()
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            if (userId == null)
+            var userId = GetCurrentUserId();
+            if (!userId.HasValue)
             {
-                return Unauthorized(ApiResponse<UserProfileResponseDto>.CreateError(
-                    message: "User not authenticated",
-                    code: "UNAUTHORIZED"
-                ));
+                return Unauthorized<UserProfileResponseDto>();
             }
 
-            var result = await _userProfileService.GetMyProfileAsync(Guid.Parse(userId));
+            var result = await _userProfileService.GetMyProfileAsync(userId.Value);
             return Ok(ApiResponse<UserProfileResponseDto>.CreateSuccess(result));
         }
 
@@ -47,16 +44,13 @@ namespace starterkit.API.Controllers.V1.Tenant
         public async Task<ActionResult<ApiResponse<UserProfileResponseDto>>> UpdateMyProfile(
             [FromBody] UpdateUserProfileRequestDto request)
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            if (userId == null)
+            var userId = GetCurrentUserId();
+            if (!userId.HasValue)
             {
-                return Unauthorized(ApiResponse<UserProfileResponseDto>.CreateError(
-                    message: "User not authenticated",
-                    code: "UNAUTHORIZED"
-                ));
+                return Unauthorized<UserProfileResponseDto>();
             }
 
-            var result = await _userProfileService.UpdateProfileAsync(Guid.Parse(userId), request);
+            var result = await _userProfileService.UpdateProfileAsync(userId.Value, request);
             return Ok(ApiResponse<UserProfileResponseDto>.CreateSuccess(result));
         }
 

@@ -37,11 +37,11 @@ namespace starterkit.Infrastructure.Services
                 // Log all claims for debugging
                 if (context.User?.Identity?.IsAuthenticated == true)
                 {
-                    _logger.LogInformation("User is authenticated. Available claims:");
-                    foreach (var claim in context.User.Claims)
-                    {
-                        _logger.LogInformation("Claim: {Type} = {Value}", claim.Type, claim.Value);
-                    }
+                    // _logger.LogInformation("User is authenticated. Available claims:");
+                    // foreach (var claim in context.User.Claims)
+                    // {
+                    //     _logger.LogInformation("Claim: {Type} = {Value}", claim.Type, claim.Value);
+                    // }
                     
                     // Try from JWT token claims
                     tenantId = context.User?.FindFirst("tenant_id")?.Value 
