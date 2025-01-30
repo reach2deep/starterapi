@@ -15,6 +15,8 @@ using FluentValidation;
 using System.Reflection;
 using n.Modules.Global.Auth.Services;
 using starterkit.starterkit.Application.Modules.Global.Auth.Mappings;
+using starterkit.starterkit.Application.Modules.Global.TenantManagement.Interfaces;
+using starterkit.starterkit.Application.Modules.Global.TenantManagement.Validators;
 
 namespace starterkit.starterkit.Infrastructure.Extensions
 {
@@ -25,10 +27,9 @@ namespace starterkit.starterkit.Infrastructure.Extensions
             // Register AutoMapper from Application assembly
             services.AddAutoMapper(typeof(GlobalMappingProfile).Assembly);
 
-            var assembly = Assembly.GetExecutingAssembly();
-
-            // Register FluentValidation
-            services.AddValidatorsFromAssembly(assembly);
+            // Register FluentValidation from both assemblies
+            services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly()); // Infrastructure validators
+            services.AddValidatorsFromAssembly(typeof(CreateTenantRequestValidator).Assembly); // Application validators
 
             // Register Application Services
             services.Scan(scan => scan
@@ -40,7 +41,6 @@ namespace starterkit.starterkit.Infrastructure.Extensions
                 .AsImplementedInterfaces()
                 .WithScopedLifetime());
 
-
             // Register root database context
             services.AddDbContext<RootDbContext>(options =>
                 options.UseSqlServer(configuration.GetConnectionString("RootConnection")));
@@ -48,6 +48,18 @@ namespace starterkit.starterkit.Infrastructure.Extensions
 
             // Add tenant store (needs to be before tenant context registration)
             services.AddScoped<ITenantStore, CachedTenantStore>();
+
+            // Register tenant database context options
+            services.AddSingleton(new DbContextOptionsBuilder<TenantDbContext>()
+                .UseSqlServer(configuration.GetConnectionString("TenantConnection"))
+                .Options);
+
+            // Register DbContext factory for tenant initialization
+            services.AddScoped<IDbContextFactory<DbContext>>(sp =>
+            {
+                var options = sp.GetRequiredService<DbContextOptions<TenantDbContext>>();
+                return new TenantDbContextFactory(options);
+            });
 
             // Register tenant DbContext factory
             services.AddScoped<Func<string, TenantDbContext>>(sp => tenantId =>
@@ -90,10 +102,23 @@ namespace starterkit.starterkit.Infrastructure.Extensions
             // Add tenant database initializer
             services.AddScoped<ITenantDatabaseInitializer, TenantDatabaseInitializer>();
 
-             
-            
-
             return services;
+        }
+    }
+
+    internal class TenantDbContextFactory : IDbContextFactory<DbContext>
+    {
+        private readonly DbContextOptions<TenantDbContext> _options;
+
+        public TenantDbContextFactory(DbContextOptions<TenantDbContext> options)
+        {
+            _options = options;
+        }
+
+        public DbContext CreateDbContext()
+        {
+            // Use a temporary tenant ID for initialization purposes
+            return new TenantDbContext(_options, "temp");
         }
     }
 }

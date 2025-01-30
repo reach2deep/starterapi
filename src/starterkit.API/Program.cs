@@ -5,6 +5,7 @@ using Microsoft.OpenApi.Models;
 using n.Modules.Global.Auth.Services;
 using starterkit.starterkit.API.Middlewares;
 using starterkit.starterkit.Application.Modules.Global.Auth.Interfaces;
+using starterkit.starterkit.Application.Modules.Global.TenantManagement.Interfaces;
 using starterkit.starterkit.Application.Modules.Tenant.UserManagement.Interfaces;
 using starterkit.starterkit.Application.Modules.Tenant.UserManagement.Services;
 using starterkit.starterkit.Infrastructure.Data;

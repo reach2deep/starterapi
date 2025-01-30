@@ -25,6 +25,9 @@ namespace starterkit.starterkit.Infrastructure.Data.RootDb.Configurations
                 .IsRequired()
                 .HasMaxLength(500);
 
+            builder.Property(t => t.Description)
+                .HasMaxLength(500);
+
             builder.Property(t => t.Status)
                 .IsRequired();
 
