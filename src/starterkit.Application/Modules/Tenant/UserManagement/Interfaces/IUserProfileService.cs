@@ -1,8 +1,8 @@
 
 
-using starterkit.starterkit.Application.Modules.Tenant.UserManagement.DTOs;
+using starterkit.Application.Modules.Tenant.UserManagement.DTOs;
 
-namespace starterkit.starterkit.Application.Modules.Tenant.UserManagement.Interfaces
+namespace starterkit.Application.Modules.Tenant.UserManagement.Interfaces
 {
     public interface IUserProfileService
     {

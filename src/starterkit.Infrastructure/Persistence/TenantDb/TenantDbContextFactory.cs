@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 
-namespace starterkit.starterkit.Infrastructure.Data.TenantDb
+namespace starterkit.Infrastructure.Data.TenantDb
 {
     public class TenantDbContextFactory : IDesignTimeDbContextFactory<TenantDbContext>
     {

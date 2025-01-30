@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
-using starterkit.starterkit.Application.Modules.Global.Auth.Interfaces;
-using starterkit.starterkit.Core.Modules.Global;
+using starterkit.Application.Modules.Global.Auth.Interfaces;
+using starterkit.Core.Modules.Global;
 
-namespace starterkit.starterkit.Infrastructure.Data.RootDb.Repositories
+namespace starterkit.Infrastructure.Data.RootDb.Repositories
 {
     public class GlobalUserRepository : IGlobalUserRepository
     {

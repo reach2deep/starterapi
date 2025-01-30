@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
-using starterkit.starterkit.Application.Persistence;
-using starterkit.starterkit.Core.Modules.Tenant;
-using starterkit.starterkit.Infrastructure.Data.TenantDb.Configurations;
+using starterkit.Application.Persistence;
+using starterkit.Core.Modules.Tenant;
+using starterkit.Infrastructure.Data.TenantDb.Configurations;
 
-namespace starterkit.starterkit.Infrastructure.Data.TenantDb
+namespace starterkit.Infrastructure.Data.TenantDb
 {
     public class TenantDbContext : DbContext, ITenantDbContext
     {

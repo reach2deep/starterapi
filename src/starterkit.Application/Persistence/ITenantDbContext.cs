@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
-using starterkit.starterkit.Core.Modules.Tenant;
+using starterkit.Core.Modules.Tenant;
 
 
-namespace starterkit.starterkit.Application.Persistence
+namespace starterkit.Application.Persistence
 {
     public interface ITenantDbContext : IDisposable
     {

@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 
-using starterkit.starterkit.Core.Modules.Global;
+using starterkit.Core.Modules.Global;
 
-namespace starterkit.starterkit.Application.Persistence
+namespace starterkit.Application.Persistence
 {
     public interface IRootDbContext : IDisposable
     {

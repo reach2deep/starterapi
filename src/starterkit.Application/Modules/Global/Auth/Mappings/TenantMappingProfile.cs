@@ -1,9 +1,9 @@
 using AutoMapper;
-using starterkit.starterkit.Application.Modules.Tenant.UserManagement.DTOs;
-using starterkit.starterkit.Core.Modules.Tenant;
+using starterkit.Application.Modules.Tenant.UserManagement.DTOs;
+using starterkit.Core.Modules.Tenant;
 
 
-namespace starterkit.starterkit.Application.Modules.Global.Auth.Mappings
+namespace starterkit.Application.Modules.Global.Auth.Mappings
 {
     public class TenantMappingProfile : Profile
     {

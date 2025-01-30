@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using starterkit.starterkit.Application.Modules.Global.TenantManagement.DTOs;
-using starterkit.starterkit.Application.Modules.Global.TenantManagement.Interfaces;
-using starterkit.starterkit.Core.Modules.Common;
+using starterkit.Application.Modules.Global.TenantManagement.DTOs;
+using starterkit.Application.Modules.Global.TenantManagement.Interfaces;
+using starterkit.Core.Modules.Common;
 
-namespace starterkit.starterkit.API.Controllers.Modules.V1.Global.TenantManagement
+namespace starterkit.API.Controllers.Modules.V1.Global.TenantManagement
 {
     [Route("api/v1/global/tenants")]
     [Authorize(Roles = "RootAdmin")]

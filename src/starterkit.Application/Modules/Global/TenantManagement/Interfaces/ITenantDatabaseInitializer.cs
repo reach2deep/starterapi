@@ -1,6 +1,6 @@
-using starterkit.starterkit.Core.Modules.Global;
+using starterkit.Core.Modules.Global;
 
-namespace starterkit.starterkit.Application.Modules.Global.TenantManagement.Interfaces
+namespace starterkit.Application.Modules.Global.TenantManagement.Interfaces
 {
     public interface ITenantDatabaseInitializer
     {

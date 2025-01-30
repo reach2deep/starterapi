@@ -2,14 +2,14 @@ using AutoMapper;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
-using starterkit.starterkit.Application.Modules.Global.TenantManagement.DTOs;
-using starterkit.starterkit.Application.Modules.Global.TenantManagement.Interfaces;
-using starterkit.starterkit.Application.Persistence;
-using starterkit.starterkit.Core.Enums;
-using starterkit.starterkit.Core.Modules.Common;
-using starterkit.starterkit.Core.Modules.Global;
+using starterkit.Application.Modules.Global.TenantManagement.DTOs;
+using starterkit.Application.Modules.Global.TenantManagement.Interfaces;
+using starterkit.Application.Persistence;
+using starterkit.Core.Enums;
+using starterkit.Core.Modules.Common;
+using starterkit.Core.Modules.Global;
 
-namespace starterkit.starterkit.Application.Modules.Global.TenantManagement.Services
+namespace starterkit.Application.Modules.Global.TenantManagement.Services
 {
     public class TenantService : ITenantService
     {
@@ -52,7 +52,7 @@ namespace starterkit.starterkit.Application.Modules.Global.TenantManagement.Serv
                 throw new InvalidOperationException($"Database name {request.DatabaseName} is already in use");
             }
 
-            var tenant = _mapper.Map<Tenant>(request);
+            var tenant = _mapper.Map<Core.Modules.Global.Tenant>(request);
             tenant.Status = TenantStatus.Active;
             tenant.IsActive = true;
             tenant.CreatedAt = DateTime.UtcNow;
@@ -66,8 +66,6 @@ namespace starterkit.starterkit.Application.Modules.Global.TenantManagement.Serv
 
             tenant.CreatedBy = currentUserId.Value;
 
-            // Begin transaction
-            using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
                 // Save tenant
@@ -91,12 +89,24 @@ namespace starterkit.starterkit.Application.Modules.Global.TenantManagement.Serv
                 // Initialize the tenant database
                 await _databaseInitializer.InitializeTenantDatabaseAsync(tenant);
 
-                await transaction.CommitAsync();
                 return _mapper.Map<TenantResponseDto>(tenant);
             }
             catch
             {
-                await transaction.RollbackAsync();
+                // If anything fails, we should try to clean up
+                if (tenant.Id != Guid.Empty)
+                {
+                    try
+                    {
+                        // Try to remove the tenant if it was created
+                        _context.Tenants.Remove(tenant);
+                        await _context.SaveChangesAsync();
+                    }
+                    catch
+                    {
+                        // Log cleanup failure but throw the original exception
+                    }
+                }
                 throw;
             }
         }

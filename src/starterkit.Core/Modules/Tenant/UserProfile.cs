@@ -1,7 +1,7 @@
 
-using starterkit.starterkit.Core.Modules.Common;
+using starterkit.Core.Modules.Common;
 
-namespace starterkit.starterkit.Core.Modules.Tenant
+namespace starterkit.Core.Modules.Tenant
 {
     public class UserProfile : BaseEntity
     {

@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using starterkit.starterkit.Application.Modules.Tenant.UserManagement.DTOs;
-using starterkit.starterkit.Application.Modules.Tenant.UserManagement.Interfaces;
-using starterkit.starterkit.Core.Modules.Common;
+using starterkit.Application.Modules.Tenant.UserManagement.DTOs;
+using starterkit.Application.Modules.Tenant.UserManagement.Interfaces;
+using starterkit.Core.Modules.Common;
 
-namespace starterkit.starterkit.API.Controllers.Modules.V1.Tenant.UserManagement
+namespace starterkit.API.Controllers.Modules.V1.Tenant.UserManagement
 {
     /// <summary>
     /// Controller for managing user profiles in tenant context

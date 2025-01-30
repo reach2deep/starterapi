@@ -1,8 +1,8 @@
 using FluentValidation;
-using starterkit.starterkit.Application.Modules.Tenant.UserManagement.DTOs;
+using starterkit.Application.Modules.Tenant.UserManagement.DTOs;
 
 
-namespace starterkit.starterkit.Application.Modules.Tenant.UserManagement.Validators
+namespace starterkit.Application.Modules.Tenant.UserManagement.Validators
 {
     public class UpdateUserProfileRequestValidator : AbstractValidator<UpdateUserProfileRequestDto>
     {

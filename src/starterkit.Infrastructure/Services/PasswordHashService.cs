@@ -1,6 +1,6 @@
 using BCrypt.Net;
 
-namespace starterkit.starterkit.Infrastructure.Services
+namespace starterkit.Infrastructure.Services
 {
     public interface IPasswordHashService
     {

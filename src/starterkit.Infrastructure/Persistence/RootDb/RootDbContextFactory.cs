@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 
-namespace starterkit.starterkit.Infrastructure.Data.RootDb
+namespace starterkit.Infrastructure.Data.RootDb
 {
     public class RootDbContextFactory : IDesignTimeDbContextFactory<RootDbContext>
     {

@@ -1,7 +1,7 @@
 
-using starterkit.starterkit.Core.Modules.Common;
+using starterkit.Core.Modules.Common;
 
-namespace starterkit.starterkit.Core.Modules.Global
+namespace starterkit.Core.Modules.Global
 {
     public class TenantUserMapping : BaseEntity
     {

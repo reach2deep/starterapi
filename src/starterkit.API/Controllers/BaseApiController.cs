@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using starterkit.starterkit.Core.Modules.Common;
+using starterkit.Core.Modules.Common;
 
-namespace starterkit.starterkit.API.Controllers
+namespace starterkit.API.Controllers
 {
     [ApiController]
     public abstract class BaseApiController : ControllerBase

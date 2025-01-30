@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using starterkit.starterkit.Application.Modules.Global.Auth.DTOs;
-using starterkit.starterkit.Application.Modules.Global.Auth.Interfaces;
-using starterkit.starterkit.Core.Modules.Common;
+using starterkit.Application.Modules.Global.Auth.DTOs;
+using starterkit.Application.Modules.Global.Auth.Interfaces;
+using starterkit.Core.Modules.Common;
 
-namespace starterkit.starterkit.API.Controllers.Modules.V1.Global.Auth
+namespace starterkit.API.Controllers.Modules.V1.Global.Auth
 {
     /// <summary>
     /// Controller responsible for handling global authentication operations

@@ -1,7 +1,7 @@
 
-using starterkit.starterkit.Core.Modules.Common;
+using starterkit.Core.Modules.Common;
 
-namespace starterkit.starterkit.Infrastructure.Stores
+namespace starterkit.Infrastructure.Stores
 {
     public interface ITenantStore
     {

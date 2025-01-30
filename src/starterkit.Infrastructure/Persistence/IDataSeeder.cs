@@ -1,4 +1,4 @@
-namespace starterkit.starterkit.Infrastructure.Data
+namespace starterkit.Infrastructure.Data
 {
     public interface IDataSeeder
     {

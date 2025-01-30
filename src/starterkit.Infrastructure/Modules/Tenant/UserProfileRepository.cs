@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
-using starterkit.starterkit.Application.Modules.Tenant.UserManagement.Interfaces;
-using starterkit.starterkit.Application.Persistence;
-using starterkit.starterkit.Core.Modules.Tenant;
+using starterkit.Application.Modules.Tenant.UserManagement.Interfaces;
+using starterkit.Application.Persistence;
+using starterkit.Core.Modules.Tenant;
 
-namespace starterkit.starterkit.Infrastructure.Data.TenantDb.Repositories
+namespace starterkit.Infrastructure.Data.TenantDb.Repositories
 {
     public class UserProfileRepository : IUserProfileRepository
     {

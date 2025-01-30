@@ -1,11 +1,11 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
-using starterkit.starterkit.Core.Modules.Common;
-using starterkit.starterkit.Infrastructure.Stores;
+using starterkit.Core.Modules.Common;
+using starterkit.Infrastructure.Stores;
 using System.Security.Claims;
 
-namespace starterkit.starterkit.Infrastructure.Services
+namespace starterkit.Infrastructure.Services
 {
     public interface ITenantResolver
     {

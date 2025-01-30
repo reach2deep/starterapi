@@ -3,22 +3,22 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 using Microsoft.AspNetCore.Http;
-using starterkit.starterkit.Infrastructure.Data.RootDb;
-using starterkit.starterkit.Application.Persistence;
-using starterkit.starterkit.Infrastructure.Stores;
-using starterkit.starterkit.Infrastructure.Data.TenantDb;
-using starterkit.starterkit.Application.Modules.Tenant.UserManagement.Interfaces;
-using starterkit.starterkit.Infrastructure.Data.TenantDb.Repositories;
-using starterkit.starterkit.Application.Modules.Tenant.UserManagement.Services;
-using starterkit.starterkit.Infrastructure.Services;
+using starterkit.Infrastructure.Data.RootDb;
+using starterkit.Application.Persistence;
+using starterkit.Infrastructure.Stores;
+using starterkit.Infrastructure.Data.TenantDb;
+using starterkit.Application.Modules.Tenant.UserManagement.Interfaces;
+using starterkit.Infrastructure.Data.TenantDb.Repositories;
+using starterkit.Application.Modules.Tenant.UserManagement.Services;
+using starterkit.Infrastructure.Services;
 using FluentValidation;
 using System.Reflection;
 using n.Modules.Global.Auth.Services;
-using starterkit.starterkit.Application.Modules.Global.Auth.Mappings;
-using starterkit.starterkit.Application.Modules.Global.TenantManagement.Interfaces;
-using starterkit.starterkit.Application.Modules.Global.TenantManagement.Validators;
+using starterkit.Application.Modules.Global.Auth.Mappings;
+using starterkit.Application.Modules.Global.TenantManagement.Interfaces;
+using starterkit.Application.Modules.Global.TenantManagement.Validators;
 
-namespace starterkit.starterkit.Infrastructure.Extensions
+namespace starterkit.Infrastructure.Extensions
 {
     public static class ServiceCollectionExtensions
     {

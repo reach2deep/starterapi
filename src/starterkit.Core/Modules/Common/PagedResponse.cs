@@ -1,4 +1,4 @@
-namespace starterkit.starterkit.Core.Modules.Common
+namespace starterkit.Core.Modules.Common
 {
     public class PagedResponse<T>
     {

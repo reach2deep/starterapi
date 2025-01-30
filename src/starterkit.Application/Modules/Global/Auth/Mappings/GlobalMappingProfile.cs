@@ -1,9 +1,9 @@
 using AutoMapper;
-using starterkit.starterkit.Application.Modules.Global.Auth.DTOs;
-using starterkit.starterkit.Core.Modules.Global;
+using starterkit.Application.Modules.Global.Auth.DTOs;
+using starterkit.Core.Modules.Global;
 
 
-namespace starterkit.starterkit.Application.Modules.Global.Auth.Mappings
+namespace starterkit.Application.Modules.Global.Auth.Mappings
 {
     public class GlobalMappingProfile : Profile
     {

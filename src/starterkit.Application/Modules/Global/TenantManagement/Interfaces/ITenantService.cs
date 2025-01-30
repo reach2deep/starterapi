@@ -1,7 +1,7 @@
-using starterkit.starterkit.Application.Modules.Global.TenantManagement.DTOs;
-using starterkit.starterkit.Core.Modules.Common;
+using starterkit.Application.Modules.Global.TenantManagement.DTOs;
+using starterkit.Core.Modules.Common;
 
-namespace starterkit.starterkit.Application.Modules.Global.TenantManagement.Interfaces
+namespace starterkit.Application.Modules.Global.TenantManagement.Interfaces
 {
     public interface ITenantService
     {

@@ -1,8 +1,8 @@
 using Microsoft.Extensions.DependencyInjection;
-using starterkit.starterkit.Application.Modules.Global.TenantManagement.Interfaces;
-using starterkit.starterkit.Infrastructure.Services;
+using starterkit.Application.Modules.Global.TenantManagement.Interfaces;
+using starterkit.Infrastructure.Services;
 
-namespace starterkit.starterkit.Infrastructure.Extensions
+namespace starterkit.Infrastructure.Extensions
 {
     public static class InfrastructureServiceCollectionExtensions
     {
