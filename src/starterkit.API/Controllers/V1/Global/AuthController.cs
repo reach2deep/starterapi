@@ -58,5 +58,42 @@ namespace starterkit.API.Controllers.V1.Global
             
             return Ok(ApiResponse<TenantSelectionResponseDto>.CreateSuccess(result));
         }
+
+        /// <summary>
+        /// Authenticates a user and automatically selects their first available tenant
+        /// </summary>
+        /// <param name="request">Login credentials containing email and password</param>
+        /// <returns>
+        /// Success Response: Tenant-specific access token and tenant info
+        /// Error Response: If no tenants available or other authentication errors
+        /// </returns>
+        [HttpPost("login-with-tenant")]
+        public async Task<ActionResult<ApiResponse<TenantSelectionResponseDto>>> LoginWithFirstTenant(
+            [FromBody] GlobalLoginRequestDto request)
+        {
+            // First, perform normal login
+            var loginResult = await _authService.LoginAsync(request);
+            
+            // Check if user has any available tenants
+            if (loginResult.AvailableTenants == null || !loginResult.AvailableTenants.Any())
+            {
+                return BadRequest(ApiResponse<TenantSelectionResponseDto>.CreateError(
+                    message: "No available tenants for this user",
+                    code: "NO_TENANTS_AVAILABLE"
+                ));
+            }
+
+            // Select the first available tenant
+            var tenantSelectionRequest = new TenantSelectionRequestDto
+            {
+                BaseToken = loginResult.BaseToken,
+                TenantId = loginResult.AvailableTenants.First().TenantId
+            };
+
+            // Perform tenant selection
+            var tenantResult = await _authService.SelectTenantAsync(tenantSelectionRequest);
+            
+            return Ok(ApiResponse<TenantSelectionResponseDto>.CreateSuccess(tenantResult));
+        }
     }
 } 
