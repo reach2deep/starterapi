@@ -1,5 +1,5 @@
 name: "Multi-tenant Starter Kit"
-description: "Rules for implementing a multi-tenant C# Web API project following clean architecture"
+description: "Rules for implementing a module-based multi-tenant C# Web API project following clean architecture"
 
 rules:
   # Naming Conventions
@@ -7,11 +7,23 @@ rules:
     pattern: "*.cs"
     rules:
       - "Interfaces should start with 'I'"
-      - "DTOs should end with 'Dto'"
+      - "DTOs should end with 'Request' or 'Response'"
       - "Controllers should end with 'Controller'"
       - "Services should end with 'Service'"
       - "Repositories should end with 'Repository'"
       - "Database contexts should end with 'DbContext'"
+      - "Validators should end with 'Validator'"
+      - "Mapping profiles should end with 'MappingProfile'"
+
+  # Module Organization
+  - name: "Module Structure"
+    description: "Rules for module-based organization"
+    rules:
+      - "Each module should be under Modules/[Global|Tenant]/[ModuleName]"
+      - "Each module should contain its own DTOs, Services, Interfaces, Validators, and Mappings"
+      - "Module-specific entities should be in Core/Modules/[Global|Tenant]/[ModuleName]/Entities"
+      - "Cross-module dependencies should be minimized"
+      - "Common code should be in the Common module"
 
   # Architecture Rules
   - name: "Layer Dependencies"
@@ -20,14 +32,15 @@ rules:
       - "Core layer should not depend on other layers"
       - "Application layer can only depend on Core layer"
       - "Infrastructure layer can depend on Core and Application layers"
-      - "API layer can depend on all layers"
+      - "API layer can depend on Application layer only"
+      - "Shared layer can be used by all layers"
 
   # Multi-tenancy Rules
   - name: "Multi-tenancy Implementation"
     pattern: "*.cs"
     rules:
-      - "Global entities must be in Core/Entities/Global namespace"
-      - "Tenant entities must be in Core/Entities/Tenant namespace"
+      - "Global modules must be in Modules/Global namespace"
+      - "Tenant modules must be in Modules/Tenant namespace"
       - "TenantId must be included in all tenant-specific entities"
       - "Use TenantMiddleware for tenant resolution"
       - "Tenant context must be validated in all tenant-specific operations"
@@ -36,33 +49,45 @@ rules:
   - name: "Project Structure"
     folders:
       - src/starterkit.API:
-          - "Controllers/V1/Global for tenant-agnostic endpoints"
-          - "Controllers/V1/Tenant for tenant-specific endpoints"
+          - "Controllers/Modules/V1/Global for global endpoints"
+          - "Controllers/Modules/V1/Tenant for tenant-specific endpoints"
+          - "DependencyInjection for service registration"
           - "Middlewares must include TenantMiddleware"
       
       - src/starterkit.Core:
-          - "Separate Global and Tenant entities"
-          - "Define interfaces for all services and repositories"
-          - "Keep domain logic tenant-aware"
+          - "Modules/[Global|Tenant] for domain entities and logic"
+          - "Modules/Common for shared entities"
+          - "Interfaces/Repositories for repository contracts"
       
       - src/starterkit.Application:
-          - "Separate DTOs for Global and Tenant operations"
-          - "Implement service interfaces"
-          - "Handle tenant context in services"
+          - "Modules/[Global|Tenant]/[ModuleName] for module implementation"
+          - "Each module must have DTOs, Interfaces, Services, Validators, and Mappings"
+          - "DependencyInjection for service registration"
       
       - src/starterkit.Infrastructure:
-          - "Maintain separate RootDb and TenantDb contexts"
-          - "Implement tenant resolution and connection management"
-          - "Handle tenant data isolation"
+          - "Persistence/RootDb and Persistence/TenantDb for database contexts"
+          - "Services for infrastructure services"
+          - "Repositories/[Global|Tenant] for repository implementations"
+
+  # Module Implementation Rules
+  - name: "Module Implementation"
+    pattern: "*/Modules/*/*.cs"
+    rules:
+      - "Each module should be self-contained"
+      - "Use interfaces for cross-module communication"
+      - "Keep module-specific logic within the module"
+      - "Follow consistent folder structure within modules"
+      - "Document module dependencies and requirements"
 
   # Database Rules
   - name: "Database Contexts"
-    pattern: "*/Data/*DbContext.cs"
+    pattern: "*/Persistence/*DbContext.cs"
     rules:
       - "RootDbContext for global operations"
       - "TenantDbContext for tenant-specific operations"
       - "Use separate connection strings per tenant"
       - "Implement proper tenant data isolation"
+      - "Use DbContextFactory for context creation"
 
   # Authentication Rules
   - name: "Authentication"
@@ -72,84 +97,119 @@ rules:
       - "Include tenant information in JWT tokens"
       - "Validate tenant access in authorization"
       - "Handle tenant-specific refresh tokens"
+      - "Keep authentication logic in Global/Auth module"
 
   # Service Implementation
   - name: "Services"
     pattern: "*/Services/*.cs"
     rules:
-      - "Inject ITenantResolver in tenant-specific services"
-      - "Validate tenant context before operations"
-      - "Use proper tenant-specific repositories"
-      - "Handle cross-tenant operations properly"
+      - "Services must be in module's Services folder"
+      - "Implement corresponding interface from module's Interfaces folder"
+      - "Use dependency injection for dependencies"
+      - "Handle module-specific validation and business logic"
+      - "Use appropriate error handling and logging"
 
   # Repository Rules
   - name: "Repositories"
     pattern: "*/Repositories/*.cs"
     rules:
-      - "Implement tenant filtering in queries"
-      - "Use proper DbContext for operation type"
-      - "Ensure data isolation between tenants"
-      - "Handle tenant-specific transactions"
+      - "Implement repository interfaces from Core layer"
+      - "Use appropriate DbContext (Root or Tenant)"
+      - "Ensure proper data isolation"
+      - "Handle tenant context in tenant repositories"
+      - "Implement proper error handling"
 
   # API Endpoints
   - name: "API Controllers"
     pattern: "*/Controllers/*.cs"
     rules:
-      - "Use [TenantAuthorize] for tenant-specific endpoints"
-      - "Validate tenant context in requests"
-      - "Return proper error responses for tenant issues"
-      - "Document tenant requirements in swagger"
+      - "Place in appropriate module folder under Controllers/Modules/V1"
+      - "Inherit from BaseApiController"
+      - "Use module-specific DTOs"
+      - "Proper error handling and response codes"
+      - "Document API endpoints"
 
   # Error Handling
   - name: "Error Handling"
     pattern: "*.cs"
     rules:
-      - "Handle tenant-specific exceptions"
-      - "Provide clear error messages for tenant issues"
-      - "Log tenant context in errors"
-      - "Maintain proper error separation between tenants"
+      - "Use consistent error handling across modules"
+      - "Proper exception handling in services"
+      - "Clear error messages and logging"
+      - "Include relevant context in errors"
+      - "Use appropriate HTTP status codes"
 
   # Testing
   - name: "Testing"
     pattern: "*/Tests/*.cs"
     rules:
-      - "Test both global and tenant-specific scenarios"
-      - "Mock tenant context in unit tests"
-      - "Use test tenants in integration tests"
-      - "Verify tenant isolation in tests"
+      - "Organize tests by module structure"
+      - "Test module-specific functionality"
+      - "Mock dependencies appropriately"
+      - "Test both success and failure scenarios"
+      - "Follow consistent testing patterns"
 
   # Security
   - name: "Security"
     pattern: "*.cs"
     rules:
-      - "Encrypt tenant connection strings"
-      - "Validate tenant access in all operations"
-      - "Prevent cross-tenant data access"
-      - "Implement proper tenant user management"
+      - "Proper authentication and authorization"
+      - "Secure handling of sensitive data"
+      - "Input validation in DTOs and validators"
+      - "Proper tenant isolation"
+      - "Secure configuration management"
 
   # Performance
   - name: "Performance"
     rules:
-      - "Cache tenant configurations"
-      - "Optimize tenant resolution"
-      - "Use connection pooling per tenant"
-      - "Monitor tenant-specific metrics"
+      - "Optimize database queries"
+      - "Use appropriate caching strategies"
+      - "Efficient tenant resolution"
+      - "Proper connection management"
+      - "Monitor performance metrics"
 
 file_templates:
-  - template: "tenant_entity"
-    path: "src/starterkit.Core/Entities/Tenant/*.cs"
+  - template: "module_entity"
+    path: "src/starterkit.Core/Modules/{type}/{module}/Entities/*.cs"
     content: |
+      namespace starterkit.Core.Modules.{type}.{module}.Entities;
+      
       public class {name} : BaseEntity
       {
-          public Guid TenantId { get; set; }
-          // Additional properties
+          // Entity properties
       }
 
-  - template: "tenant_service"
-    path: "src/starterkit.Application/Services/Tenant/*.cs"
+  - template: "module_interface"
+    path: "src/starterkit.Application/Modules/{type}/{module}/Interfaces/*.cs"
     content: |
+      namespace starterkit.Application.Modules.{type}.{module}.Interfaces;
+      
+      public interface I{name}
+      {
+          // Interface members
+      }
+
+  - template: "module_service"
+    path: "src/starterkit.Application/Modules/{type}/{module}/Services/*.cs"
+    content: |
+      namespace starterkit.Application.Modules.{type}.{module}.Services;
+      
       public class {name}Service : I{name}Service
       {
-          private readonly ITenantResolver _tenantResolver;
-          // Implementation
+          // Service implementation
+      }
+
+  - template: "module_dto"
+    path: "src/starterkit.Application/Modules/{type}/{module}/DTOs/*.cs"
+    content: |
+      namespace starterkit.Application.Modules.{type}.{module}.DTOs;
+      
+      public class {name}Request
+      {
+          // Request properties
+      }
+      
+      public class {name}Response
+      {
+          // Response properties
       }
