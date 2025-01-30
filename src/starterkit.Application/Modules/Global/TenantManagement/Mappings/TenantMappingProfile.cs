@@ -1,8 +1,8 @@
 using AutoMapper;
-using starterkit.starterkit.Application.Modules.Global.TenantManagement.DTOs;
-using starterkit.starterkit.Core.Modules.Global;
+using starterkit.Application.Modules.Global.TenantManagement.DTOs;
+using starterkit.Core.Modules.Global;
 
-namespace starterkit.starterkit.Application.Modules.Global.TenantManagement.Mappings
+namespace starterkit.Application.Modules.Global.TenantManagement.Mappings
 {
     public class TenantMappingProfile : Profile
     {

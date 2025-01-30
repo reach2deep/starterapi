@@ -1,8 +1,8 @@
 
-using starterkit.starterkit.Core.Enums;
-using starterkit.starterkit.Core.Modules.Common;
+using starterkit.Core.Enums;
+using starterkit.Core.Modules.Common;
 
-namespace starterkit.starterkit.Core.Modules.Tenant
+namespace starterkit.Core.Modules.Tenant
 {
     public class User : BaseEntity
     {

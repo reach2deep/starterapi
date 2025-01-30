@@ -1,10 +1,10 @@
 using Microsoft.Extensions.DependencyInjection;
-using starterkit.starterkit.Application.Modules.Global.TenantManagement.Interfaces;
-using starterkit.starterkit.Application.Modules.Global.TenantManagement.Services;
+using starterkit.Application.Modules.Global.TenantManagement.Interfaces;
+using starterkit.Application.Modules.Global.TenantManagement.Services;
 using FluentValidation;
 using System.Reflection;
 
-namespace starterkit.starterkit.Application.Extensions
+namespace starterkit.Application.Extensions
 {
     public static class ServiceCollectionExtensions
     {

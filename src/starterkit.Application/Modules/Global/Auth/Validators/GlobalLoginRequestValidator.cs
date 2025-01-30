@@ -1,8 +1,8 @@
 using FluentValidation;
-using starterkit.starterkit.Application.Modules.Global.Auth.DTOs;
+using starterkit.Application.Modules.Global.Auth.DTOs;
 
 
-namespace starterkit.starterkit.Application.Modules.Global.Auth.Validators
+namespace starterkit.Application.Modules.Global.Auth.Validators
 {
     public class GlobalLoginRequestValidator : AbstractValidator<GlobalLoginRequestDto>
     {

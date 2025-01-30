@@ -1,10 +1,10 @@
 using Microsoft.EntityFrameworkCore;
-using starterkit.starterkit.Application.Persistence;
-using starterkit.starterkit.Core.Modules.Global;
-using starterkit.starterkit.Infrastructure.Data.RootDb.Configurations;
+using starterkit.Application.Persistence;
+using starterkit.Core.Modules.Global;
+using starterkit.Infrastructure.Data.RootDb.Configurations;
 
 
-namespace starterkit.starterkit.Infrastructure.Data.RootDb
+namespace starterkit.Infrastructure.Data.RootDb
 {
     public class RootDbContext : DbContext, IRootDbContext
     {

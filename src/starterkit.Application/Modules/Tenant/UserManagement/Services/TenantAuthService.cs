@@ -1,12 +1,12 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using starterkit.starterkit.Application.Modules.Tenant.UserManagement.Interfaces;
-using starterkit.starterkit.Application.Persistence;
-using starterkit.starterkit.Core.Modules.Tenant;
+using starterkit.Application.Modules.Tenant.UserManagement.Interfaces;
+using starterkit.Application.Persistence;
+using starterkit.Core.Modules.Tenant;
 using System.Security.Claims;
 
-namespace starterkit.starterkit.Application.Modules.Tenant.UserManagement.Services
+namespace starterkit.Application.Modules.Tenant.UserManagement.Services
 {
     public class TenantAuthService : ITenantAuthService
     {

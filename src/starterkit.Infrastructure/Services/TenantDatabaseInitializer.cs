@@ -1,10 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using starterkit.starterkit.Application.Modules.Global.TenantManagement.Interfaces;
-using starterkit.starterkit.Core.Modules.Global;
-using starterkit.starterkit.Application.Persistence;
+using starterkit.Application.Modules.Global.TenantManagement.Interfaces;
+using starterkit.Core.Modules.Global;
+using starterkit.Application.Persistence;
 
-namespace starterkit.starterkit.Infrastructure.Services
+namespace starterkit.Infrastructure.Services
 {
     public class TenantDatabaseInitializer : ITenantDatabaseInitializer
     {

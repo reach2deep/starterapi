@@ -1,4 +1,4 @@
-namespace starterkit.starterkit.Application.Modules.Tenant.UserManagement.DTOs
+namespace starterkit.Application.Modules.Tenant.UserManagement.DTOs
 {
     public class UserProfileResponseDto
     {

@@ -1,4 +1,4 @@
-namespace starterkit.starterkit.Core.Enums
+namespace starterkit.Core.Enums
 {
     public enum TenantStatus
     {

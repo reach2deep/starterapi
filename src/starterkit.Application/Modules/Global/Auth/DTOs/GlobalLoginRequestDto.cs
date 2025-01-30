@@ -1,4 +1,4 @@
-namespace starterkit.starterkit.Application.Modules.Global.Auth.DTOs
+namespace starterkit.Application.Modules.Global.Auth.DTOs
 {
     public class GlobalLoginRequestDto
     {

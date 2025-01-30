@@ -1,8 +1,8 @@
 using FluentValidation;
-using starterkit.starterkit.Application.Modules.Global.TenantManagement.DTOs;
-using starterkit.starterkit.Core.Enums;
+using starterkit.Application.Modules.Global.TenantManagement.DTOs;
+using starterkit.Core.Enums;
 
-namespace starterkit.starterkit.Application.Modules.Global.TenantManagement.Validators
+namespace starterkit.Application.Modules.Global.TenantManagement.Validators
 {
     public class UpdateTenantRequestValidator : AbstractValidator<UpdateTenantRequestDto>
     {

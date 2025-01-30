@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace starterkit.starterkit.Infrastructure.Data.RootDb.Migrations
+namespace starterkit.Infrastructure.Data.RootDb.Migrations
 {
     /// <inheritdoc />
     public partial class InitialRootSchema : Migration

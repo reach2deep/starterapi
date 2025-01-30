@@ -1,7 +1,7 @@
 
-using starterkit.starterkit.Core.Enums;
+using starterkit.Core.Enums;
 
-namespace starterkit.starterkit.Core.Modules.Common
+namespace starterkit.Core.Modules.Common
 {
     public class TenantInfo
     {

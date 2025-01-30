@@ -1,4 +1,4 @@
-namespace starterkit.starterkit.Application.Common.Exceptions.Auth
+namespace starterkit.Application.Common.Exceptions.Auth
 {
     public class InvalidTokenException : Exception
     {

@@ -2,11 +2,11 @@ using System.ComponentModel.DataAnnotations;
 using System.Net;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
-using starterkit.starterkit.Application.Common.Exceptions.Auth;
-using starterkit.starterkit.Application.Common.Exceptions.Tenant;
-using starterkit.starterkit.Core.Modules.Common;
+using starterkit.Application.Common.Exceptions.Auth;
+using starterkit.Application.Common.Exceptions.Tenant;
+using starterkit.Core.Modules.Common;
 
-namespace starterkit.starterkit.API.Middlewares
+namespace starterkit.API.Middlewares
 {
     public class GlobalExceptionHandlingMiddleware
     {

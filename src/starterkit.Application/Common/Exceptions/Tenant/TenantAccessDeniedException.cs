@@ -1,4 +1,4 @@
-namespace starterkit.starterkit.Application.Common.Exceptions.Tenant
+namespace starterkit.Application.Common.Exceptions.Tenant
 {
     public class TenantAccessDeniedException : Exception
     {

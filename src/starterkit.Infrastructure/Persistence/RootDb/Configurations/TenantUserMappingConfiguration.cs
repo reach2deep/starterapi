@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using starterkit.starterkit.Core.Modules.Global;
+using starterkit.Core.Modules.Global;
 
 
-namespace starterkit.starterkit.Infrastructure.Data.RootDb.Configurations
+namespace starterkit.Infrastructure.Data.RootDb.Configurations
 {
     public class TenantUserMappingConfiguration : IEntityTypeConfiguration<TenantUserMapping>
     {

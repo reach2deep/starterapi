@@ -1,6 +1,6 @@
-using starterkit.starterkit.Core.Enums;
+using starterkit.Core.Enums;
 
-namespace starterkit.starterkit.Application.Modules.Global.TenantManagement.DTOs
+namespace starterkit.Application.Modules.Global.TenantManagement.DTOs
 {
     public class CreateTenantRequestDto
     {

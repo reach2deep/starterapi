@@ -1,11 +1,11 @@
 using Microsoft.EntityFrameworkCore;
-using starterkit.starterkit.Core.Enums;
-using starterkit.starterkit.Core.Modules.Global;
-using starterkit.starterkit.Core.Modules.Tenant;
-using starterkit.starterkit.Infrastructure.Data.RootDb;
-using starterkit.starterkit.Infrastructure.Services;
+using starterkit.Core.Enums;
+using starterkit.Core.Modules.Global;
+using starterkit.Core.Modules.Tenant;
+using starterkit.Infrastructure.Data.RootDb;
+using starterkit.Infrastructure.Services;
 
-namespace starterkit.starterkit.Infrastructure.Data.TenantDb
+namespace starterkit.Infrastructure.Data.TenantDb
 {
     public class TenantDbSeeder : IDataSeeder
     {

@@ -1,4 +1,4 @@
-namespace starterkit.starterkit.Application.Modules.Tenant.UserManagement.Interfaces
+namespace starterkit.Application.Modules.Tenant.UserManagement.Interfaces
 {
     public interface ITenantAuthService
     {

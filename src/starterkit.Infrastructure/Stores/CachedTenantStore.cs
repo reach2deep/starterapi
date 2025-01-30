@@ -1,10 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
-using starterkit.starterkit.Application.Persistence;
-using starterkit.starterkit.Core.Modules.Common;
+using starterkit.Application.Persistence;
+using starterkit.Core.Modules.Common;
 
 
-namespace starterkit.starterkit.Infrastructure.Stores
+namespace starterkit.Infrastructure.Stores
 {
     public class CachedTenantStore : ITenantStore
     {

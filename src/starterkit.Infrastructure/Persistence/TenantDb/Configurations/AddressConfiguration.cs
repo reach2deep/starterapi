@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using starterkit.starterkit.Core.Modules.Tenant;
+using starterkit.Core.Modules.Tenant;
 
 
-namespace starterkit.starterkit.Infrastructure.Data.TenantDb.Configurations
+namespace starterkit.Infrastructure.Data.TenantDb.Configurations
 {
     public class AddressConfiguration : IEntityTypeConfiguration<Address>
     {

@@ -1,8 +1,8 @@
 
-using starterkit.starterkit.Application.Modules.Global.TenantManagement.Interfaces;
-using starterkit.starterkit.Infrastructure.Services;
+using starterkit.Application.Modules.Global.TenantManagement.Interfaces;
+using starterkit.Infrastructure.Services;
 
-namespace starterkit.starterkit.API.Middlewares
+namespace starterkit.API.Middlewares
 {
     public class TenantMiddleware
     {
