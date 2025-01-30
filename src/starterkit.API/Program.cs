@@ -151,17 +151,6 @@ using (var scope = app.Services.CreateScope())
     // Seed root database
     var seeder = scope.ServiceProvider.GetRequiredService<IDataSeeder>();
     await seeder.SeedAsync();
-
-    // Initialize tenant databases
-    var tenantStore = scope.ServiceProvider.GetRequiredService<ITenantStore>();
-    var databaseInitializer = scope.ServiceProvider.GetRequiredService<ITenantDatabaseInitializer>();
-
-    // Get all tenants and initialize their databases
-    var tenants = await tenantStore.GetAllTenantsAsync();
-    foreach (var tenant in tenants)
-    {
-        await databaseInitializer.InitializeTenantDatabaseAsync(tenant.DatabaseName);
-    }
 }
 
 app.Run();
