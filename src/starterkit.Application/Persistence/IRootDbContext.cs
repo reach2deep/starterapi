@@ -1,7 +1,8 @@
 using Microsoft.EntityFrameworkCore;
-using starterkit.Core.Entities.Global;
 
-namespace starterkit.Core.Interfaces.Data
+using starterkit.starterkit.Core.Modules.Global;
+
+namespace starterkit.starterkit.Application.Persistence
 {
     public interface IRootDbContext : IDisposable
     {
@@ -11,4 +12,4 @@ namespace starterkit.Core.Interfaces.Data
         DbSet<TEntity> Set<TEntity>() where TEntity : class;
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }
-} 
+}

@@ -31,10 +31,10 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Starter Kit API", Version = "v1" });
-    
+
     // Configure schema IDs to use full type names
     c.CustomSchemaIds(type => type.FullName);
-    
+
     // Add JWT Authentication
     var securityScheme = new OpenApiSecurityScheme
     {

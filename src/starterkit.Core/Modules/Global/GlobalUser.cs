@@ -1,7 +1,8 @@
-using starterkit.Core.Entities.Common;
-using starterkit.Core.Enums;
 
-namespace starterkit.Core.Entities.Global
+using starterkit.starterkit.Core.Enums;
+using starterkit.starterkit.Core.Modules.Common;
+
+namespace starterkit.starterkit.Core.Modules.Global
 {
     public class GlobalUser : BaseEntity
     {
@@ -13,4 +14,4 @@ namespace starterkit.Core.Entities.Global
         public UserType UserType { get; set; }
         public UserStatus Status { get; set; }
     }
-} 
+}

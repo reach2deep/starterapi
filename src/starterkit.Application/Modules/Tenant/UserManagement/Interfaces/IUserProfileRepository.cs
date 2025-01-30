@@ -1,6 +1,7 @@
-using starterkit.Core.Entities.Tenant;
 
-namespace starterkit.Core.Interfaces.Repositories.Tenant
+using starterkit.starterkit.Core.Modules.Tenant;
+
+namespace starterkit.starterkit.Application.Modules.Tenant.UserManagement.Interfaces
 {
     public interface IUserProfileRepository
     {
@@ -11,4 +12,4 @@ namespace starterkit.Core.Interfaces.Repositories.Tenant
         Task<bool> ExistsAsync(Guid id);
         Task<bool> ExistsByUserIdAsync(Guid userId);
     }
-} 
+}

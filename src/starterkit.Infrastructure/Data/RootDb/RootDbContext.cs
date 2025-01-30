@@ -1,9 +1,10 @@
 using Microsoft.EntityFrameworkCore;
-using starterkit.Core.Entities.Global;
-using starterkit.Core.Interfaces.Data;
-using starterkit.Infrastructure.Data.RootDb.Configurations;
+using starterkit.starterkit.Application.Persistence;
+using starterkit.starterkit.Core.Modules.Global;
+using starterkit.starterkit.Infrastructure.Data.RootDb.Configurations;
 
-namespace starterkit.Infrastructure.Data.RootDb
+
+namespace starterkit.starterkit.Infrastructure.Data.RootDb
 {
     public class RootDbContext : DbContext, IRootDbContext
     {
@@ -25,4 +26,4 @@ namespace starterkit.Infrastructure.Data.RootDb
             modelBuilder.ApplyConfiguration(new TenantUserMappingConfiguration());
         }
     }
-} 
+}

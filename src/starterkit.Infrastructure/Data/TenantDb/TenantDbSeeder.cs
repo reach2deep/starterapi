@@ -1,12 +1,11 @@
 using Microsoft.EntityFrameworkCore;
-using starterkit.Core.Entities.Global;
-using starterkit.Core.Entities.Tenant;
-using starterkit.Core.Enums;
-using starterkit.Core.Interfaces.Data;
-using starterkit.Infrastructure.Data.RootDb;
-using starterkit.Infrastructure.Services;
+using starterkit.starterkit.Core.Enums;
+using starterkit.starterkit.Core.Modules.Global;
+using starterkit.starterkit.Core.Modules.Tenant;
+using starterkit.starterkit.Infrastructure.Data.RootDb;
+using starterkit.starterkit.Infrastructure.Services;
 
-namespace starterkit.Infrastructure.Data.TenantDb
+namespace starterkit.starterkit.Infrastructure.Data.TenantDb
 {
     public class TenantDbSeeder : IDataSeeder
     {
@@ -198,4 +197,4 @@ namespace starterkit.Infrastructure.Data.TenantDb
             await _rootContext.SaveChangesAsync();
         }
     }
-} 
+}

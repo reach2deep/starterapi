@@ -1,6 +1,7 @@
-using starterkit.Core.Enums;
 
-namespace starterkit.Infrastructure.MultiTenancy.Models
+using starterkit.starterkit.Core.Enums;
+
+namespace starterkit.starterkit.Core.Modules.Common
 {
     public class TenantInfo
     {
@@ -10,4 +11,4 @@ namespace starterkit.Infrastructure.MultiTenancy.Models
         public string ConnectionString { get; set; }
         public TenantStatus Status { get; set; }
     }
-} 
+}

@@ -1,9 +1,9 @@
-using starterkit.Core.DTOs.Tenant;
-using starterkit.Core.Entities.Tenant;
-using starterkit.Core.Interfaces.Repositories.Tenant;
-using starterkit.Core.Interfaces.Services.Tenant;
 
-namespace starterkit.Application.Services.Tenant
+using starterkit.starterkit.Application.Modules.Tenant.UserManagement.DTOs;
+using starterkit.starterkit.Application.Modules.Tenant.UserManagement.Interfaces;
+using starterkit.starterkit.Core.Modules.Tenant;
+
+namespace starterkit.starterkit.Application.Modules.Tenant.UserManagement.Services
 {
     public class UserProfileService : IUserProfileService
     {
@@ -93,4 +93,4 @@ namespace starterkit.Application.Services.Tenant
             };
         }
     }
-} 
+}

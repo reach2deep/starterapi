@@ -1,4 +1,4 @@
-namespace starterkit.Core.Entities.Common
+namespace starterkit.starterkit.Core.Modules.Common
 {
     public abstract class BaseEntity
     {
@@ -15,4 +15,4 @@ namespace starterkit.Core.Entities.Common
             CreatedAt = DateTime.UtcNow;
         }
     }
-} 
+}

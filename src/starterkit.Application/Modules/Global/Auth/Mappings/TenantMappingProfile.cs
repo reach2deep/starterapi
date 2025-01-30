@@ -1,15 +1,16 @@
 using AutoMapper;
-using starterkit.Core.DTOs.Tenant;
-using starterkit.Core.Entities.Tenant;
+using starterkit.starterkit.Application.Modules.Tenant.UserManagement.DTOs;
+using starterkit.starterkit.Core.Modules.Tenant;
 
-namespace starterkit.Application.Mappings
+
+namespace starterkit.starterkit.Application.Modules.Global.Auth.Mappings
 {
     public class TenantMappingProfile : Profile
     {
         public TenantMappingProfile()
         {
             CreateMap<Address, AddressDto>();
-            
+
             CreateMap<UserProfile, UserProfileResponseDto>()
                 .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.Address));
 
@@ -27,4 +28,4 @@ namespace starterkit.Application.Mappings
                 .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(_ => DateTime.UtcNow));
         }
     }
-} 
+}

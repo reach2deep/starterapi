@@ -1,7 +1,8 @@
 using FluentValidation;
-using starterkit.Application.DTOs.Global.Auth;
+using starterkit.starterkit.Application.Modules.Global.Auth.DTOs;
 
-namespace starterkit.Application.Validators.Global
+
+namespace starterkit.starterkit.Application.Modules.Global.Auth.Validators
 {
     public class GlobalLoginRequestValidator : AbstractValidator<GlobalLoginRequestDto>
     {
@@ -16,4 +17,4 @@ namespace starterkit.Application.Validators.Global
                 .MinimumLength(6).WithMessage("Password must be at least 6 characters long");
         }
     }
-} 
+}

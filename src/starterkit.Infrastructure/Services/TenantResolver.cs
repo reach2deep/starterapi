@@ -2,9 +2,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using starterkit.Infrastructure.MultiTenancy.Models;
 using starterkit.Infrastructure.MultiTenancy.Stores;
+using starterkit.starterkit.Core.Modules.Common;
+using starterkit.starterkit.Infrastructure.Stores;
 using System.Security.Claims;
 
-namespace starterkit.Infrastructure.Services
+namespace starterkit.starterkit.Infrastructure.Services
 {
     public interface ITenantResolver
     {
@@ -31,7 +33,7 @@ namespace starterkit.Infrastructure.Services
             // First try from header
             tenantId = context.Request.Headers["X-Tenant-ID"].FirstOrDefault();
             _logger.LogInformation("Tenant ID from header: {TenantId}", tenantId);
-            
+
             if (string.IsNullOrEmpty(tenantId))
             {
                 // Log all claims for debugging
@@ -42,9 +44,9 @@ namespace starterkit.Infrastructure.Services
                     // {
                     //     _logger.LogInformation("Claim: {Type} = {Value}", claim.Type, claim.Value);
                     // }
-                    
+
                     // Try from JWT token claims
-                    tenantId = context.User?.FindFirst("tenant_id")?.Value 
+                    tenantId = context.User?.FindFirst("tenant_id")?.Value
                            ?? context.User?.FindFirst("tenant-id")?.Value
                            ?? context.User?.FindFirst("TenantId")?.Value;
                     _logger.LogInformation("Tenant ID from JWT claim: {TenantId}", tenantId);
@@ -60,7 +62,7 @@ namespace starterkit.Infrastructure.Services
                 // Try from subdomain
                 var host = context.Request.Host.Value;
                 var subdomain = host.Split('.').FirstOrDefault();
-                
+
                 if (!string.IsNullOrEmpty(subdomain) && subdomain != "www")
                 {
                     tenantId = subdomain;
@@ -86,4 +88,4 @@ namespace starterkit.Infrastructure.Services
             return tenant;
         }
     }
-} 
+}

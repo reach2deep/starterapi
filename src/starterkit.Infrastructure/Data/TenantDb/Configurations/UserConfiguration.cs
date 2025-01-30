@@ -1,8 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using starterkit.Core.Entities.Tenant;
+using starterkit.starterkit.Core.Modules.Tenant;
 
-namespace starterkit.Infrastructure.Data.TenantDb.Configurations
+
+namespace starterkit.starterkit.Infrastructure.Data.TenantDb.Configurations
 {
     public class UserConfiguration : IEntityTypeConfiguration<User>
     {
@@ -39,4 +40,4 @@ namespace starterkit.Infrastructure.Data.TenantDb.Configurations
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }
-} 
+}

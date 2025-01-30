@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using starterkit.Core.Entities.Tenant;
 
-namespace starterkit.Infrastructure.Data.TenantDb.Configurations
+namespace starterkit.starterkit.Infrastructure.Data.TenantDb.Configurations
 {
     public class AddressConfiguration : IEntityTypeConfiguration<Address>
     {
@@ -32,4 +32,4 @@ namespace starterkit.Infrastructure.Data.TenantDb.Configurations
                 .HasMaxLength(100);
         }
     }
-} 
+}

@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
-using starterkit.Core.Entities.Global;
-using starterkit.Core.Interfaces.Repositories.Global;
+using starterkit.starterkit.Application.Modules.Global.Auth.Interfaces;
+using starterkit.starterkit.Core.Modules.Global;
 
-namespace starterkit.Infrastructure.Data.RootDb.Repositories
+namespace starterkit.starterkit.Infrastructure.Data.RootDb.Repositories
 {
     public class GlobalUserRepository : IGlobalUserRepository
     {
@@ -29,8 +29,8 @@ namespace starterkit.Infrastructure.Data.RootDb.Repositories
         {
             return await _context.Set<TenantUserMapping>()
                 .Include(t => t.Tenant)
-                .Where(t => t.UserId == userId && 
-                           t.IsActive && 
+                .Where(t => t.UserId == userId &&
+                           t.IsActive &&
                            t.Tenant.Status == Core.Enums.TenantStatus.Active)
                 .ToListAsync();
         }
@@ -39,11 +39,11 @@ namespace starterkit.Infrastructure.Data.RootDb.Repositories
         {
             return await _context.Set<TenantUserMapping>()
                 .Include(t => t.Tenant)
-                .FirstOrDefaultAsync(t => 
-                    t.TenantId == tenantId && 
-                    t.UserId == userId && 
-                    t.IsActive && 
+                .FirstOrDefaultAsync(t =>
+                    t.TenantId == tenantId &&
+                    t.UserId == userId &&
+                    t.IsActive &&
                     t.Tenant.Status == Core.Enums.TenantStatus.Active);
         }
     }
-} 
+}

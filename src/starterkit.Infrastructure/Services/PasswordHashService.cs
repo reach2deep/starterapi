@@ -1,6 +1,6 @@
 using BCrypt.Net;
 
-namespace starterkit.Infrastructure.Services
+namespace starterkit.starterkit.Infrastructure.Services
 {
     public interface IPasswordHashService
     {
@@ -20,4 +20,4 @@ namespace starterkit.Infrastructure.Services
             return BCrypt.Net.BCrypt.Verify(password, passwordHash);
         }
     }
-} 
+}

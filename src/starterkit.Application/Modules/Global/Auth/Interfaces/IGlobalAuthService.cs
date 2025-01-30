@@ -1,7 +1,9 @@
-using starterkit.Application.DTOs.Global.Auth;
-using starterkit.Core.Entities.Global;
 
-namespace starterkit.Application.Interfaces.Services.Global
+
+using starterkit.starterkit.Application.Modules.Global.Auth.DTOs;
+using starterkit.starterkit.Core.Modules.Global;
+
+namespace starterkit.starterkit.Application.Modules.Global.Auth.Interfaces
 {
     public interface IGlobalAuthService
     {
@@ -9,4 +11,4 @@ namespace starterkit.Application.Interfaces.Services.Global
         Task<TenantSelectionResponseDto> SelectTenantAsync(TenantSelectionRequestDto request);
         Task<GlobalUser> ValidateBaseTokenAsync(string baseToken);
     }
-} 
+}

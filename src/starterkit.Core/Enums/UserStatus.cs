@@ -1,4 +1,4 @@
-namespace starterkit.Core.Enums
+namespace starterkit.starterkit.Core.Enums
 {
     public enum UserStatus
     {
@@ -7,4 +7,4 @@ namespace starterkit.Core.Enums
         Suspended = 3,
         Pending = 4
     }
-} 
+}

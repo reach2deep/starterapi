@@ -1,6 +1,7 @@
-using starterkit.Infrastructure.MultiTenancy.Models;
 
-namespace starterkit.Infrastructure.MultiTenancy.Stores
+using starterkit.starterkit.Core.Modules.Common;
+
+namespace starterkit.starterkit.Infrastructure.Stores
 {
     public interface ITenantStore
     {
@@ -8,4 +9,4 @@ namespace starterkit.Infrastructure.MultiTenancy.Stores
         Task<bool> TenantExistsAsync(string identifier);
         Task<IEnumerable<TenantInfo>> GetAllTenantsAsync();
     }
-} 
+}

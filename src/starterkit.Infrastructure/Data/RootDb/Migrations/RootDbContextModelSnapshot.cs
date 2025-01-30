@@ -8,7 +8,7 @@ using starterkit.Infrastructure.Data.RootDb;
 
 #nullable disable
 
-namespace starterkit.Infrastructure.Data.RootDb.Migrations
+namespace starterkit.starterkit.Infrastructure.Data.RootDb.Migrations
 {
     [DbContext(typeof(RootDbContext))]
     partial class RootDbContextModelSnapshot : ModelSnapshot

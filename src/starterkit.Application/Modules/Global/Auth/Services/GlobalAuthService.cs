@@ -3,17 +3,18 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
-using starterkit.Application.DTOs.Global.Auth;
-using starterkit.Application.Interfaces.Services.Global;
-using starterkit.Core.Entities.Global;
-using starterkit.Core.Exceptions.Auth;
-using starterkit.Core.Exceptions.Tenant;
-using starterkit.Core.Interfaces.Data;
+using starterkit.starterkit.Application.Common.Exceptions.Auth;
+using starterkit.starterkit.Application.Common.Exceptions.Tenant;
+using starterkit.starterkit.Application.Modules.Global.Auth.DTOs;
+using starterkit.starterkit.Application.Modules.Global.Auth.Interfaces;
+using starterkit.starterkit.Application.Persistence;
+using starterkit.starterkit.Core.Enums;
+using starterkit.starterkit.Core.Modules.Global;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace starterkit.Application.Services.Global
+namespace n.Modules.Global.Auth.Services
 {
     public class GlobalAuthService : IGlobalAuthService
     {
@@ -57,7 +58,7 @@ namespace starterkit.Application.Services.Global
                 // Get user's tenant mappings
                 var tenantMappings = await _context.TenantUserMappings
                     .Include(t => t.Tenant)
-                    .Where(t => t.UserId == user.Id && t.IsActive && t.Tenant.Status == Core.Enums.TenantStatus.Active)
+                    .Where(t => t.UserId == user.Id && t.IsActive && t.Tenant.Status == TenantStatus.Active)
                     .ToListAsync();
 
                 if (!tenantMappings.Any())
@@ -78,8 +79,8 @@ namespace starterkit.Application.Services.Global
 
                 return response;
             }
-            catch (Exception ex) when (ex is not InvalidCredentialsException && 
-                                     ex is not TenantAccessDeniedException && 
+            catch (Exception ex) when (ex is not InvalidCredentialsException &&
+                                     ex is not TenantAccessDeniedException &&
                                      ex is not ArgumentException)
             {
                 _logger.LogError(ex, "An error occurred during login for user {Email}", request?.Email);
@@ -108,15 +109,15 @@ namespace starterkit.Application.Services.Global
                 // Verify tenant access
                 var tenantMapping = await _context.Set<TenantUserMapping>()
                     .Include(t => t.Tenant)
-                    .FirstOrDefaultAsync(t => 
-                        t.TenantId == request.TenantId && 
-                        t.UserId == user.Id && 
-                        t.IsActive && 
-                        t.Tenant.Status == Core.Enums.TenantStatus.Active);
+                    .FirstOrDefaultAsync(t =>
+                        t.TenantId == request.TenantId &&
+                        t.UserId == user.Id &&
+                        t.IsActive &&
+                        t.Tenant.Status == TenantStatus.Active);
 
                 if (tenantMapping == null)
                 {
-                    _logger.LogWarning("User {UserId} attempted to access unauthorized tenant {TenantId}", 
+                    _logger.LogWarning("User {UserId} attempted to access unauthorized tenant {TenantId}",
                         user.Id, request.TenantId);
                     throw new TenantAccessDeniedException(request.TenantId, user.Id);
                 }
@@ -125,7 +126,7 @@ namespace starterkit.Application.Services.Global
                 var token = GenerateJwtToken(user, tenantMapping);
                 var refreshToken = GenerateRefreshToken();
 
-                _logger.LogInformation("Successfully generated tokens for user {UserId} in tenant {TenantId}", 
+                _logger.LogInformation("Successfully generated tokens for user {UserId} in tenant {TenantId}",
                     user.Id, request.TenantId);
 
                 return new TenantSelectionResponseDto
@@ -136,8 +137,8 @@ namespace starterkit.Application.Services.Global
                     TokenType = "Bearer"
                 };
             }
-            catch (Exception ex) when (ex is not InvalidTokenException && 
-                                     ex is not TenantAccessDeniedException && 
+            catch (Exception ex) when (ex is not InvalidTokenException &&
+                                     ex is not TenantAccessDeniedException &&
                                      ex is not ArgumentException)
             {
                 _logger.LogError(ex, "An error occurred during tenant selection for tenant {TenantId}", request?.TenantId);
@@ -243,4 +244,4 @@ namespace starterkit.Application.Services.Global
             return true;
         }
     }
-} 
+}

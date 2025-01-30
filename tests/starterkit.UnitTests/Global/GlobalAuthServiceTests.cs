@@ -11,7 +11,7 @@ using starterkit.Core.Exceptions.Auth;
 using starterkit.Core.Interfaces.Data;
 using Xunit;
 
-namespace starterkit.UnitTests.Global
+namespace starterkit...tests.starterkit.UnitTests.Global
 {
     public class GlobalAuthServiceTests
     {

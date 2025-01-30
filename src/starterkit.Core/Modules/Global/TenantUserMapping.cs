@@ -1,6 +1,7 @@
-using starterkit.Core.Entities.Common;
 
-namespace starterkit.Core.Entities.Global
+using starterkit.starterkit.Core.Modules.Common;
+
+namespace starterkit.starterkit.Core.Modules.Global
 {
     public class TenantUserMapping : BaseEntity
     {
@@ -13,4 +14,4 @@ namespace starterkit.Core.Entities.Global
         public Tenant Tenant { get; set; }
         public GlobalUser User { get; set; }
     }
-} 
+}

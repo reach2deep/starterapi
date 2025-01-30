@@ -1,9 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
-using starterkit.Core.Interfaces.Data;
-using starterkit.Infrastructure.MultiTenancy.Models;
+using starterkit.starterkit.Application.Persistence;
+using starterkit.starterkit.Core.Modules.Common;
 
-namespace starterkit.Infrastructure.MultiTenancy.Stores
+
+namespace starterkit.starterkit.Infrastructure.Stores
 {
     public class CachedTenantStore : ITenantStore
     {
@@ -28,9 +29,9 @@ namespace starterkit.Infrastructure.MultiTenancy.Stores
                 entry.AbsoluteExpirationRelativeToNow = _cacheDuration;
 
                 var tenant = await _context.Tenants
-                    .FirstOrDefaultAsync(t => 
+                    .FirstOrDefaultAsync(t =>
                         t.Id.ToString().ToLower() == identifier.ToLower() ||
-                        t.Name.ToLower() == identifier.ToLower() || 
+                        t.Name.ToLower() == identifier.ToLower() ||
                         t.DatabaseName.ToLower() == identifier.ToLower());
 
                 if (tenant == null)
@@ -72,4 +73,4 @@ namespace starterkit.Infrastructure.MultiTenancy.Stores
             return tenant != null;
         }
     }
-} 
+}

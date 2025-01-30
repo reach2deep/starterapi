@@ -1,6 +1,8 @@
-using starterkit.Core.DTOs.Tenant;
 
-namespace starterkit.Core.Interfaces.Services.Tenant
+
+using starterkit.starterkit.Application.Modules.Tenant.UserManagement.DTOs;
+
+namespace starterkit.starterkit.Application.Modules.Tenant.UserManagement.Interfaces
 {
     public interface IUserProfileService
     {
@@ -8,4 +10,4 @@ namespace starterkit.Core.Interfaces.Services.Tenant
         Task<UserProfileResponseDto> GetProfileAsync(Guid id);
         Task<UserProfileResponseDto> UpdateProfileAsync(Guid userId, UpdateUserProfileRequestDto request);
     }
-} 
+}
