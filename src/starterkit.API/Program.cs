@@ -132,6 +132,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+// Add global exception handling first
+app.UseGlobalExceptionHandling();
+
 // Add authentication & authorization first
 app.UseAuthentication();
 app.UseAuthorization();
