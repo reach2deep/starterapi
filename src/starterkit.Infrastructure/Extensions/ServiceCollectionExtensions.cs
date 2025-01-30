@@ -14,6 +14,7 @@ using starterkit.starterkit.Infrastructure.Services;
 using FluentValidation;
 using System.Reflection;
 using n.Modules.Global.Auth.Services;
+using starterkit.starterkit.Application.Modules.Global.Auth.Mappings;
 
 namespace starterkit.starterkit.Infrastructure.Extensions
 {
@@ -21,11 +22,10 @@ namespace starterkit.starterkit.Infrastructure.Extensions
     {
         public static IServiceCollection AddTenantServices(this IServiceCollection services, IConfiguration configuration)
         {
+            // Register AutoMapper from Application assembly
+            services.AddAutoMapper(typeof(GlobalMappingProfile).Assembly);
 
             var assembly = Assembly.GetExecutingAssembly();
-
-            // Register AutoMapper
-            services.AddAutoMapper(assembly);
 
             // Register FluentValidation
             services.AddValidatorsFromAssembly(assembly);
