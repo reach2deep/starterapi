@@ -1,6 +1,7 @@
 using AutoMapper;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Http;
 using starterkit.starterkit.Application.Modules.Global.TenantManagement.DTOs;
 using starterkit.starterkit.Application.Modules.Global.TenantManagement.Interfaces;
 using starterkit.starterkit.Application.Persistence;
@@ -17,19 +18,22 @@ namespace starterkit.starterkit.Application.Modules.Global.TenantManagement.Serv
         private readonly IMapper _mapper;
         private readonly IValidator<CreateTenantRequestDto> _createValidator;
         private readonly IValidator<UpdateTenantRequestDto> _updateValidator;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public TenantService(
             IRootDbContext context,
             ITenantDatabaseInitializer databaseInitializer,
             IMapper mapper,
             IValidator<CreateTenantRequestDto> createValidator,
-            IValidator<UpdateTenantRequestDto> updateValidator)
+            IValidator<UpdateTenantRequestDto> updateValidator,
+            IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
             _databaseInitializer = databaseInitializer;
             _mapper = mapper;
             _createValidator = createValidator;
             _updateValidator = updateValidator;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<TenantResponseDto> CreateTenantAsync(CreateTenantRequestDto request)
@@ -48,18 +52,59 @@ namespace starterkit.starterkit.Application.Modules.Global.TenantManagement.Serv
                 throw new InvalidOperationException($"Database name {request.DatabaseName} is already in use");
             }
 
-            var tenant = _mapper.Map<Core.Modules.Global.Tenant>(request);
+            var tenant = _mapper.Map<Tenant>(request);
             tenant.Status = TenantStatus.Active;
             tenant.IsActive = true;
             tenant.CreatedAt = DateTime.UtcNow;
 
-            _context.Tenants.Add(tenant);
-            await _context.SaveChangesAsync();
+            // Get the current user (root admin) ID
+            var currentUserId = GetCurrentUserId();
+            if (!currentUserId.HasValue)
+            {
+                throw new UnauthorizedAccessException("User not authenticated");
+            }
 
-            // Initialize the tenant database
-            await _databaseInitializer.InitializeTenantDatabaseAsync(tenant);
+            tenant.CreatedBy = currentUserId.Value;
 
-            return _mapper.Map<TenantResponseDto>(tenant);
+            // Begin transaction
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                // Save tenant
+                _context.Tenants.Add(tenant);
+                await _context.SaveChangesAsync();
+
+                // Create tenant user mapping for root admin
+                var tenantUserMapping = new TenantUserMapping
+                {
+                    TenantId = tenant.Id,
+                    UserId = currentUserId.Value,
+                    Role = "RootAdmin",
+                    IsActive = true,
+                    CreatedBy = currentUserId.Value,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                _context.TenantUserMappings.Add(tenantUserMapping);
+                await _context.SaveChangesAsync();
+
+                // Initialize the tenant database
+                await _databaseInitializer.InitializeTenantDatabaseAsync(tenant);
+
+                await transaction.CommitAsync();
+                return _mapper.Map<TenantResponseDto>(tenant);
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
+
+        private Guid? GetCurrentUserId()
+        {
+            var userIdString = _httpContextAccessor.HttpContext?.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            return userIdString != null ? Guid.Parse(userIdString) : null;
         }
 
         public async Task<TenantResponseDto> UpdateTenantAsync(Guid id, UpdateTenantRequestDto request)

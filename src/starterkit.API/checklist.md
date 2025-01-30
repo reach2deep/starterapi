@@ -135,6 +135,42 @@
 - [ ] Shared components in appropriate location
 - [ ] No unnecessary module coupling
 
+## 6. Multi-Tenant Database Initialization Checklist
+### Database Context Registration
+- [ ] DbContext options properly registered with correct lifetime
+- [ ] DbContextFactory properly handles tenant-specific parameters
+- [ ] Connection strings properly configured in appsettings.json
+- [ ] Tenant-specific connection strings handled correctly
+- [ ] DbContext constructor parameters properly provided
+
+### Tenant Database Initialization
+- [ ] Database initializer properly registered in DI
+- [ ] Migration runner properly configured
+- [ ] Seed data properly handled
+- [ ] Error handling for failed initialization
+- [ ] Proper cleanup if initialization fails
+
+### Dependency Injection for Multi-Tenancy
+- [ ] All required services registered in correct order
+- [ ] Service lifetimes properly scoped
+- [ ] Tenant resolution properly handled
+- [ ] Proper error handling for missing tenant context
+- [ ] Circular dependencies avoided in tenant services
+
+### Validation Checks
+- [ ] Validators properly registered for all DTOs
+- [ ] Validator assemblies correctly scanned
+- [ ] Validation rules properly applied
+- [ ] Custom validation messages defined
+- [ ] Validation context properly handled
+
+### Database Migration Checks
+- [ ] Migration files properly created
+- [ ] Migration properly handles new columns
+- [ ] Rollback scenarios considered
+- [ ] Data preservation handled in migrations
+- [ ] Migration applied in correct order
+
 ## Final Verification
 - [ ] Dependencies point inward
 - [ ] No circular references
