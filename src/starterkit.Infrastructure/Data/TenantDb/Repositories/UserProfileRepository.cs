@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
-using starterkit.Core.Entities.Tenant;
-using starterkit.Core.Interfaces.Data;
-using starterkit.Core.Interfaces.Repositories.Tenant;
+using starterkit.starterkit.Application.Modules.Tenant.UserManagement.Interfaces;
+using starterkit.starterkit.Application.Persistence;
+using starterkit.starterkit.Core.Modules.Tenant;
 
-namespace starterkit.Infrastructure.Data.TenantDb.Repositories
+namespace starterkit.starterkit.Infrastructure.Data.TenantDb.Repositories
 {
     public class UserProfileRepository : IUserProfileRepository
     {
@@ -63,4 +63,4 @@ namespace starterkit.Infrastructure.Data.TenantDb.Repositories
             return await _context.UserProfiles.AnyAsync(p => p.UserId == userId);
         }
     }
-} 
+}

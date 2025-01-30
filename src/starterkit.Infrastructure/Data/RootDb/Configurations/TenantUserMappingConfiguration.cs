@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using starterkit.Core.Entities.Global;
 
-namespace starterkit.Infrastructure.Data.RootDb.Configurations
+namespace starterkit.starterkit.Infrastructure.Data.RootDb.Configurations
 {
     public class TenantUserMappingConfiguration : IEntityTypeConfiguration<TenantUserMapping>
     {
@@ -32,4 +32,4 @@ namespace starterkit.Infrastructure.Data.RootDb.Configurations
                 .IsUnique();
         }
     }
-} 
+}

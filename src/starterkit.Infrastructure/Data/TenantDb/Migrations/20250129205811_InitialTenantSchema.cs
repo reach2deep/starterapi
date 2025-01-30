@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace starterkit.Infrastructure.Data.TenantDb.Migrations
+namespace starterkit.starterkit.Infrastructure.Data.TenantDb.Migrations
 {
     /// <inheritdoc />
     public partial class InitialTenantSchema : Migration

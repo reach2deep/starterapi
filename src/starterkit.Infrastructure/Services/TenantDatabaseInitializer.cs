@@ -4,7 +4,7 @@ using starterkit.Core.Interfaces.Data;
 using starterkit.Infrastructure.Data.RootDb;
 using starterkit.Infrastructure.Data.TenantDb;
 
-namespace starterkit.Infrastructure.Services
+namespace starterkit.starterkit.Infrastructure.Services
 {
     public interface ITenantDatabaseInitializer
     {
@@ -23,10 +23,10 @@ namespace starterkit.Infrastructure.Services
         public async Task InitializeTenantDatabaseAsync(string tenantId)
         {
             using var scope = _scopeFactory.CreateScope();
-            
+
             // Get the root context to access tenant information
             var rootContext = scope.ServiceProvider.GetRequiredService<RootDbContext>();
-            
+
             // Get the tenant context factory
             var tenantDbFactory = scope.ServiceProvider.GetRequiredService<Func<string, TenantDbContext>>();
             var tenantContext = tenantDbFactory(tenantId);
@@ -40,4 +40,4 @@ namespace starterkit.Infrastructure.Services
             await seeder.SeedAsync();
         }
     }
-} 
+}

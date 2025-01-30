@@ -1,12 +1,12 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using starterkit.Core.Entities.Tenant;
-using starterkit.Core.Interfaces.Data;
-using starterkit.Core.Interfaces.Services.Tenant;
+using starterkit.starterkit.Application.Modules.Tenant.UserManagement.Interfaces;
+using starterkit.starterkit.Application.Persistence;
+using starterkit.starterkit.Core.Modules.Tenant;
 using System.Security.Claims;
 
-namespace starterkit.Application.Services.Tenant
+namespace starterkit.starterkit.Application.Modules.Tenant.UserManagement.Services
 {
     public class TenantAuthService : ITenantAuthService
     {
@@ -97,4 +97,4 @@ namespace starterkit.Application.Services.Tenant
             return Guid.NewGuid().ToString();
         }
     }
-} 
+}

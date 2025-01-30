@@ -6,7 +6,7 @@ using starterkit.Core.Exceptions.Auth;
 using starterkit.Core.Exceptions.Tenant;
 using starterkit.Core.Models;
 
-namespace starterkit.API.Middlewares
+namespace starterkit.starterkit.API.Middlewares
 {
     public class GlobalExceptionHandlingMiddleware
     {
@@ -113,4 +113,4 @@ namespace starterkit.API.Middlewares
             return builder.UseMiddleware<GlobalExceptionHandlingMiddleware>();
         }
     }
-} 
+}

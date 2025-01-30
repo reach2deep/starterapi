@@ -1,7 +1,7 @@
 using starterkit.Infrastructure.MultiTenancy.Models;
 using starterkit.Infrastructure.Services;
 
-namespace starterkit.API.Middlewares
+namespace starterkit.starterkit.API.Middlewares
 {
     public class TenantMiddleware
     {
@@ -13,7 +13,7 @@ namespace starterkit.API.Middlewares
         }
 
         public async Task InvokeAsync(
-            HttpContext context, 
+            HttpContext context,
             ITenantResolver tenantResolver,
             ITenantDatabaseInitializer databaseInitializer)
         {
@@ -33,7 +33,7 @@ namespace starterkit.API.Middlewares
             }
 
             var tenant = await tenantResolver.ResolveTenantAsync(context);
-            
+
             if (tenant == null)
             {
                 context.Response.StatusCode = StatusCodes.Status400BadRequest;
@@ -76,4 +76,4 @@ namespace starterkit.API.Middlewares
             return builder.UseMiddleware<TenantMiddleware>();
         }
     }
-} 
+}

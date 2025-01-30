@@ -1,9 +1,9 @@
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
-using starterkit.Application.Services.Global;
+using n.Modules.Global.Auth.Services;
 using System.Reflection;
 
-namespace starterkit.Application.Extensions
+namespace starterkit.starterkit.Application.Extensions
 {
     public static class ServiceCollectionExtensions
     {
@@ -20,7 +20,7 @@ namespace starterkit.Application.Extensions
             // Register Application Services
             services.Scan(scan => scan
                 .FromAssemblyOf<GlobalAuthService>()
-                .AddClasses(classes => classes.Where(type => 
+                .AddClasses(classes => classes.Where(type =>
                     type.Name.EndsWith("Service") &&
                     !type.IsAbstract &&
                     !type.IsInterface))
@@ -30,4 +30,4 @@ namespace starterkit.Application.Extensions
             return services;
         }
     }
-} 
+}

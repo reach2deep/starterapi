@@ -1,4 +1,4 @@
-namespace starterkit.Core.Models
+namespace starterkit.starterkit.Core.Modules.Common
 {
     public class ApiResponse<T>
     {
@@ -36,4 +36,4 @@ namespace starterkit.Core.Models
         public string? Code { get; set; }
         public object? Details { get; set; }
     }
-} 
+}

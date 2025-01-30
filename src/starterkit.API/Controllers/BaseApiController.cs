@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using starterkit.Core.Models;
 
-namespace starterkit.API.Controllers
+namespace starterkit.starterkit.API.Controllers
 {
     [ApiController]
     public abstract class BaseApiController : ControllerBase
@@ -29,4 +29,4 @@ namespace starterkit.API.Controllers
             ));
         }
     }
-} 
+}

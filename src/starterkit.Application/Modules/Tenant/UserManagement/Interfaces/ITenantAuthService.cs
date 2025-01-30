@@ -1,4 +1,4 @@
-namespace starterkit.Core.Interfaces.Services.Tenant
+namespace starterkit.starterkit.Application.Modules.Tenant.UserManagement.Interfaces
 {
     public interface ITenantAuthService
     {
@@ -6,4 +6,4 @@ namespace starterkit.Core.Interfaces.Services.Tenant
         Task RevokeTokenAsync(string refreshToken);
         Task<bool> ValidateAccessTokenAsync(string accessToken);
     }
-} 
+}

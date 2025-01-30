@@ -1,7 +1,8 @@
-using starterkit.Core.Entities.Common;
-using starterkit.Core.Enums;
 
-namespace starterkit.Core.Entities.Global
+using starterkit.starterkit.Core.Enums;
+using starterkit.starterkit.Core.Modules.Common;
+
+namespace starterkit.starterkit.Core.Modules.Global
 {
     public class Tenant : BaseEntity
     {
@@ -10,4 +11,4 @@ namespace starterkit.Core.Entities.Global
         public string ConnectionString { get; set; }
         public TenantStatus Status { get; set; }
     }
-} 
+}

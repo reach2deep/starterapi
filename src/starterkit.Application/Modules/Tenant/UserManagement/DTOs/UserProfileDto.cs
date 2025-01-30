@@ -1,4 +1,4 @@
-namespace starterkit.Core.DTOs.Tenant
+namespace starterkit.starterkit.Application.Modules.Tenant.UserManagement.DTOs
 {
     public class UserProfileResponseDto
     {
@@ -36,4 +36,4 @@ namespace starterkit.Core.DTOs.Tenant
         public string? Country { get; set; }
         public string? PostalCode { get; set; }
     }
-} 
+}

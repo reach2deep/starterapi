@@ -1,7 +1,8 @@
-using starterkit.Core.Entities.Common;
-using starterkit.Core.Enums;
 
-namespace starterkit.Core.Entities.Tenant
+using starterkit.starterkit.Core.Enums;
+using starterkit.starterkit.Core.Modules.Common;
+
+namespace starterkit.starterkit.Core.Modules.Tenant
 {
     public class User : BaseEntity
     {
@@ -14,4 +15,4 @@ namespace starterkit.Core.Entities.Tenant
         // Navigation property
         public UserProfile Profile { get; set; }
     }
-} 
+}

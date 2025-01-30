@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
-using starterkit.Core.Entities.Tenant;
-using starterkit.Core.Interfaces.Data;
-using starterkit.Infrastructure.Data.TenantDb.Configurations;
+using starterkit.starterkit.Application.Persistence;
+using starterkit.starterkit.Core.Modules.Tenant;
+using starterkit.starterkit.Infrastructure.Data.TenantDb.Configurations;
 
-namespace starterkit.Infrastructure.Data.TenantDb
+namespace starterkit.starterkit.Infrastructure.Data.TenantDb
 {
     public class TenantDbContext : DbContext, ITenantDbContext
     {
@@ -36,4 +36,4 @@ namespace starterkit.Infrastructure.Data.TenantDb
             return base.SaveChangesAsync(cancellationToken);
         }
     }
-} 
+}

@@ -4,7 +4,7 @@ using starterkit.Application.DTOs.Global.Auth;
 using starterkit.Application.Interfaces.Services.Global;
 using starterkit.Core.Models;
 
-namespace starterkit.API.Controllers.V1.Global
+namespace starterkit.starterkit.API.Controllers.Modules.V1.Global.Auth
 {
     /// <summary>
     /// Controller responsible for handling global authentication operations
@@ -38,7 +38,7 @@ namespace starterkit.API.Controllers.V1.Global
             [FromBody] GlobalLoginRequestDto request)
         {
             var result = await _authService.LoginAsync(request);
-            
+
             return Ok(ApiResponse<GlobalLoginResponseDto>.CreateSuccess(result));
         }
 
@@ -55,7 +55,7 @@ namespace starterkit.API.Controllers.V1.Global
             [FromBody] TenantSelectionRequestDto request)
         {
             var result = await _authService.SelectTenantAsync(request);
-            
+
             return Ok(ApiResponse<TenantSelectionResponseDto>.CreateSuccess(result));
         }
 
@@ -73,7 +73,7 @@ namespace starterkit.API.Controllers.V1.Global
         {
             // First, perform normal login
             var loginResult = await _authService.LoginAsync(request);
-            
+
             // Check if user has any available tenants
             if (loginResult.AvailableTenants == null || !loginResult.AvailableTenants.Any())
             {
@@ -92,8 +92,8 @@ namespace starterkit.API.Controllers.V1.Global
 
             // Perform tenant selection
             var tenantResult = await _authService.SelectTenantAsync(tenantSelectionRequest);
-            
+
             return Ok(ApiResponse<TenantSelectionResponseDto>.CreateSuccess(tenantResult));
         }
     }
-} 
+}

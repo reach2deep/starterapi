@@ -1,4 +1,4 @@
-namespace starterkit.Core.Exceptions.Auth
+namespace starterkit.starterkit.Application.Common.Exceptions.Auth
 {
     public class InvalidCredentialsException : Exception
     {
@@ -6,4 +6,4 @@ namespace starterkit.Core.Exceptions.Auth
         public InvalidCredentialsException(string message) : base(message) { }
         public InvalidCredentialsException(string message, Exception inner) : base(message, inner) { }
     }
-} 
+}

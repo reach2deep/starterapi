@@ -1,6 +1,7 @@
-using starterkit.Core.Entities.Global;
 
-namespace starterkit.Core.Interfaces.Repositories.Global
+using starterkit.starterkit.Core.Modules.Global;
+
+namespace starterkit.starterkit.Application.Modules.Global.Auth.Interfaces
 {
     public interface IGlobalUserRepository
     {
@@ -9,4 +10,4 @@ namespace starterkit.Core.Interfaces.Repositories.Global
         Task<List<TenantUserMapping>> GetActiveTenantMappingsAsync(Guid userId);
         Task<TenantUserMapping?> GetTenantMappingAsync(Guid userId, Guid tenantId);
     }
-} 
+}

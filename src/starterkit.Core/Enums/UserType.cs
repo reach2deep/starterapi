@@ -1,4 +1,4 @@
-namespace starterkit.Core.Enums
+namespace starterkit.starterkit.Core.Enums
 {
     public enum UserType
     {
@@ -6,4 +6,4 @@ namespace starterkit.Core.Enums
         TenantAdmin = 2,
         User = 3
     }
-} 
+}

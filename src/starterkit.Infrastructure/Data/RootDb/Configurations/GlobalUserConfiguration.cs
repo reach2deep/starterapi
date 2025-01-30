@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using starterkit.Core.Entities.Global;
 
-namespace starterkit.Infrastructure.Data.RootDb.Configurations
+namespace starterkit.starterkit.Infrastructure.Data.RootDb.Configurations
 {
     public class GlobalUserConfiguration : IEntityTypeConfiguration<GlobalUser>
     {
@@ -41,4 +41,4 @@ namespace starterkit.Infrastructure.Data.RootDb.Configurations
                 .IsUnique();
         }
     }
-} 
+}

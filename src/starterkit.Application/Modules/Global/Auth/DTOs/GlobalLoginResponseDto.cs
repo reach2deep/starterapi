@@ -1,4 +1,4 @@
-namespace starterkit.Application.DTOs.Global.Auth
+namespace starterkit.starterkit.Application.Modules.Global.Auth.DTOs
 {
     public class GlobalLoginResponseDto
     {
@@ -14,4 +14,4 @@ namespace starterkit.Application.DTOs.Global.Auth
         public string TenantName { get; set; }
         public string Role { get; set; }
     }
-} 
+}

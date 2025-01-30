@@ -1,7 +1,8 @@
 using FluentValidation;
-using starterkit.Application.DTOs.Global.Auth;
 
-namespace starterkit.Application.Validators.Global
+using starterkit.starterkit.Application.Modules.Global.Auth.DTOs;
+
+namespace starterkit.starterkit.Application.Modules.Global.Auth.Validators
 {
     public class TenantSelectionRequestValidator : AbstractValidator<TenantSelectionRequestDto>
     {
@@ -14,4 +15,4 @@ namespace starterkit.Application.Validators.Global
                 .NotEmpty().WithMessage("Tenant ID is required");
         }
     }
-} 
+}

@@ -1,8 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using starterkit.Core.Entities.Global;
+using starterkit.starterkit.Core.Modules.Global;
 
-namespace starterkit.Infrastructure.Data.RootDb.Configurations
+
+namespace starterkit.starterkit.Infrastructure.Data.RootDb.Configurations
 {
     public class TenantConfiguration : IEntityTypeConfiguration<Tenant>
     {
@@ -34,4 +35,4 @@ namespace starterkit.Infrastructure.Data.RootDb.Configurations
                 .IsUnique();
         }
     }
-} 
+}

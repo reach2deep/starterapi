@@ -1,15 +1,13 @@
 using Microsoft.EntityFrameworkCore;
-using starterkit.Core.Entities.Global;
-using starterkit.Core.Enums;
-using starterkit.Infrastructure.Services;
 
-namespace starterkit.Infrastructure.Data.RootDb
+
+namespace starterkit.starterkit.Infrastructure.Data.RootDb
 {
     public class RootDbSeeder : IDataSeeder
     {
         private readonly RootDbContext _context;
         private readonly IPasswordHashService _passwordHashService;
-    
+
         public RootDbSeeder(
             RootDbContext context,
             IPasswordHashService passwordHashService)
@@ -93,4 +91,4 @@ namespace starterkit.Infrastructure.Data.RootDb
             await _context.SaveChangesAsync();
         }
     }
-} 
+}

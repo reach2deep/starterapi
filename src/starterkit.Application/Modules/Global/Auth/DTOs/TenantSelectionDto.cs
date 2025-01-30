@@ -1,4 +1,4 @@
-namespace starterkit.Application.DTOs.Global.Auth
+namespace starterkit.starterkit.Application.Modules.Global.Auth.DTOs
 {
     public class TenantSelectionRequestDto
     {
@@ -13,4 +13,4 @@ namespace starterkit.Application.DTOs.Global.Auth
         public int ExpiresIn { get; set; }
         public string TokenType { get; set; } = "Bearer";
     }
-} 
+}

@@ -1,6 +1,7 @@
-using starterkit.Core.Entities.Common;
 
-namespace starterkit.Core.Entities.Tenant
+using starterkit.starterkit.Core.Modules.Common;
+
+namespace starterkit.starterkit.Core.Modules.Tenant
 {
     public class RefreshToken : BaseEntity
     {
@@ -14,4 +15,4 @@ namespace starterkit.Core.Entities.Tenant
         // Navigation property
         public User User { get; set; }
     }
-} 
+}

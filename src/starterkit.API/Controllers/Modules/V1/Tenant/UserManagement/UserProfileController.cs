@@ -5,7 +5,7 @@ using starterkit.Core.DTOs.Tenant;
 using starterkit.Core.Interfaces.Services.Tenant;
 using starterkit.Core.Models;
 
-namespace starterkit.API.Controllers.V1.Tenant
+namespace starterkit.starterkit.API.Controllers.Modules.V1.Tenant.UserManagement
 {
     /// <summary>
     /// Controller for managing user profiles in tenant context
@@ -65,4 +65,4 @@ namespace starterkit.API.Controllers.V1.Tenant
             return Ok(ApiResponse<UserProfileResponseDto>.CreateSuccess(result));
         }
     }
-} 
+}

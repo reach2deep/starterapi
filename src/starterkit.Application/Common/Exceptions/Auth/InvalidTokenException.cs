@@ -1,4 +1,4 @@
-namespace starterkit.Core.Exceptions.Auth
+namespace starterkit.starterkit.Application.Common.Exceptions.Auth
 {
     public class InvalidTokenException : Exception
     {
@@ -6,4 +6,4 @@ namespace starterkit.Core.Exceptions.Auth
         public InvalidTokenException(string message) : base(message) { }
         public InvalidTokenException(string message, Exception inner) : base(message, inner) { }
     }
-} 
+}

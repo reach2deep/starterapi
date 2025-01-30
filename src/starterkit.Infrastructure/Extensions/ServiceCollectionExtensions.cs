@@ -12,7 +12,7 @@ using starterkit.Infrastructure.MultiTenancy.Stores;
 using starterkit.Infrastructure.Services;
 using Microsoft.AspNetCore.Http;
 
-namespace starterkit.Infrastructure.Extensions
+namespace starterkit.starterkit.Infrastructure.Extensions
 {
     public static class ServiceCollectionExtensions
     {
@@ -70,4 +70,4 @@ namespace starterkit.Infrastructure.Extensions
             return services;
         }
     }
-} 
+}

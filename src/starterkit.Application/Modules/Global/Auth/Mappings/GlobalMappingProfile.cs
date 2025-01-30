@@ -1,8 +1,9 @@
 using AutoMapper;
-using starterkit.Application.DTOs.Global.Auth;
-using starterkit.Core.Entities.Global;
+using starterkit.starterkit.Application.Modules.Global.Auth.DTOs;
+using starterkit.starterkit.Core.Modules.Global;
 
-namespace starterkit.Application.Mappings
+
+namespace starterkit.starterkit.Application.Modules.Global.Auth.Mappings
 {
     public class GlobalMappingProfile : Profile
     {
@@ -20,4 +21,4 @@ namespace starterkit.Application.Mappings
                 .ForMember(dest => dest.AvailableTenants, opt => opt.Ignore());
         }
     }
-} 
+}

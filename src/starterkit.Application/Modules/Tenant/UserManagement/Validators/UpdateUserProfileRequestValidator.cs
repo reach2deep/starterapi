@@ -1,7 +1,8 @@
 using FluentValidation;
-using starterkit.Core.DTOs.Tenant;
+using starterkit.starterkit.Application.Modules.Tenant.UserManagement.DTOs;
 
-namespace starterkit.Application.Validators.Tenant
+
+namespace starterkit.starterkit.Application.Modules.Tenant.UserManagement.Validators
 {
     public class UpdateUserProfileRequestValidator : AbstractValidator<UpdateUserProfileRequestDto>
     {
@@ -44,4 +45,4 @@ namespace starterkit.Application.Validators.Tenant
             return Uri.TryCreate(url, UriKind.Absolute, out _);
         }
     }
-} 
+}

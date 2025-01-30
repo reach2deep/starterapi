@@ -1,6 +1,7 @@
-using starterkit.Core.Entities.Common;
 
-namespace starterkit.Core.Entities.Tenant
+using starterkit.starterkit.Core.Modules.Common;
+
+namespace starterkit.starterkit.Core.Modules.Tenant
 {
     public class Address : BaseEntity
     {
@@ -10,4 +11,4 @@ namespace starterkit.Core.Entities.Tenant
         public string PostalCode { get; set; }
         public string? State { get; set; }
     }
-} 
+}
