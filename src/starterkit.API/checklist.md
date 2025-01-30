@@ -1,8 +1,8 @@
-# Clean Architecture Implementation Checklist
+# Clean Architecture Implementation Checklist (Module-Based)
 
 ## 1. Core (Domain) Layer Checklist
-### Domain Entities
-- [ ] Entity is placed in appropriate folder (`Global/` or `Tenant/`)
+### Domain Entities and Models
+- [ ] Entity is placed in appropriate module (`Modules/[ModuleName]/Entities`)
 - [ ] Entity inherits from correct base class (`BaseEntity` or `AuditableEntity`)
 - [ ] No dependency on any outer layer (Application, Infrastructure)
 - [ ] No reference to DTOs or external libraries
@@ -10,56 +10,72 @@
 - [ ] Properties have appropriate access modifiers (private setters where needed)
 
 ### Repository Interfaces
-- [ ] Interface placed in `Core/Interfaces/Repositories/[Global|Tenant]`
+- [ ] Interface placed in `Core/Modules/[ModuleName]/Interfaces/Repositories`
 - [ ] Defines only essential data access methods needed by domain
 - [ ] Methods use domain entities as parameters/return types
 - [ ] No reference to DTOs or infrastructure concerns
 - [ ] Named with 'I' prefix (e.g., `IUserRepository`)
 
 ### Enums
-- [ ] Placed in `Core/Enums`
-- [ ] Represents domain concept
+- [ ] Placed in `Core/Modules/[ModuleName]/Enums`
+- [ ] Represents domain concept specific to the module
 - [ ] No dependency on outer layers
 
 ## 2. Application Layer Checklist
+### Module Structure
+- [ ] Module folder created under `Application/Modules/[Global|Tenant]/[ModuleName]`
+- [ ] Consistent internal structure for each module:
+  - DTOs/
+  - Services/
+  - Interfaces/
+  - Mappings/
+  - Validators/
+
 ### DTOs
-- [ ] Placed in appropriate folder structure (`DTOs/[Global|Tenant]/[Feature]`)
+- [ ] Placed in `Modules/[ModuleName]/DTOs`
 - [ ] Separate DTOs for request and response
 - [ ] No circular references
 - [ ] Contains only necessary properties for use case
-- [ ] Follows naming convention (`[Action][Entity]Dto`)
+- [ ] Follows naming convention (`[Entity][Action]Request/Response`)
 
 ### Service Interfaces
-- [ ] Placed in `Application/Interfaces/Services/[Global|Tenant]`
+- [ ] Placed in `Modules/[ModuleName]/Interfaces`
 - [ ] Methods represent specific use cases
 - [ ] Uses DTOs for input/output
 - [ ] No infrastructure dependencies
 - [ ] Named with 'I' prefix (e.g., `IAuthService`)
+- [ ] Methods follow consistent naming patterns
+- [ ] Clear documentation for each service method
 
 ### Service Implementations
-- [ ] Placed in `Application/Services/[Global|Tenant]`
+- [ ] Placed in `Modules/[ModuleName]/Services`
 - [ ] Implements corresponding interface
 - [ ] Uses only dependencies declared in constructor
 - [ ] No direct infrastructure dependencies (uses interfaces)
 - [ ] Contains proper exception handling
 - [ ] Includes logging where appropriate
+- [ ] Business logic properly encapsulated
+- [ ] Follows Single Responsibility Principle
 
 ### Validators
-- [ ] Placed in `Application/Validators/[Global|Tenant]`
-- [ ] One validator per DTO
+- [ ] Placed in `Modules/[ModuleName]/Validators`
+- [ ] One validator per request DTO
 - [ ] Comprehensive validation rules
 - [ ] No domain logic (validation only)
 - [ ] Named appropriately (`[Dto]Validator`)
+- [ ] Reusable validation rules extracted when appropriate
 
 ### Mappings
-- [ ] Placed in `Application/Mappings`
-- [ ] Profiles separated by context (Global/Tenant)
+- [ ] Placed in `Modules/[ModuleName]/Mappings`
+- [ ] One profile per module
 - [ ] All DTOs have corresponding mapping configurations
 - [ ] No complex logic in mappings
+- [ ] Proper handling of nested objects
+- [ ] Consistent mapping conventions across modules
 
 ## 3. Infrastructure Layer Checklist
 ### Repository Implementations
-- [ ] Placed in correct database context folder
+- [ ] Placed in `Infrastructure/Repositories/[ModuleName]`
 - [ ] Implements interface from Core layer
 - [ ] Uses appropriate DbContext
 - [ ] Proper error handling
@@ -67,13 +83,14 @@
 - [ ] Follows repository pattern best practices
 
 ### Database Configurations
-- [ ] Entity configurations in correct folder
+- [ ] Entity configurations in `Infrastructure/Data/Configurations/[ModuleName]`
 - [ ] All entity properties properly configured
 - [ ] Relationships clearly defined
 - [ ] Proper database constraints
 - [ ] Indexes defined where needed
 
 ### Infrastructure Services
+- [ ] Module-specific services in `Infrastructure/Services/[ModuleName]`
 - [ ] Implements application layer interface
 - [ ] External service concerns isolated
 - [ ] Proper error handling
@@ -82,7 +99,7 @@
 
 ## 4. API Layer Checklist
 ### Controllers
-- [ ] Placed in correct version and module folder
+- [ ] Placed in `Controllers/Modules/V[n]/[ModuleName]`
 - [ ] Inherits from `BaseApiController`
 - [ ] Uses only Application layer services
 - [ ] Returns appropriate HTTP status codes
@@ -99,16 +116,24 @@
 
 ## 5. Cross-Cutting Concerns
 ### Dependency Injection
-- [ ] All services registered with appropriate lifetime
+- [ ] Module services registered with appropriate lifetime
 - [ ] Dependencies flow inward
 - [ ] No circular dependencies
 - [ ] Core layer has no external dependencies
+- [ ] Each module's dependencies properly isolated
 
 ### Error Handling
 - [ ] Global exception handling
+- [ ] Module-specific error handling where needed
 - [ ] Appropriate error messages
 - [ ] Proper logging
 - [ ] Security considerations in error responses
+
+### Module Integration
+- [ ] Clear boundaries between modules
+- [ ] Proper cross-module communication (if needed)
+- [ ] Shared components in appropriate location
+- [ ] No unnecessary module coupling
 
 ## Final Verification
 - [ ] Dependencies point inward
@@ -118,4 +143,6 @@
 - [ ] Infrastructure implements interfaces from Core and Application
 - [ ] API layer uses only Application layer services
 - [ ] Feature properly integrated with multi-tenancy
+- [ ] Module boundaries respected
 - [ ] All tests passing
+- [ ] Module documentation complete

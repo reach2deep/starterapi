@@ -1,5 +1,3 @@
-
-
 # Multi-Tenancy Architecture with Root Database Approach
 
 Here's a detailed approach for implementing multi-tenancy with a root database strategy:
@@ -80,160 +78,87 @@ Here's a detailed approach for implementing multi-tenancy with a root database s
 - Data Access Services
 - Tenant-specific Operations
 
-## Suggested Project Structure
+## Actual Project Structure
 
 ```
 starterkit/
 ├── src/
 │   ├── starterkit.API/
 │   │   ├── Controllers/
-│   │   │   ├── V1/
-│   │   │   │   ├── Global/
-│   │   │   │   │   ├── AuthController.cs           # Global auth & tenant selection
-│   │   │   │   │   └── TenantsController.cs        # Tenant CRUD operations
-│   │   │   │   └── Tenant/
-│   │   │   │       ├── UsersController.cs          # Tenant user management
-│   │   │   │       └── ProfileController.cs        # User profile management
-│   │   │   └── BaseApiController.cs
+│   │   │   ├── Modules/
+│   │   │   │   ├── V1/
+│   │   │   │   │   ├── Global/
+│   │   │   │   │   │   └── Auth/
+│   │   │   │   │   │       └── AuthController.cs
+│   │   │   │   │   └── Tenant/
+│   │   └── BaseApiController.cs
+│   │   ├── DependencyInjection/
+│   │   │   └── ServiceCollectionExtensions.cs
 │   │   ├── Middlewares/
 │   │   │   ├── ExceptionHandlingMiddleware.cs
 │   │   │   └── TenantMiddleware.cs
-│   │   ├── Filters/
-│   │   │   └── TenantAuthorizationFilter.cs
 │   │   └── Program.cs
 │   │
-│   ├── starterkit.Core/                            # Domain Layer - Most Inner Layer
-│   │   ├── Entities/
+│   ├── starterkit.Core/                            # Domain Layer
+│   │   ├── Modules/
 │   │   │   ├── Common/
 │   │   │   │   ├── BaseEntity.cs
-│   │   │   │   └── AuditableEntity.cs
+│   │   │   │   └── TenantInfo.cs
 │   │   │   ├── Global/
-│   │   │   │   ├── Tenant.cs
-│   │   │   │   ├── GlobalUser.cs
-│   │   │   │   └── TenantUserMapping.cs
+│   │   │   │   └── Auth/
+│   │   │   │       └── Entities/
 │   │   │   └── Tenant/
-│   │   │       ├── User.cs
-│   │   │       ├── Role.cs
-│   │   │       ├── UserRole.cs
-│   │   │       └── RefreshToken.cs
-│   │   ├── Interfaces/
-│   │   │   └── Repositories/                        # Only Repository Interfaces
-│   │   │       ├── Global/
-│   │   │       │   ├── ITenantRepository.cs
-│   │   │       │   └── IGlobalUserRepository.cs
-│   │   │       └── Tenant/
-│   │   │           ├── IUserRepository.cs
-│   │   │           └── IRefreshTokenRepository.cs
-│   │   └── Enums/
-│   │       ├── UserStatus.cs
-│   │       └── TenantStatus.cs
+│   │   └── Interfaces/
+│   │       └── Repositories/
 │   │
 │   ├── starterkit.Application/                     # Application Layer
-│   │   ├── DTOs/
+│   │   ├── Modules/
 │   │   │   ├── Global/
-│   │   │   │   ├── Auth/
-│   │   │   │   │   ├── GlobalLoginRequestDto.cs
-│   │   │   │   │   ├── GlobalLoginResponseDto.cs
-│   │   │   │   │   └── TenantSelectionDto.cs
-│   │   │   │   └── Tenant/
-│   │   │   │       ├── TenantDto.cs
-│   │   │   │       ├── CreateTenantDto.cs
-│   │   │   │       └── UpdateTenantDto.cs
+│   │   │   │   └── Auth/
+│   │   │   │       ├── DTOs/
+│   │   │   │       ├── Interfaces/
+│   │   │   │       ├── Services/
+│   │   │   │       ├── Validators/
+│   │   │   │       └── Mappings/
 │   │   │   └── Tenant/
-│   │   │       ├── Auth/
-│   │   │       │   ├── LoginRequestDto.cs
-│   │   │       │   └── LoginResponseDto.cs
-│   │   │       └── Users/
-│   │   │           ├── UserDto.cs
-│   │   │           ├── CreateUserDto.cs
-│   │   │           └── UpdateUserDto.cs
-│   │   ├── Interfaces/                             # Service Interfaces moved here
-│   │   │   └── Services/
-│   │   │       ├── Global/
-│   │   │       │   ├── IGlobalAuthService.cs
-│   │   │       │   └── ITenantService.cs
-│   │   │       └── Tenant/
-│   │   │           ├── IAuthService.cs
-│   │   │           └── IUserService.cs
-│   │   ├── Services/                               # Service Implementations
-│   │   │   ├── Global/
-│   │   │   │   ├── GlobalAuthService.cs
-│   │   │   │   └── TenantService.cs
-│   │   │   └── Tenant/
-│   │   │       ├── AuthService.cs
-│   │   │       └── UserService.cs
-│   │   ├── Validators/
-│   │   │   ├── Global/
-│   │   │   │   ├── CreateTenantValidator.cs
-│   │   │   │   └── GlobalLoginValidator.cs
-│   │   │   └── Tenant/
-│   │   │       ├── CreateUserValidator.cs
-│   │   │       └── UpdateUserValidator.cs
-│   │   └── Mappings/
-│   │       ├── GlobalMappingProfile.cs
-│   │       └── TenantMappingProfile.cs
+│   │   └── DependencyInjection/
+│   │       └── ServiceCollectionExtensions.cs
 │   │
 │   ├── starterkit.Infrastructure/                  # Infrastructure Layer
-│   │   ├── Data/
+│   │   ├── Persistence/
 │   │   │   ├── RootDb/
 │   │   │   │   ├── RootDbContext.cs
+│   │   │   │   ├── RootDbContextFactory.cs
 │   │   │   │   ├── Configurations/
-│   │   │   │   │   ├── TenantConfiguration.cs
-│   │   │   │   │   ├── GlobalUserConfiguration.cs
-│   │   │   │   │   └── TenantUserMappingConfiguration.cs
-│   │   │   │   └── Repositories/
-│   │   │   │       ├── TenantRepository.cs
-│   │   │   │       └── GlobalUserRepository.cs
+│   │   │   │   └── Migrations/
 │   │   │   └── TenantDb/
 │   │   │       ├── TenantDbContext.cs
+│   │   │       ├── TenantDbContextFactory.cs
 │   │   │       ├── Configurations/
-│   │   │       │   ├── UserConfiguration.cs
-│   │   │       │   ├── RoleConfiguration.cs
-│   │   │       │   └── RefreshTokenConfiguration.cs
-│   │   │       └── Repositories/
-│   │   │           ├── UserRepository.cs
-│   │   │           └── RefreshTokenRepository.cs
+│   │   │       └── Migrations/
 │   │   ├── Services/
 │   │   │   ├── TenantResolver.cs
-│   │   │   ├── ConnectionStringResolver.cs
-│   │   │   ├── JwtTokenService.cs
-│   │   │   └── PasswordHashService.cs
-│   │   └── MultiTenancy/
-│   │       ├── Models/
-│   │       │   ├── TenantInfo.cs
-│   │       │   └── TenantConnectionConfig.cs
-│   │       ├── Stores/
-│   │       │   ├── ITenantStore.cs
-│   │       │   └── CachedTenantStore.cs
-│   │       └── Options/
-│   │           └── MultiTenancyOptions.cs
+│   │   │   └── TenantDatabaseInitializer.cs
+│   │   ├── Extensions/
+│   │   │   └── ServiceCollectionExtensions.cs
+│   │   └── Repositories/
+│   │       ├── Global/
+│   │       └── Tenant/
 │   │
 │   └── starterkit.Shared/                         # Shared Kernel
 │       ├── Constants/
-│       │   ├── AuthConstants.cs
-│       │   ├── TenantConstants.cs
-│       │   └── ClaimConstants.cs
 │       ├── Extensions/
-│       │   ├── ClaimsPrincipalExtensions.cs
-│       │   ├── TenantExtensions.cs
-│       │   └── StringExtensions.cs
 │       └── Helpers/
-│           ├── ConnectionStringBuilder.cs
-│           └── TenantHelper.cs
 │
 └── tests/
     ├── starterkit.UnitTests/
-    │   ├── Global/
-    │   │   ├── TenantServiceTests.cs
-    │   │   └── GlobalAuthServiceTests.cs
-    │   └── Tenant/
-    │       ├── AuthServiceTests.cs
-    │       └── UserServiceTests.cs
+    │   ├── Modules/
+    │   │   ├── Global/
+    │   │   └── Tenant/
     └── starterkit.IntegrationTests/
-        ├── Global/
-        │   └── TenantManagementTests.cs
-        └── Tenant/
-            └── UserManagementTests.cs
+        ├── Modules/
+        │   ├── Global/
+        │   └── Tenant/
 ```
 
 ## Key Implementation Considerations
