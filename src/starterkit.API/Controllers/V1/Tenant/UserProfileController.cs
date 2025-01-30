@@ -1,147 +1,74 @@
-using AutoMapper;
-using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using starterkit.Core.DTOs.Tenant;
-using starterkit.Core.Entities.Tenant;
-using starterkit.Infrastructure.Data.TenantDb;
+using starterkit.Core.Interfaces.Services.Tenant;
+using starterkit.Core.Models;
 
 namespace starterkit.API.Controllers.V1.Tenant
 {
+    /// <summary>
+    /// Controller for managing user profiles in tenant context
+    /// </summary>
     [ApiController]
     [Route("api/v1/tenant/profiles")]
     [Authorize]
     public class UserProfileController : ControllerBase
     {
-        private readonly Func<string, TenantDbContext> _tenantDbFactory;
-        private readonly string? _tenantId;
-        private readonly IMapper _mapper;
-        private readonly IValidator<UpdateUserProfileRequestDto> _updateProfileValidator;
+        private readonly IUserProfileService _userProfileService;
 
-        public UserProfileController(
-            Func<string, TenantDbContext> tenantDbFactory,
-            IHttpContextAccessor httpContextAccessor,
-            IMapper mapper,
-            IValidator<UpdateUserProfileRequestDto> updateProfileValidator)
+        public UserProfileController(IUserProfileService userProfileService)
         {
-            _tenantDbFactory = tenantDbFactory;
-            _tenantId = httpContextAccessor.HttpContext?.Items["Tenant"]?.ToString();
-            _mapper = mapper;
-            _updateProfileValidator = updateProfileValidator;
+            _userProfileService = userProfileService;
         }
 
+        /// <summary>
+        /// Get the profile of the currently authenticated user
+        /// </summary>
         [HttpGet("me")]
-        public async Task<ActionResult<UserProfileResponseDto>> GetMyProfile()
+        public async Task<ActionResult<ApiResponse<UserProfileResponseDto>>> GetMyProfile()
         {
-            try
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null)
             {
-                var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-                if (userId == null)
-                {
-                    return Unauthorized(new { error = "User not authenticated" });
-                }
-
-                using var context = _tenantDbFactory(_tenantId);
-                var profile = await context.UserProfiles
-                    .Include(p => p.Address)
-                    .FirstOrDefaultAsync(p => p.UserId == Guid.Parse(userId));
-
-                if (profile == null)
-                {
-                    return NotFound(new { error = "Profile not found" });
-                }
-
-                return Ok(_mapper.Map<UserProfileResponseDto>(profile));
+                return Unauthorized(ApiResponse<UserProfileResponseDto>.CreateError(
+                    message: "User not authenticated",
+                    code: "UNAUTHORIZED"
+                ));
             }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { error = "An error occurred while retrieving the profile", details = ex.Message });
-            }
+
+            var result = await _userProfileService.GetMyProfileAsync(Guid.Parse(userId));
+            return Ok(ApiResponse<UserProfileResponseDto>.CreateSuccess(result));
         }
 
+        /// <summary>
+        /// Update the profile of the currently authenticated user
+        /// </summary>
         [HttpPut("me")]
-        public async Task<ActionResult<UserProfileResponseDto>> UpdateMyProfile([FromBody] UpdateUserProfileRequestDto request)
+        public async Task<ActionResult<ApiResponse<UserProfileResponseDto>>> UpdateMyProfile(
+            [FromBody] UpdateUserProfileRequestDto request)
         {
-            try
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null)
             {
-                // Validate request
-                var validationResult = await _updateProfileValidator.ValidateAsync(request);
-                if (!validationResult.IsValid)
-                {
-                    return BadRequest(new 
-                    { 
-                        error = "Validation failed",
-                        details = validationResult.Errors.Select(e => new 
-                        { 
-                            field = e.PropertyName,
-                            error = e.ErrorMessage 
-                        })
-                    });
-                }
-
-                var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-                if (userId == null)
-                {
-                    return Unauthorized(new { error = "User not authenticated" });
-                }
-
-                using var context = _tenantDbFactory(_tenantId);
-                var existingProfile = await context.UserProfiles
-                    .Include(p => p.Address)
-                    .FirstOrDefaultAsync(p => p.UserId == Guid.Parse(userId));
-
-                if (existingProfile == null)
-                {
-                    return NotFound(new { error = "Profile not found" });
-                }
-
-                // Update profile using AutoMapper
-                _mapper.Map(request, existingProfile);
-                existingProfile.UpdatedBy = Guid.Parse(userId);
-
-                // Update address if provided
-                if (request.Address != null)
-                {
-                    if (existingProfile.Address == null)
-                    {
-                        existingProfile.Address = new Address();
-                    }
-                    _mapper.Map(request.Address, existingProfile.Address);
-                    existingProfile.Address.UpdatedBy = Guid.Parse(userId);
-                }
-
-                await context.SaveChangesAsync();
-                return Ok(_mapper.Map<UserProfileResponseDto>(existingProfile));
+                return Unauthorized(ApiResponse<UserProfileResponseDto>.CreateError(
+                    message: "User not authenticated",
+                    code: "UNAUTHORIZED"
+                ));
             }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { error = "An error occurred while updating the profile", details = ex.Message });
-            }
+
+            var result = await _userProfileService.UpdateProfileAsync(Guid.Parse(userId), request);
+            return Ok(ApiResponse<UserProfileResponseDto>.CreateSuccess(result));
         }
 
+        /// <summary>
+        /// Get a user profile by ID (Admin only)
+        /// </summary>
         [HttpGet("{id}")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<UserProfileResponseDto>> GetProfile(Guid id)
+        public async Task<ActionResult<ApiResponse<UserProfileResponseDto>>> GetProfile(Guid id)
         {
-            try
-            {
-                using var context = _tenantDbFactory(_tenantId);
-                var profile = await context.UserProfiles
-                    .Include(p => p.Address)
-                    .FirstOrDefaultAsync(p => p.Id == id);
-
-                if (profile == null)
-                {
-                    return NotFound(new { error = "Profile not found" });
-                }
-
-                return Ok(_mapper.Map<UserProfileResponseDto>(profile));
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { error = "An error occurred while retrieving the profile", details = ex.Message });
-            }
+            var result = await _userProfileService.GetProfileAsync(id);
+            return Ok(ApiResponse<UserProfileResponseDto>.CreateSuccess(result));
         }
     }
 } 
