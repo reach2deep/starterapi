@@ -1,99 +1,148 @@
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using starterkit.Application.DTOs.Global.Auth;
+using starterkit.Application.Interfaces.Services.Global;
 using starterkit.Core.Entities.Global;
+using starterkit.Core.Exceptions.Auth;
+using starterkit.Core.Exceptions.Tenant;
 using starterkit.Core.Interfaces.Data;
-
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
 namespace starterkit.Application.Services.Global
 {
-    public interface IGlobalAuthService
-    {
-        Task<GlobalLoginResponseDto> LoginAsync(GlobalLoginRequestDto request);
-        Task<TenantSelectionResponseDto> SelectTenantAsync(TenantSelectionRequestDto request);
-        Task<GlobalUser> ValidateBaseTokenAsync(string baseToken);
-    }
-
     public class GlobalAuthService : IGlobalAuthService
     {
         private readonly IRootDbContext _context;
         private readonly IConfiguration _configuration;
+        private readonly ILogger<GlobalAuthService> _logger;
+        private readonly IMapper _mapper;
 
-        public GlobalAuthService(IRootDbContext context, IConfiguration configuration)
+        public GlobalAuthService(
+            IRootDbContext context,
+            IConfiguration configuration,
+            ILogger<GlobalAuthService> logger,
+            IMapper mapper)
         {
-            _context = context;
-            _configuration = configuration;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
         public async Task<GlobalLoginResponseDto> LoginAsync(GlobalLoginRequestDto request)
         {
-            var user = await _context.GlobalUsers
-                .FirstOrDefaultAsync(u => u.Email == request.Email);
-
-            if (user == null || !VerifyPassword(request.Password, user.PasswordHash))
+            try
             {
-                throw new UnauthorizedAccessException("Invalid credentials");
-            }
+                // Validate request
+                if (request == null) throw new ArgumentNullException(nameof(request));
+                if (string.IsNullOrEmpty(request.Email)) throw new ArgumentException("Email is required", nameof(request));
+                if (string.IsNullOrEmpty(request.Password)) throw new ArgumentException("Password is required", nameof(request));
 
-            // Get user's tenant mappings
-            var tenantMappings = await _context.TenantUserMappings
-                .Include(t => t.Tenant)
-                .Where(t => t.UserId == user.Id && t.IsActive && t.Tenant.Status == Core.Enums.TenantStatus.Active)
-                .ToListAsync();
+                _logger.LogInformation("Attempting login for user: {Email}", request.Email);
 
-            // Generate base token
-            var baseToken = GenerateBaseToken(user);
+                var user = await _context.GlobalUsers
+                    .FirstOrDefaultAsync(u => u.Email == request.Email);
 
-            return new GlobalLoginResponseDto
-            {
-                BaseToken = baseToken,
-                Email = user.Email,
-                FullName = $"{user.FirstName} {user.LastName}",
-                AvailableTenants = tenantMappings.Select(t => new TenantAccessDto
+                if (user == null || !VerifyPassword(request.Password, user.PasswordHash))
                 {
-                    TenantId = t.TenantId,
-                    TenantName = t.Tenant.Name,
-                    Role = t.Role
-                })
-            };
+                    _logger.LogWarning("Invalid login attempt for user: {Email}", request.Email);
+                    throw new InvalidCredentialsException();
+                }
+
+                // Get user's tenant mappings
+                var tenantMappings = await _context.TenantUserMappings
+                    .Include(t => t.Tenant)
+                    .Where(t => t.UserId == user.Id && t.IsActive && t.Tenant.Status == Core.Enums.TenantStatus.Active)
+                    .ToListAsync();
+
+                if (!tenantMappings.Any())
+                {
+                    _logger.LogWarning("User {Email} has no active tenant mappings", request.Email);
+                    throw new TenantAccessDeniedException("User has no active tenant access");
+                }
+
+                // Generate base token
+                var baseToken = GenerateBaseToken(user);
+
+                _logger.LogInformation("User {Email} successfully logged in", request.Email);
+
+                // Map user to response DTO
+                var response = _mapper.Map<GlobalLoginResponseDto>(user);
+                response.BaseToken = baseToken;
+                response.AvailableTenants = _mapper.Map<IEnumerable<TenantAccessDto>>(tenantMappings);
+
+                return response;
+            }
+            catch (Exception ex) when (ex is not InvalidCredentialsException && 
+                                     ex is not TenantAccessDeniedException && 
+                                     ex is not ArgumentException)
+            {
+                _logger.LogError(ex, "An error occurred during login for user {Email}", request?.Email);
+                throw;
+            }
         }
 
         public async Task<TenantSelectionResponseDto> SelectTenantAsync(TenantSelectionRequestDto request)
         {
-            var user = await ValidateBaseTokenAsync(request.BaseToken);
-            if (user == null)
+            try
             {
-                throw new UnauthorizedAccessException("Invalid base token");
+                // Validate request
+                if (request == null) throw new ArgumentNullException(nameof(request));
+                if (string.IsNullOrEmpty(request.BaseToken)) throw new ArgumentException("Base token is required", nameof(request));
+                if (request.TenantId == Guid.Empty) throw new ArgumentException("Valid tenant ID is required", nameof(request));
+
+                _logger.LogInformation("Attempting tenant selection for tenant: {TenantId}", request.TenantId);
+
+                var user = await ValidateBaseTokenAsync(request.BaseToken);
+                if (user == null)
+                {
+                    _logger.LogWarning("Invalid base token used for tenant selection");
+                    throw new InvalidTokenException("Invalid base token");
+                }
+
+                // Verify tenant access
+                var tenantMapping = await _context.Set<TenantUserMapping>()
+                    .Include(t => t.Tenant)
+                    .FirstOrDefaultAsync(t => 
+                        t.TenantId == request.TenantId && 
+                        t.UserId == user.Id && 
+                        t.IsActive && 
+                        t.Tenant.Status == Core.Enums.TenantStatus.Active);
+
+                if (tenantMapping == null)
+                {
+                    _logger.LogWarning("User {UserId} attempted to access unauthorized tenant {TenantId}", 
+                        user.Id, request.TenantId);
+                    throw new TenantAccessDeniedException(request.TenantId, user.Id);
+                }
+
+                // Generate JWT token
+                var token = GenerateJwtToken(user, tenantMapping);
+                var refreshToken = GenerateRefreshToken();
+
+                _logger.LogInformation("Successfully generated tokens for user {UserId} in tenant {TenantId}", 
+                    user.Id, request.TenantId);
+
+                return new TenantSelectionResponseDto
+                {
+                    AccessToken = token,
+                    RefreshToken = refreshToken,
+                    ExpiresIn = 3600, // 1 hour
+                    TokenType = "Bearer"
+                };
             }
-
-            // Verify tenant access
-            var tenantMapping = await _context.Set<TenantUserMapping>()
-                .Include(t => t.Tenant)
-                .FirstOrDefaultAsync(t => 
-                    t.TenantId == request.TenantId && 
-                    t.UserId == user.Id && 
-                    t.IsActive && 
-                    t.Tenant.Status == Core.Enums.TenantStatus.Active);
-
-            if (tenantMapping == null)
+            catch (Exception ex) when (ex is not InvalidTokenException && 
+                                     ex is not TenantAccessDeniedException && 
+                                     ex is not ArgumentException)
             {
-                throw new UnauthorizedAccessException("User does not have access to this tenant");
+                _logger.LogError(ex, "An error occurred during tenant selection for tenant {TenantId}", request?.TenantId);
+                throw;
             }
-
-            // Generate JWT token
-            var token = GenerateJwtToken(user, tenantMapping);
-            var refreshToken = GenerateRefreshToken();
-
-            return new TenantSelectionResponseDto
-            {
-                AccessToken = token,
-                RefreshToken = refreshToken,
-                ExpiresIn = 3600 // 1 hour
-            };
         }
 
         public async Task<GlobalUser> ValidateBaseTokenAsync(string baseToken)

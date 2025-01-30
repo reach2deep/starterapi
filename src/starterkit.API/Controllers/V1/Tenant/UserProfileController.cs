@@ -1,3 +1,5 @@
+using AutoMapper;
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,13 +16,19 @@ namespace starterkit.API.Controllers.V1.Tenant
     {
         private readonly Func<string, TenantDbContext> _tenantDbFactory;
         private readonly string? _tenantId;
+        private readonly IMapper _mapper;
+        private readonly IValidator<UpdateUserProfileRequestDto> _updateProfileValidator;
 
         public UserProfileController(
             Func<string, TenantDbContext> tenantDbFactory,
-            IHttpContextAccessor httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor,
+            IMapper mapper,
+            IValidator<UpdateUserProfileRequestDto> updateProfileValidator)
         {
             _tenantDbFactory = tenantDbFactory;
             _tenantId = httpContextAccessor.HttpContext?.Items["Tenant"]?.ToString();
+            _mapper = mapper;
+            _updateProfileValidator = updateProfileValidator;
         }
 
         [HttpGet("me")]
@@ -44,7 +52,7 @@ namespace starterkit.API.Controllers.V1.Tenant
                     return NotFound(new { error = "Profile not found" });
                 }
 
-                return Ok(MapToResponseDto(profile));
+                return Ok(_mapper.Map<UserProfileResponseDto>(profile));
             }
             catch (Exception ex)
             {
@@ -57,6 +65,21 @@ namespace starterkit.API.Controllers.V1.Tenant
         {
             try
             {
+                // Validate request
+                var validationResult = await _updateProfileValidator.ValidateAsync(request);
+                if (!validationResult.IsValid)
+                {
+                    return BadRequest(new 
+                    { 
+                        error = "Validation failed",
+                        details = validationResult.Errors.Select(e => new 
+                        { 
+                            field = e.PropertyName,
+                            error = e.ErrorMessage 
+                        })
+                    });
+                }
+
                 var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
                 if (userId == null)
                 {
@@ -73,6 +96,10 @@ namespace starterkit.API.Controllers.V1.Tenant
                     return NotFound(new { error = "Profile not found" });
                 }
 
+                // Update profile using AutoMapper
+                _mapper.Map(request, existingProfile);
+                existingProfile.UpdatedBy = Guid.Parse(userId);
+
                 // Update address if provided
                 if (request.Address != null)
                 {
@@ -80,24 +107,12 @@ namespace starterkit.API.Controllers.V1.Tenant
                     {
                         existingProfile.Address = new Address();
                     }
-
-                    existingProfile.Address.StreetAddress = request.Address.StreetAddress;
-                    existingProfile.Address.City = request.Address.City;
-                    existingProfile.Address.Country = request.Address.Country;
-                    existingProfile.Address.PostalCode = request.Address.PostalCode;
-                    existingProfile.Address.State = request.Address.State;
+                    _mapper.Map(request.Address, existingProfile.Address);
                     existingProfile.Address.UpdatedBy = Guid.Parse(userId);
-                    existingProfile.Address.UpdatedAt = DateTime.UtcNow;
                 }
 
-                // Update profile fields
-                existingProfile.DateOfBirth = request.DateOfBirth;
-                existingProfile.ProfilePictureUrl = request.ProfilePictureUrl;
-                existingProfile.UpdatedBy = Guid.Parse(userId);
-                existingProfile.UpdatedAt = DateTime.UtcNow;
-
                 await context.SaveChangesAsync();
-                return Ok(MapToResponseDto(existingProfile));
+                return Ok(_mapper.Map<UserProfileResponseDto>(existingProfile));
             }
             catch (Exception ex)
             {
@@ -121,34 +136,12 @@ namespace starterkit.API.Controllers.V1.Tenant
                     return NotFound(new { error = "Profile not found" });
                 }
 
-                return Ok(MapToResponseDto(profile));
+                return Ok(_mapper.Map<UserProfileResponseDto>(profile));
             }
             catch (Exception ex)
             {
                 return StatusCode(500, new { error = "An error occurred while retrieving the profile", details = ex.Message });
             }
-        }
-
-        private static UserProfileResponseDto MapToResponseDto(UserProfile profile)
-        {
-            return new UserProfileResponseDto
-            {
-                Id = profile.Id,
-                UserId = profile.UserId,
-                DateOfBirth = profile.DateOfBirth,
-                ProfilePictureUrl = profile.ProfilePictureUrl,
-                CreatedAt = profile.CreatedAt,
-                UpdatedAt = profile.UpdatedAt,
-                Address = profile.Address == null ? null : new AddressDto
-                {
-                    Id = profile.Address.Id,
-                    StreetAddress = profile.Address.StreetAddress,
-                    City = profile.Address.City,
-                    Country = profile.Address.Country,
-                    PostalCode = profile.Address.PostalCode,
-                    State = profile.Address.State
-                }
-            };
         }
     }
 } 

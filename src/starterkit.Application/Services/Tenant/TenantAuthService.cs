@@ -3,18 +3,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using starterkit.Core.Entities.Tenant;
 using starterkit.Core.Interfaces.Data;
-
+using starterkit.Core.Interfaces.Services.Tenant;
 using System.Security.Claims;
 
 namespace starterkit.Application.Services.Tenant
 {
-    public interface ITenantAuthService
-    {
-        Task<(string AccessToken, string RefreshToken)> RefreshTokenAsync(string refreshToken);
-        Task RevokeTokenAsync(string refreshToken);
-        Task<bool> ValidateAccessTokenAsync(string accessToken);
-    }
-
     public class TenantAuthService : ITenantAuthService
     {
         private readonly Func<string, ITenantDbContext> _tenantDbFactory;
