@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-
+using starterkit.starterkit.Infrastructure.Data.RootDb;
 
 #nullable disable
 
@@ -22,7 +22,7 @@ namespace starterkit.starterkit.Infrastructure.Data.RootDb.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("starterkit.Core.Entities.Global.GlobalUser", b =>
+            modelBuilder.Entity("starterkit.starterkit.Core.Modules.Global.GlobalUser", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -80,7 +80,7 @@ namespace starterkit.starterkit.Infrastructure.Data.RootDb.Migrations
                     b.ToTable("GlobalUsers", (string)null);
                 });
 
-            modelBuilder.Entity("starterkit.Core.Entities.Global.Tenant", b =>
+            modelBuilder.Entity("starterkit.starterkit.Core.Modules.Global.Tenant", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -101,6 +101,11 @@ namespace starterkit.starterkit.Infrastructure.Data.RootDb.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
@@ -130,7 +135,7 @@ namespace starterkit.starterkit.Infrastructure.Data.RootDb.Migrations
                     b.ToTable("Tenants", (string)null);
                 });
 
-            modelBuilder.Entity("starterkit.Core.Entities.Global.TenantUserMapping", b =>
+            modelBuilder.Entity("starterkit.starterkit.Core.Modules.Global.TenantUserMapping", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -172,15 +177,15 @@ namespace starterkit.starterkit.Infrastructure.Data.RootDb.Migrations
                     b.ToTable("TenantUserMappings", (string)null);
                 });
 
-            modelBuilder.Entity("starterkit.Core.Entities.Global.TenantUserMapping", b =>
+            modelBuilder.Entity("starterkit.starterkit.Core.Modules.Global.TenantUserMapping", b =>
                 {
-                    b.HasOne("starterkit.Core.Entities.Global.Tenant", "Tenant")
+                    b.HasOne("starterkit.starterkit.Core.Modules.Global.Tenant", "Tenant")
                         .WithMany()
                         .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("starterkit.Core.Entities.Global.GlobalUser", "User")
+                    b.HasOne("starterkit.starterkit.Core.Modules.Global.GlobalUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)

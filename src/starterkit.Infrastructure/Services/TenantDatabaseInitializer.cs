@@ -1,43 +1,61 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using starterkit.starterkit.Infrastructure.Data.RootDb;
-using starterkit.starterkit.Infrastructure.Data.TenantDb;
-
+using starterkit.starterkit.Application.Modules.Global.TenantManagement.Interfaces;
+using starterkit.starterkit.Core.Modules.Global;
+using starterkit.starterkit.Application.Persistence;
 
 namespace starterkit.starterkit.Infrastructure.Services
 {
-    public interface ITenantDatabaseInitializer
-    {
-        Task InitializeTenantDatabaseAsync(string tenantId);
-    }
-
     public class TenantDatabaseInitializer : ITenantDatabaseInitializer
     {
-        private readonly IServiceScopeFactory _scopeFactory;
+        private readonly IDbContextFactory<DbContext> _dbContextFactory;
+        private readonly IRootDbContext _rootContext;
 
-        public TenantDatabaseInitializer(IServiceScopeFactory scopeFactory)
+        public TenantDatabaseInitializer(
+            IDbContextFactory<DbContext> dbContextFactory,
+            IRootDbContext rootContext)
         {
-            _scopeFactory = scopeFactory;
+            _dbContextFactory = dbContextFactory;
+            _rootContext = rootContext;
         }
 
-        public async Task InitializeTenantDatabaseAsync(string tenantId)
+        public async Task InitializeTenantDatabaseAsync(Tenant tenant)
         {
-            using var scope = _scopeFactory.CreateScope();
+            // Create a new DbContext for the tenant
+            using var context = _dbContextFactory.CreateDbContext();
 
-            // Get the root context to access tenant information
-            var rootContext = scope.ServiceProvider.GetRequiredService<RootDbContext>();
+            // Set the connection string
+            context.Database.SetConnectionString(tenant.ConnectionString);
 
-            // Get the tenant context factory
-            var tenantDbFactory = scope.ServiceProvider.GetRequiredService<Func<string, TenantDbContext>>();
-            var tenantContext = tenantDbFactory(tenantId);
+            // Ensure database is created
+            await context.Database.EnsureCreatedAsync();
 
-            // Create database if it doesn't exist and apply migrations
-            await tenantContext.Database.MigrateAsync();
+            // Apply migrations
+            await context.Database.MigrateAsync();
 
-            // Create and run the seeder
-            var passwordHashService = scope.ServiceProvider.GetRequiredService<IPasswordHashService>();
-            var seeder = new TenantDbSeeder(tenantContext, rootContext, passwordHashService, tenantId);
-            await seeder.SeedAsync();
+            // Seed initial data if needed
+            await SeedInitialDataAsync(context);
+        }
+
+        public async Task InitializeTenantDatabaseAsync(string databaseName)
+        {
+            // Find the tenant by database name
+            var tenant = await _rootContext.Tenants
+                .FirstOrDefaultAsync(t => t.DatabaseName == databaseName);
+
+            if (tenant == null)
+            {
+                throw new InvalidOperationException($"Tenant with database name {databaseName} not found");
+            }
+
+            await InitializeTenantDatabaseAsync(tenant);
+        }
+
+        private async Task SeedInitialDataAsync(DbContext context)
+        {
+            // Add your seeding logic here
+            // Example: Add default roles, settings, etc.
+            await context.SaveChangesAsync();
         }
     }
 }
