@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using starterkit.Application.DTOs.Global.Auth;
+using starterkit.Application.Interfaces.Services.Global;
 using starterkit.Application.Services.Global;
 
 namespace starterkit.API.Controllers.V1.Global

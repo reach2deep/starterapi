@@ -3,9 +3,9 @@ namespace starterkit.Application.DTOs.Global.Auth
     public class GlobalLoginResponseDto
     {
         public string BaseToken { get; set; }
-        public IEnumerable<TenantAccessDto> AvailableTenants { get; set; }
         public string Email { get; set; }
         public string FullName { get; set; }
+        public IEnumerable<TenantAccessDto> AvailableTenants { get; set; }
     }
 
     public class TenantAccessDto

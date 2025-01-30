@@ -83,7 +83,7 @@ Here's a detailed approach for implementing multi-tenancy with a root database s
 ## Suggested Project Structure
 
 ```
-    starterkit/
+starterkit/
 ├── src/
 │   ├── starterkit.API/
 │   │   ├── Controllers/
@@ -102,7 +102,7 @@ Here's a detailed approach for implementing multi-tenancy with a root database s
 │   │   │   └── TenantAuthorizationFilter.cs
 │   │   └── Program.cs
 │   │
-│   ├── starterkit.Core/
+│   ├── starterkit.Core/                            # Domain Layer - Most Inner Layer
 │   │   ├── Entities/
 │   │   │   ├── Common/
 │   │   │   │   ├── BaseEntity.cs
@@ -117,25 +117,18 @@ Here's a detailed approach for implementing multi-tenancy with a root database s
 │   │   │       ├── UserRole.cs
 │   │   │       └── RefreshToken.cs
 │   │   ├── Interfaces/
-│   │   │   ├── Repositories/
-│   │   │   │   ├── Global/
-│   │   │   │   │   ├── ITenantRepository.cs
-│   │   │   │   │   └── IGlobalUserRepository.cs
-│   │   │   │   └── Tenant/
-│   │   │   │       ├── IUserRepository.cs
-│   │   │   │       └── IRefreshTokenRepository.cs
-│   │   │   └── Services/
+│   │   │   └── Repositories/                        # Only Repository Interfaces
 │   │   │       ├── Global/
-│   │   │       │   ├── IGlobalAuthService.cs
-│   │   │       │   └── ITenantService.cs
+│   │   │       │   ├── ITenantRepository.cs
+│   │   │       │   └── IGlobalUserRepository.cs
 │   │   │       └── Tenant/
-│   │   │           ├── IAuthService.cs
-│   │   │           └── IUserService.cs
+│   │   │           ├── IUserRepository.cs
+│   │   │           └── IRefreshTokenRepository.cs
 │   │   └── Enums/
 │   │       ├── UserStatus.cs
 │   │       └── TenantStatus.cs
 │   │
-│   ├── starterkit.Application/
+│   ├── starterkit.Application/                     # Application Layer
 │   │   ├── DTOs/
 │   │   │   ├── Global/
 │   │   │   │   ├── Auth/
@@ -154,7 +147,15 @@ Here's a detailed approach for implementing multi-tenancy with a root database s
 │   │   │           ├── UserDto.cs
 │   │   │           ├── CreateUserDto.cs
 │   │   │           └── UpdateUserDto.cs
-│   │   ├── Services/
+│   │   ├── Interfaces/                             # Service Interfaces moved here
+│   │   │   └── Services/
+│   │   │       ├── Global/
+│   │   │       │   ├── IGlobalAuthService.cs
+│   │   │       │   └── ITenantService.cs
+│   │   │       └── Tenant/
+│   │   │           ├── IAuthService.cs
+│   │   │           └── IUserService.cs
+│   │   ├── Services/                               # Service Implementations
 │   │   │   ├── Global/
 │   │   │   │   ├── GlobalAuthService.cs
 │   │   │   │   └── TenantService.cs
@@ -172,7 +173,7 @@ Here's a detailed approach for implementing multi-tenancy with a root database s
 │   │       ├── GlobalMappingProfile.cs
 │   │       └── TenantMappingProfile.cs
 │   │
-│   ├── starterkit.Infrastructure/
+│   ├── starterkit.Infrastructure/                  # Infrastructure Layer
 │   │   ├── Data/
 │   │   │   ├── RootDb/
 │   │   │   │   ├── RootDbContext.cs
@@ -207,7 +208,7 @@ Here's a detailed approach for implementing multi-tenancy with a root database s
 │   │       └── Options/
 │   │           └── MultiTenancyOptions.cs
 │   │
-│   └── starterkit.Shared/
+│   └── starterkit.Shared/                         # Shared Kernel
 │       ├── Constants/
 │       │   ├── AuthConstants.cs
 │       │   ├── TenantConstants.cs
@@ -232,7 +233,7 @@ Here's a detailed approach for implementing multi-tenancy with a root database s
         ├── Global/
         │   └── TenantManagementTests.cs
         └── Tenant/
-            └── UserManagementTests.cs  
+            └── UserManagementTests.cs
 ```
 
 ## Key Implementation Considerations
