@@ -1,5 +1,5 @@
-using starterkit.Infrastructure.MultiTenancy.Models;
-using starterkit.Infrastructure.Services;
+
+using starterkit.starterkit.Infrastructure.Services;
 
 namespace starterkit.starterkit.API.Middlewares
 {

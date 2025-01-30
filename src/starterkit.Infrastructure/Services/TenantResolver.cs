@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using starterkit.Infrastructure.MultiTenancy.Models;
-using starterkit.Infrastructure.MultiTenancy.Stores;
+
 using starterkit.starterkit.Core.Modules.Common;
 using starterkit.starterkit.Infrastructure.Stores;
 using System.Security.Claims;

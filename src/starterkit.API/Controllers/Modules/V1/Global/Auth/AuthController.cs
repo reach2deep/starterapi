@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using starterkit.Application.DTOs.Global.Auth;
-using starterkit.Application.Interfaces.Services.Global;
-using starterkit.Core.Models;
+using starterkit.starterkit.Application.Modules.Global.Auth.DTOs;
+using starterkit.starterkit.Application.Modules.Global.Auth.Interfaces;
+using starterkit.starterkit.Core.Modules.Common;
 
 namespace starterkit.starterkit.API.Controllers.Modules.V1.Global.Auth
 {

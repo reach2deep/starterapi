@@ -1,9 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using starterkit.API.Controllers;
-using starterkit.Core.DTOs.Tenant;
-using starterkit.Core.Interfaces.Services.Tenant;
-using starterkit.Core.Models;
+using starterkit.starterkit.Application.Modules.Tenant.UserManagement.DTOs;
+using starterkit.starterkit.Application.Modules.Tenant.UserManagement.Interfaces;
+using starterkit.starterkit.Core.Modules.Common;
 
 namespace starterkit.starterkit.API.Controllers.Modules.V1.Tenant.UserManagement
 {

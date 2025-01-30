@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using starterkit.Core.Interfaces.Data;
-using starterkit.Infrastructure.Data.RootDb;
-using starterkit.Infrastructure.Data.TenantDb;
+using starterkit.starterkit.Infrastructure.Data.RootDb;
+using starterkit.starterkit.Infrastructure.Data.TenantDb;
+
 
 namespace starterkit.starterkit.Infrastructure.Services
 {
