@@ -70,12 +70,28 @@ namespace starterkit.Infrastructure.Data.TenantDb
                     await _context.Users.AddAsync(rootAdminInTenant);
                     await _context.SaveChangesAsync();
 
-                    // Create tenant admin
-                    var tenantAdmin = new User
+                    // First create tenant admin in GlobalUsers
+                    var tenantAdminGlobal = new GlobalUser
                     {
                         Email = $"admin@{tenant.Name.ToLower()}.com",
-                        FullName = $"{tenant.Name} Admin",
+                        FirstName = $"{tenant.Name}",
+                        LastName = "Admin",
                         PasswordHash = _passwordHashService.HashPassword("Admin@123"),
+                        UserType = UserType.User,
+                        Status = UserStatus.Active,
+                        CreatedBy = rootAdmin.Id
+                    };
+
+                    await _rootContext.GlobalUsers.AddAsync(tenantAdminGlobal);
+                    await _rootContext.SaveChangesAsync(); // Save to get the ID
+
+                    // Create tenant admin in tenant database
+                    var tenantAdmin = new User
+                    {
+                        Id = tenantAdminGlobal.Id, // Use the same ID as global user
+                        Email = tenantAdminGlobal.Email,
+                        FullName = $"{tenantAdminGlobal.FirstName} {tenantAdminGlobal.LastName}",
+                        PasswordHash = tenantAdminGlobal.PasswordHash,
                         Status = UserStatus.Active,
                         CreatedBy = rootAdminInTenant.Id,
                         Profile = new UserProfile
@@ -91,16 +107,13 @@ namespace starterkit.Infrastructure.Data.TenantDb
                     var mapping = new TenantUserMapping
                     {
                         TenantId = tenant.Id,
-                        UserId = tenantAdmin.Id,
+                        UserId = tenantAdminGlobal.Id,
                         Role = "Admin",
                         CreatedBy = rootAdmin.Id
                     };
 
                     await _rootContext.TenantUserMappings.AddAsync(mapping);
                     await _rootContext.SaveChangesAsync();
-
-                    // Add some sample data
-                    //await SeedSampleDataAsync(tenantAdmin.Id, tenant.Id, rootAdmin.Id);
                 }
             }
             catch (Exception ex)

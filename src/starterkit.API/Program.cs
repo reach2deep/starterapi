@@ -14,6 +14,7 @@ using starterkit.Infrastructure.Extensions;
 using starterkit.Infrastructure.MultiTenancy.Stores;
 using starterkit.Infrastructure.Services;
 using System.Text;
+using starterkit.Application.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -117,6 +118,8 @@ builder.Services.AddScoped<IPasswordHashService, PasswordHashService>();
 builder.Services.AddScoped<IDataSeeder, RootDbSeeder>();
 builder.Services.AddScoped<ITenantDatabaseInitializer, TenantDatabaseInitializer>();
 builder.Services.AddScoped<ITenantResolver, TenantResolver>();
+
+builder.Services.AddApplicationServices();
 
 var app = builder.Build();
 
