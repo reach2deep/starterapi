@@ -7,7 +7,6 @@ using starterkit.Core.Modules.Common;
 namespace starterkit.API.Controllers.Modules.V1.Global.TenantManagement
 {
     [Route("api/v1/global/tenants")]
-    [Authorize(Roles = "RootAdmin")]
     public class TenantController : BaseApiController
     {
         private readonly ITenantService _tenantService;
