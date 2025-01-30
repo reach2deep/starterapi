@@ -1,4 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using starterkit.starterkit.Core.Enums;
+using starterkit.starterkit.Core.Modules.Global;
+using starterkit.starterkit.Infrastructure.Services;
 
 
 namespace starterkit.starterkit.Infrastructure.Data.RootDb

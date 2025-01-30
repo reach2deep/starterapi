@@ -2,19 +2,19 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using starterkit.API.Middlewares;
-using starterkit.Application.Interfaces.Services.Global;
-using starterkit.Application.Services.Global;
-using starterkit.Application.Services.Tenant;
-using starterkit.Core.Interfaces.Services.Tenant;
-using starterkit.Infrastructure.Data;
-using starterkit.Infrastructure.Data.RootDb;
-using starterkit.Infrastructure.Data.TenantDb;
-using starterkit.Infrastructure.Extensions;
-using starterkit.Infrastructure.MultiTenancy.Stores;
-using starterkit.Infrastructure.Services;
+using n.Modules.Global.Auth.Services;
+using starterkit.starterkit.API.Middlewares;
+using starterkit.starterkit.Application.Modules.Global.Auth.Interfaces;
+using starterkit.starterkit.Application.Modules.Tenant.UserManagement.Interfaces;
+using starterkit.starterkit.Application.Modules.Tenant.UserManagement.Services;
+using starterkit.starterkit.Infrastructure.Data;
+using starterkit.starterkit.Infrastructure.Data.RootDb;
+using starterkit.starterkit.Infrastructure.Data.TenantDb;
+using starterkit.starterkit.Infrastructure.Extensions;
+using starterkit.starterkit.Infrastructure.Services;
+using starterkit.starterkit.Infrastructure.Stores;
 using System.Text;
-using starterkit.Application.Extensions;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -119,7 +119,7 @@ builder.Services.AddScoped<IDataSeeder, RootDbSeeder>();
 builder.Services.AddScoped<ITenantDatabaseInitializer, TenantDatabaseInitializer>();
 builder.Services.AddScoped<ITenantResolver, TenantResolver>();
 
-builder.Services.AddApplicationServices();
+// builder.Services.AddApplicationServices();
 
 var app = builder.Build();
 

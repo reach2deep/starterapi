@@ -2,9 +2,9 @@ using System.ComponentModel.DataAnnotations;
 using System.Net;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
-using starterkit.Core.Exceptions.Auth;
-using starterkit.Core.Exceptions.Tenant;
-using starterkit.Core.Models;
+using starterkit.starterkit.Application.Common.Exceptions.Auth;
+using starterkit.starterkit.Application.Common.Exceptions.Tenant;
+using starterkit.starterkit.Core.Modules.Common;
 
 namespace starterkit.starterkit.API.Middlewares
 {

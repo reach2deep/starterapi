@@ -1,16 +1,19 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using starterkit.Core.Interfaces.Data;
-using starterkit.Core.Interfaces.Repositories.Tenant;
-using starterkit.Core.Interfaces.Services.Tenant;
-using starterkit.Infrastructure.Data.RootDb;
-using starterkit.Infrastructure.Data.TenantDb;
-using starterkit.Infrastructure.Data.TenantDb.Repositories;
-using starterkit.Application.Services.Tenant;
-using starterkit.Infrastructure.MultiTenancy.Stores;
-using starterkit.Infrastructure.Services;
+
 using Microsoft.AspNetCore.Http;
+using starterkit.starterkit.Infrastructure.Data.RootDb;
+using starterkit.starterkit.Application.Persistence;
+using starterkit.starterkit.Infrastructure.Stores;
+using starterkit.starterkit.Infrastructure.Data.TenantDb;
+using starterkit.starterkit.Application.Modules.Tenant.UserManagement.Interfaces;
+using starterkit.starterkit.Infrastructure.Data.TenantDb.Repositories;
+using starterkit.starterkit.Application.Modules.Tenant.UserManagement.Services;
+using starterkit.starterkit.Infrastructure.Services;
+using FluentValidation;
+using System.Reflection;
+using n.Modules.Global.Auth.Services;
 
 namespace starterkit.starterkit.Infrastructure.Extensions
 {
@@ -18,6 +21,26 @@ namespace starterkit.starterkit.Infrastructure.Extensions
     {
         public static IServiceCollection AddTenantServices(this IServiceCollection services, IConfiguration configuration)
         {
+
+            var assembly = Assembly.GetExecutingAssembly();
+
+            // Register AutoMapper
+            services.AddAutoMapper(assembly);
+
+            // Register FluentValidation
+            services.AddValidatorsFromAssembly(assembly);
+
+            // Register Application Services
+            services.Scan(scan => scan
+                .FromAssemblyOf<GlobalAuthService>()
+                .AddClasses(classes => classes.Where(type =>
+                    type.Name.EndsWith("Service") &&
+                    !type.IsAbstract &&
+                    !type.IsInterface))
+                .AsImplementedInterfaces()
+                .WithScopedLifetime());
+
+
             // Register root database context
             services.AddDbContext<RootDbContext>(options =>
                 options.UseSqlServer(configuration.GetConnectionString("RootConnection")));
@@ -66,6 +89,9 @@ namespace starterkit.starterkit.Infrastructure.Extensions
 
             // Add tenant database initializer
             services.AddScoped<ITenantDatabaseInitializer, TenantDatabaseInitializer>();
+
+             
+            
 
             return services;
         }

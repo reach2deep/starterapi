@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using starterkit.Core.Models;
+using starterkit.starterkit.Core.Modules.Common;
 
 namespace starterkit.starterkit.API.Controllers
 {
