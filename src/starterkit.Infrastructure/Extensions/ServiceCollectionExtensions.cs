@@ -18,6 +18,7 @@ using starterkit.Application.Modules.Global.TenantManagement.Interfaces;
 using starterkit.Application.Modules.Global.TenantManagement.Validators;
 using starterkit.Infrastructure.Persistence.RootDb;
 using starterkit.Infrastructure.Persistence.TenantDb;
+using Microsoft.EntityFrameworkCore.Design;
 
 namespace starterkit.Infrastructure.Extensions
 {
@@ -107,19 +108,33 @@ namespace starterkit.Infrastructure.Extensions
         }
     }
 
-    internal class TenantDbContextFactory : IDbContextFactory<DbContext>
+    internal class TenantDbContextFactory : IDbContextFactory<DbContext>, IDesignTimeDbContextFactory<TenantDbContext>
     {
         private readonly DbContextOptions<TenantDbContext> _options;
 
+        // Constructor for runtime usage
         public TenantDbContextFactory(DbContextOptions<TenantDbContext> options)
         {
             _options = options;
+        }
+
+        // Parameterless constructor for design-time usage
+        public TenantDbContextFactory()
+        {
         }
 
         public DbContext CreateDbContext()
         {
             // Use a temporary tenant ID for initialization purposes
             return new TenantDbContext(_options, "temp");
+        }
+
+        public TenantDbContext CreateDbContext(string[] args)
+        {
+            var optionsBuilder = new DbContextOptionsBuilder<TenantDbContext>();
+            optionsBuilder.UseSqlServer("Server=localhost;Database=StarterKit_Tenant;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True");
+            
+            return new TenantDbContext(optionsBuilder.Options, "design-time-tenant");
         }
     }
 }
