@@ -4,7 +4,8 @@ using starterkit.Application.Modules.Tenant.PermissionManagement.DTOs;
 using starterkit.Application.Modules.Tenant.PermissionManagement.Interfaces;
 using starterkit.Core.Modules.Common;
 using starterkit.Core.Modules.Tenant;
-using starterkit.Core.Modules.Tenant.Interfaces.Repositories;
+using starterkit.Core.Modules.Tenant.PermissionManagement.Interfaces;
+
 
 namespace starterkit.Application.Modules.Tenant.PermissionManagement.Services
 {

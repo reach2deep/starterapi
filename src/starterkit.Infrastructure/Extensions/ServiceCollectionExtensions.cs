@@ -21,10 +21,12 @@ using starterkit.Infrastructure.Persistence.TenantDb;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Logging;
 using starterkit.Infrastructure.Data;
-using starterkit.Core.Modules.Tenant.Interfaces.Repositories;
+
 using starterkit.Application.Modules.Tenant.PermissionManagement.Interfaces;
 using starterkit.Application.Modules.Tenant.PermissionManagement.Services;
 using starterkit.Infrastructure.Persistence.TenantDb.Repositories;
+using starterkit.Core.Modules.Tenant.UserManagement.Interfaces.Repositories;
+using starterkit.Core.Modules.Tenant.PermissionManagement.Interfaces;
 
 namespace starterkit.Infrastructure.Extensions
 {

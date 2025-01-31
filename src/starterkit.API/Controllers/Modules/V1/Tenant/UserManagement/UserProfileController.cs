@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using starterkit.Application.Modules.Tenant.UserManagement.DTOs;
 using starterkit.Application.Modules.Tenant.UserManagement.Interfaces;
 using starterkit.Core.Modules.Common;
+using starterkit.Core.Modules.Tenant.UserManagement.Interfaces.Repositories;
 
 namespace starterkit.API.Controllers.Modules.V1.Tenant.UserManagement
 {

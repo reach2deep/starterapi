@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using starterkit.Application.Modules.Global.Auth.DTOs;
 using starterkit.Application.Modules.Global.Auth.Interfaces;
 using starterkit.Core.Modules.Common;
+using starterkit.Core.Modules.Global.Auth.Interfaces.Repositories;
 
 namespace starterkit.API.Controllers.Modules.V1.Global.Auth
 {

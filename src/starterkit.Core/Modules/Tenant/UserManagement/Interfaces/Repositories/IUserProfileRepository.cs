@@ -1,7 +1,6 @@
-
 using starterkit.Core.Modules.Tenant;
 
-namespace starterkit.Application.Modules.Tenant.UserManagement.Interfaces
+namespace starterkit.Core.Modules.Tenant.UserManagement.Interfaces.Repositories
 {
     public interface IUserProfileRepository
     {

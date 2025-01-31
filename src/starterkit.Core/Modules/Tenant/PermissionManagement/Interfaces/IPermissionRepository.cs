@@ -1,6 +1,6 @@
 using starterkit.Core.Modules.Tenant;
 
-namespace starterkit.Core.Modules.Tenant.Interfaces.Repositories
+namespace starterkit.Core.Modules.Tenant.PermissionManagement.Interfaces
 {
     public interface IPermissionRepository
     {

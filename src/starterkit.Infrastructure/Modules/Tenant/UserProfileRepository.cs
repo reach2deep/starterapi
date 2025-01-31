@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using starterkit.Application.Modules.Tenant.UserManagement.Interfaces;
+using starterkit.Core.Modules.Tenant.UserManagement.Interfaces.Repositories;
 using starterkit.Application.Persistence;
 using starterkit.Core.Modules.Tenant;
 

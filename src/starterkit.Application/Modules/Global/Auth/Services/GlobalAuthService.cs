@@ -10,6 +10,7 @@ using starterkit.Application.Modules.Global.Auth.Interfaces;
 using starterkit.Application.Persistence;
 using starterkit.Core.Enums;
 using starterkit.Core.Modules.Global;
+using starterkit.Core.Modules.Global.Auth.Interfaces.Repositories;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;

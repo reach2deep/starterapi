@@ -1,7 +1,7 @@
-
 using starterkit.Application.Modules.Tenant.UserManagement.DTOs;
-using starterkit.Application.Modules.Tenant.UserManagement.Interfaces;
+using starterkit.Core.Modules.Tenant.UserManagement.Interfaces.Repositories;
 using starterkit.Core.Modules.Tenant;
+using starterkit.Application.Modules.Tenant.UserManagement.Interfaces;
 
 namespace starterkit.Application.Modules.Tenant.UserManagement.Services
 {
