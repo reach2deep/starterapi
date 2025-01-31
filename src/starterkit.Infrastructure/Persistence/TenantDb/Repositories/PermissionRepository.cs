@@ -2,16 +2,16 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using starterkit.Core.Modules.Tenant;
 using starterkit.Core.Modules.Tenant.Interfaces.Repositories;
-using starterkit.Infrastructure.Persistence.TenantDb;
+using starterkit.Application.Persistence;
 
 namespace starterkit.Infrastructure.Persistence.TenantDb.Repositories
 {
     public class PermissionRepository : IPermissionRepository
     {
-        private readonly TenantDbContext _context;
+        private readonly ITenantDbContext _context;
         private readonly ILogger<PermissionRepository> _logger;
 
-        public PermissionRepository(TenantDbContext context, ILogger<PermissionRepository> logger)
+        public PermissionRepository(ITenantDbContext context, ILogger<PermissionRepository> logger)
         {
             _context = context;
             _logger = logger;
@@ -67,7 +67,7 @@ namespace starterkit.Infrastructure.Persistence.TenantDb.Repositories
 
         public async Task<Permission> UpdateAsync(Permission permission)
         {
-            _context.Entry(permission).State = EntityState.Modified;
+            _context.Set<Permission>().Update(permission);
             await _context.SaveChangesAsync();
             return permission;
         }

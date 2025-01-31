@@ -21,6 +21,10 @@ using starterkit.Infrastructure.Persistence.TenantDb;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Logging;
 using starterkit.Infrastructure.Data;
+using starterkit.Core.Modules.Tenant.Interfaces.Repositories;
+using starterkit.Application.Modules.Tenant.PermissionManagement.Interfaces;
+using starterkit.Application.Modules.Tenant.PermissionManagement.Services;
+using starterkit.Infrastructure.Persistence.TenantDb.Repositories;
 
 namespace starterkit.Infrastructure.Extensions
 {
@@ -99,9 +103,11 @@ namespace starterkit.Infrastructure.Extensions
 
             // Add tenant repositories
             services.AddScoped<IUserProfileRepository, UserProfileRepository>();
+            services.AddScoped<IPermissionRepository, PermissionRepository>();
 
             // Add tenant services
             services.AddScoped<IUserProfileService, UserProfileService>();
+            services.AddScoped<IPermissionService, PermissionService>();
 
             // Add tenant database initializer
             services.AddScoped<ITenantDatabaseInitializer, TenantDatabaseInitializer>();
