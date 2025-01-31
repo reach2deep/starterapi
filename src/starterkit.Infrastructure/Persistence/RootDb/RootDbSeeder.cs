@@ -59,7 +59,8 @@ namespace starterkit.Infrastructure.Data.RootDb
                         DatabaseName = "alpha_tenant",
                         ConnectionString = "Server=localhost;Database=alpha_tenant;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;MultipleActiveResultSets=true;",
                         Status = TenantStatus.Active,
-                        CreatedBy = Guid.Empty // System
+                        CreatedBy = Guid.Empty, // System
+                        Description = "Alpha tenant description"
                     },
                     new Tenant
                     {
@@ -67,7 +68,8 @@ namespace starterkit.Infrastructure.Data.RootDb
                         DatabaseName = "beta_tenant",
                         ConnectionString = "Server=localhost;Database=beta_tenant;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;MultipleActiveResultSets=true;",
                         Status = TenantStatus.Active,
-                        CreatedBy = Guid.Empty // System
+                        CreatedBy = Guid.Empty, // System
+                        Description = "Beta tenant description"
                     }
                 };
 
