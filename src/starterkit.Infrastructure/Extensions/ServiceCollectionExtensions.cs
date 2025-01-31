@@ -19,6 +19,8 @@ using starterkit.Application.Modules.Global.TenantManagement.Validators;
 using starterkit.Infrastructure.Persistence.RootDb;
 using starterkit.Infrastructure.Persistence.TenantDb;
 using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.Extensions.Logging;
+using starterkit.Infrastructure.Data;
 
 namespace starterkit.Infrastructure.Extensions
 {
@@ -103,6 +105,16 @@ namespace starterkit.Infrastructure.Extensions
 
             // Add tenant database initializer
             services.AddScoped<ITenantDatabaseInitializer, TenantDatabaseInitializer>();
+
+            // Register tenant DbContext factory
+            services.AddScoped<Func<string, IDataSeeder>>(sp => tenantId =>
+            {
+                var context = sp.GetRequiredService<Func<string, TenantDbContext>>()(tenantId);
+                var rootContext = sp.GetRequiredService<RootDbContext>();
+                var passwordHashService = sp.GetRequiredService<IPasswordHashService>();
+                var logger = sp.GetRequiredService<ILogger<TenantDbSeeder>>();
+                return new TenantDbSeeder(context, rootContext, passwordHashService, logger, tenantId);
+            });
 
             return services;
         }
