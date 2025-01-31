@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using starterkit.Application.Modules.Global.Auth.Interfaces;
 using starterkit.Core.Modules.Global;
+using starterkit.Infrastructure.Persistence.RootDb;
 
 namespace starterkit.Infrastructure.Data.RootDb.Repositories
 {

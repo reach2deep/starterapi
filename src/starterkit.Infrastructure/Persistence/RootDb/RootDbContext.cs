@@ -2,9 +2,9 @@ using Microsoft.EntityFrameworkCore;
 using starterkit.Application.Persistence;
 using starterkit.Core.Modules.Global;
 using starterkit.Infrastructure.Data.RootDb.Configurations;
+using starterkit.Infrastructure.Persistence.RootDb.Configurations;
 
-
-namespace starterkit.Infrastructure.Data.RootDb
+namespace starterkit.Infrastructure.Persistence.RootDb
 {
     public class RootDbContext : DbContext, IRootDbContext
     {
@@ -15,6 +15,7 @@ namespace starterkit.Infrastructure.Data.RootDb
         public DbSet<Tenant> Tenants { get; set; }
         public DbSet<GlobalUser> GlobalUsers { get; set; }
         public DbSet<TenantUserMapping> TenantUserMappings { get; set; }
+        public DbSet<LoginActivity> LoginActivities { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -24,6 +25,7 @@ namespace starterkit.Infrastructure.Data.RootDb
             modelBuilder.ApplyConfiguration(new GlobalUserConfiguration());
             modelBuilder.ApplyConfiguration(new TenantConfiguration());
             modelBuilder.ApplyConfiguration(new TenantUserMappingConfiguration());
+            modelBuilder.ApplyConfiguration(new LoginActivityConfiguration());
         }
     }
 }
