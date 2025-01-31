@@ -15,7 +15,7 @@ using starterkit.Infrastructure.Extensions;
 using starterkit.Infrastructure.Services;
 using starterkit.Infrastructure.Stores;
 using System.Text;
-
+using starterkit.Core.Enums;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -145,12 +145,33 @@ app.UseTenantMiddleware();
 
 app.MapControllers();
 
-// Seed the root database
+// Initialize databases
 using (var scope = app.Services.CreateScope())
 {
-    // Seed root database
-    var seeder = scope.ServiceProvider.GetRequiredService<IDataSeeder>();
-    await seeder.SeedAsync();
+    var services = scope.ServiceProvider;
+    var rootContext = services.GetRequiredService<RootDbContext>();
+    var tenantInitializer = services.GetRequiredService<ITenantDatabaseInitializer>();
+
+    // Ensure root database is created and migrated
+    await rootContext.Database.MigrateAsync();
+
+    // Initialize databases for all active tenants
+    var activeTenants = await rootContext.Tenants
+        .Where(t => t.IsActive && t.Status == TenantStatus.Active)
+        .ToListAsync();
+
+    foreach (var tenant in activeTenants)
+    {
+        try
+        {
+            await tenantInitializer.InitializeTenantDatabaseAsync(tenant);
+        }
+        catch (Exception ex)
+        {
+            // Log the error but continue with other tenants
+            Console.WriteLine($"Failed to initialize database for tenant {tenant.Name}: {ex.Message}");
+        }
+    }
 }
 
 app.Run();
