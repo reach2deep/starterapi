@@ -8,6 +8,7 @@ using starterkit.Application.Modules.Global.Auth.Interfaces;
 using starterkit.Application.Modules.Global.TenantManagement.Interfaces;
 using starterkit.Application.Modules.Tenant.UserManagement.Interfaces;
 using starterkit.Application.Modules.Tenant.UserManagement.Services;
+using starterkit.Core.Enums;
 using starterkit.Infrastructure.Data;
 using starterkit.Infrastructure.Data.RootDb;
 using starterkit.Infrastructure.Data.TenantDb;
@@ -15,7 +16,7 @@ using starterkit.Infrastructure.Extensions;
 using starterkit.Infrastructure.Services;
 using starterkit.Infrastructure.Stores;
 using System.Text;
-using starterkit.Core.Enums;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -148,8 +149,15 @@ app.MapControllers();
 // Initialize databases
 using (var scope = app.Services.CreateScope())
 {
-    var services = scope.ServiceProvider;
+   
+
+    // Seed root database
+    var seeder = scope.ServiceProvider.GetRequiredService<IDataSeeder>();
+    await seeder.SeedAsync();
+
+     var services = scope.ServiceProvider;
     var rootContext = services.GetRequiredService<RootDbContext>();
+
     var tenantInitializer = services.GetRequiredService<ITenantDatabaseInitializer>();
 
     // Ensure root database is created and migrated
@@ -173,6 +181,5 @@ using (var scope = app.Services.CreateScope())
         }
     }
 }
-
 app.Run();
 
