@@ -11,6 +11,9 @@ namespace starterkit.Application.Persistence
         DbSet<Address> Addresses { get; set; }
         DbSet<RefreshToken> RefreshTokens { get; set; }
         DbSet<Role> Roles { get; set; }
+        DbSet<Permission> Permissions { get; set; }
+        DbSet<UserRole> UserRoles { get; set; }
+        DbSet<RolePermission> RolePermissions { get; set; }
         DbSet<TEntity> Set<TEntity>() where TEntity : class;
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }

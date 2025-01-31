@@ -35,8 +35,14 @@ namespace starterkit.Infrastructure.Data.TenantDb
                 // Ensure database is migrated
                 await _context.Database.MigrateAsync();
 
-                // Seed default roles first
+                // Seed default permissions first
+                await SeedDefaultPermissionsAsync();
+                
+                // Seed default roles
                 await SeedDefaultRolesAsync();
+
+                // Assign default permissions to roles
+                await AssignDefaultPermissionsToRolesAsync();
 
                 if (!await _context.Users.AnyAsync())
                 {
@@ -124,6 +130,78 @@ namespace starterkit.Infrastructure.Data.TenantDb
             {
                 throw new Exception($"Error seeding tenant database {_tenantId}: {ex.Message}", ex);
             }
+        }
+
+        private async Task SeedDefaultPermissionsAsync()
+        {
+            if (!await _context.Permissions.AnyAsync())
+            {
+                var defaultPermissions = new[]
+                {
+                    // User Management
+                    new Permission { Name = "View Users", Module = "Users", Action = "View", IsDefault = true },
+                    new Permission { Name = "Create User", Module = "Users", Action = "Create", IsDefault = true },
+                    new Permission { Name = "Edit User", Module = "Users", Action = "Edit", IsDefault = true },
+                    new Permission { Name = "Delete User", Module = "Users", Action = "Delete", IsDefault = true },
+
+                    // Role Management
+                    new Permission { Name = "View Roles", Module = "Roles", Action = "View", IsDefault = true },
+                    new Permission { Name = "Create Role", Module = "Roles", Action = "Create", IsDefault = true },
+                    new Permission { Name = "Edit Role", Module = "Roles", Action = "Edit", IsDefault = true },
+                    new Permission { Name = "Delete Role", Module = "Roles", Action = "Delete", IsDefault = true },
+
+                    // Permission Management
+                    new Permission { Name = "View Permissions", Module = "Permissions", Action = "View", IsDefault = true },
+                    new Permission { Name = "Assign Permissions", Module = "Permissions", Action = "Assign", IsDefault = true }
+                };
+
+                foreach (var permission in defaultPermissions)
+                {
+                    permission.CreatedBy = Guid.Empty; // System
+                }
+
+                await _context.Permissions.AddRangeAsync(defaultPermissions);
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        private async Task AssignDefaultPermissionsToRolesAsync()
+        {
+            var adminRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == "Tenant Admin");
+            var userRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == "User");
+            
+            if (adminRole != null && !await _context.RolePermissions.AnyAsync(rp => rp.RoleId == adminRole.Id))
+            {
+                // Assign all permissions to admin role
+                var allPermissions = await _context.Permissions.ToListAsync();
+                var adminPermissions = allPermissions.Select(p => new RolePermission
+                {
+                    RoleId = adminRole.Id,
+                    PermissionId = p.Id,
+                    CreatedBy = Guid.Empty
+                });
+
+                await _context.RolePermissions.AddRangeAsync(adminPermissions);
+            }
+
+            if (userRole != null && !await _context.RolePermissions.AnyAsync(rp => rp.RoleId == userRole.Id))
+            {
+                // Assign view permissions to user role
+                var viewPermissions = await _context.Permissions
+                    .Where(p => p.Action == "View")
+                    .ToListAsync();
+
+                var userPermissions = viewPermissions.Select(p => new RolePermission
+                {
+                    RoleId = userRole.Id,
+                    PermissionId = p.Id,
+                    CreatedBy = Guid.Empty
+                });
+
+                await _context.RolePermissions.AddRangeAsync(userPermissions);
+            }
+
+            await _context.SaveChangesAsync();
         }
 
         private async Task SeedDefaultRolesAsync()
