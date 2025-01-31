@@ -1,14 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using starterkit.Application.Modules.Global.TenantManagement.Interfaces;
 using starterkit.Core.Modules.Global;
 using starterkit.Application.Persistence;
-using BCrypt.Net;
-using starterkit.Core.Enums;
-using starterkit.Infrastructure.Persistence.TenantDb;
-using starterkit.Infrastructure.Persistence.RootDb;
+using starterkit.Infrastructure.Data;
 using starterkit.Infrastructure.Data.TenantDb;
-
 
 namespace starterkit.Infrastructure.Services
 {
@@ -16,40 +13,53 @@ namespace starterkit.Infrastructure.Services
     {
         private readonly IDbContextFactory<DbContext> _dbContextFactory;
         private readonly IRootDbContext _rootContext;
-        private readonly IPasswordHashService _passwordHashService;
+        private readonly IServiceProvider _serviceProvider;
+        private readonly ILogger<TenantDatabaseInitializer> _logger;
 
         public TenantDatabaseInitializer(
             IDbContextFactory<DbContext> dbContextFactory,
             IRootDbContext rootContext,
-            IPasswordHashService passwordHashService)
+            IServiceProvider serviceProvider,
+            ILogger<TenantDatabaseInitializer> logger)
         {
             _dbContextFactory = dbContextFactory;
             _rootContext = rootContext;
-            _passwordHashService = passwordHashService;
+            _serviceProvider = serviceProvider;
+            _logger = logger;
         }
 
         public async Task InitializeTenantDatabaseAsync(Tenant tenant)
         {
-            // Create a new DbContext for the tenant
-            using var context = _dbContextFactory.CreateDbContext();
+            try
+            {
+                _logger.LogInformation("Starting database initialization for tenant {TenantId}", tenant.DatabaseName);
+                
+                // Create a new DbContext for the tenant
+                using var context = _dbContextFactory.CreateDbContext();
 
-            // Set the connection string
-            context.Database.SetConnectionString(tenant.ConnectionString);
+                // Set the connection string
+                context.Database.SetConnectionString(tenant.ConnectionString);
 
-            // Ensure database is created
-            await context.Database.EnsureCreatedAsync();
+                // Ensure database is created
+                await context.Database.EnsureCreatedAsync();
 
-            // Apply migrations
-            await context.Database.MigrateAsync();
+                // Apply migrations
+                await context.Database.MigrateAsync();
 
-            // Create and run the tenant seeder
-            var tenantSeeder = new TenantDbSeeder(
-                (TenantDbContext)context,
-                (RootDbContext)_rootContext,
-                _passwordHashService,
-                tenant.DatabaseName);
+                // Get the seeder factory
+                var seederFactory = _serviceProvider.GetRequiredService<Func<string, IDataSeeder>>();
+                
+                // Create and run the seeder with the tenant database name
+                var seeder = seederFactory(tenant.DatabaseName);
+                await seeder.SeedAsync();
 
-            await tenantSeeder.SeedAsync();
+                _logger.LogInformation("Successfully initialized database for tenant {TenantId}", tenant.DatabaseName);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to initialize database for tenant {TenantId}", tenant.DatabaseName);
+                throw;
+            }
         }
 
         public async Task InitializeTenantDatabaseAsync(string databaseName)

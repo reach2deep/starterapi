@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using starterkit.Core.Enums;
 using starterkit.Core.Modules.Global;
 using starterkit.Core.Modules.Tenant;
@@ -14,17 +15,20 @@ namespace starterkit.Infrastructure.Data.TenantDb
         private readonly TenantDbContext _context;
         private readonly RootDbContext _rootContext;
         private readonly IPasswordHashService _passwordHashService;
+        private readonly ILogger<TenantDbSeeder> _logger;
         private readonly string _tenantId;
 
         public TenantDbSeeder(
             TenantDbContext context,
             RootDbContext rootContext,
             IPasswordHashService passwordHashService,
+            ILogger<TenantDbSeeder> logger,
             string tenantId)
         {
             _context = context;
             _rootContext = rootContext;
             _passwordHashService = passwordHashService;
+            _logger = logger;
             _tenantId = tenantId;
         }
 
@@ -32,20 +36,27 @@ namespace starterkit.Infrastructure.Data.TenantDb
         {
             try
             {
+                _logger.LogInformation("Starting database seeding for tenant {TenantId}", _tenantId);
+
                 // Ensure database is migrated
+                _logger.LogInformation("Applying migrations for tenant {TenantId}", _tenantId);
                 await _context.Database.MigrateAsync();
 
                 // Seed default permissions first
+                _logger.LogInformation("Seeding default permissions for tenant {TenantId}", _tenantId);
                 await SeedDefaultPermissionsAsync();
                 
                 // Seed default roles
+                _logger.LogInformation("Seeding default roles for tenant {TenantId}", _tenantId);
                 await SeedDefaultRolesAsync();
 
                 // Assign default permissions to roles
+                _logger.LogInformation("Assigning default permissions to roles for tenant {TenantId}", _tenantId);
                 await AssignDefaultPermissionsToRolesAsync();
 
                 if (!await _context.Users.AnyAsync())
                 {
+                    _logger.LogInformation("Seeding users for tenant {TenantId}", _tenantId);
                     // Get tenant info from root database
                     var tenant = await _rootContext.Tenants
                         .FirstOrDefaultAsync(t => t.DatabaseName == _tenantId);
@@ -125,83 +136,124 @@ namespace starterkit.Infrastructure.Data.TenantDb
                     await _rootContext.TenantUserMappings.AddAsync(mapping);
                     await _rootContext.SaveChangesAsync();
                 }
+
+                _logger.LogInformation("Successfully completed seeding for tenant {TenantId}", _tenantId);
+            }
+            catch (DbUpdateException ex)
+            {
+                _logger.LogError(ex, "Database update error while seeding tenant {TenantId}. Error: {Message}, Inner Error: {InnerMessage}", 
+                    _tenantId, ex.Message, ex.InnerException?.Message);
+                throw new Exception($"Error seeding tenant database {_tenantId}: {ex.Message}", ex);
             }
             catch (Exception ex)
             {
-                throw new Exception($"Error seeding tenant database {_tenantId}: {ex.Message}", ex);
+                _logger.LogError(ex, "Error while seeding tenant {TenantId}. Error: {Message}", _tenantId, ex.Message);
+                throw;
             }
         }
 
         private async Task SeedDefaultPermissionsAsync()
         {
-            if (!await _context.Permissions.AnyAsync())
+            try
             {
-                var defaultPermissions = new[]
+                if (!await _context.Permissions.AnyAsync())
                 {
-                    // User Management
-                    new Permission { Name = "View Users", Module = "Users", Action = "View", IsDefault = true },
-                    new Permission { Name = "Create User", Module = "Users", Action = "Create", IsDefault = true },
-                    new Permission { Name = "Edit User", Module = "Users", Action = "Edit", IsDefault = true },
-                    new Permission { Name = "Delete User", Module = "Users", Action = "Delete", IsDefault = true },
+                    _logger.LogInformation("Creating default permissions for tenant {TenantId}", _tenantId);
+                    var defaultPermissions = new[]
+                    {
+                        // User Management
+                        new Permission { Name = "View Users", Module = "Users", Action = "View", IsDefault = true, Description = "Allows viewing the list of users and user details" },
+                        new Permission { Name = "Create User", Module = "Users", Action = "Create", IsDefault = true, Description = "Allows creating new users in the system" },
+                        new Permission { Name = "Edit User", Module = "Users", Action = "Edit", IsDefault = true, Description = "Allows editing existing user information" },
+                        new Permission { Name = "Delete User", Module = "Users", Action = "Delete", IsDefault = true, Description = "Allows deleting users from the system" },
 
-                    // Role Management
-                    new Permission { Name = "View Roles", Module = "Roles", Action = "View", IsDefault = true },
-                    new Permission { Name = "Create Role", Module = "Roles", Action = "Create", IsDefault = true },
-                    new Permission { Name = "Edit Role", Module = "Roles", Action = "Edit", IsDefault = true },
-                    new Permission { Name = "Delete Role", Module = "Roles", Action = "Delete", IsDefault = true },
+                        // Role Management
+                        new Permission { Name = "View Roles", Module = "Roles", Action = "View", IsDefault = true, Description = "Allows viewing the list of roles and role details" },
+                        new Permission { Name = "Create Role", Module = "Roles", Action = "Create", IsDefault = true, Description = "Allows creating new roles in the system" },
+                        new Permission { Name = "Edit Role", Module = "Roles", Action = "Edit", IsDefault = true, Description = "Allows editing existing role information" },
+                        new Permission { Name = "Delete Role", Module = "Roles", Action = "Delete", IsDefault = true, Description = "Allows deleting roles from the system" },
 
-                    // Permission Management
-                    new Permission { Name = "View Permissions", Module = "Permissions", Action = "View", IsDefault = true },
-                    new Permission { Name = "Assign Permissions", Module = "Permissions", Action = "Assign", IsDefault = true }
-                };
+                        // Permission Management
+                        new Permission { Name = "View Permissions", Module = "Permissions", Action = "View", IsDefault = true, Description = "Allows viewing the list of permissions and their details" },
+                        new Permission { Name = "Assign Permissions", Module = "Permissions", Action = "Assign", IsDefault = true, Description = "Allows assigning permissions to roles" }
+                    };
 
-                foreach (var permission in defaultPermissions)
-                {
-                    permission.CreatedBy = Guid.Empty; // System
+                    foreach (var permission in defaultPermissions)
+                    {
+                        permission.CreatedBy = Guid.Empty;
+                        _logger.LogDebug("Adding permission: {PermissionName} ({Module}.{Action})", 
+                            permission.Name, permission.Module, permission.Action);
+                    }
+
+                    await _context.Permissions.AddRangeAsync(defaultPermissions);
+                    await _context.SaveChangesAsync();
+                    _logger.LogInformation("Successfully added {Count} default permissions", defaultPermissions.Length);
                 }
-
-                await _context.Permissions.AddRangeAsync(defaultPermissions);
-                await _context.SaveChangesAsync();
+                else
+                {
+                    _logger.LogInformation("Permissions already exist for tenant {TenantId}, skipping", _tenantId);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error seeding permissions for tenant {TenantId}", _tenantId);
+                throw;
             }
         }
 
         private async Task AssignDefaultPermissionsToRolesAsync()
         {
-            var adminRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == "Tenant Admin");
-            var userRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == "User");
-            
-            if (adminRole != null && !await _context.RolePermissions.AnyAsync(rp => rp.RoleId == adminRole.Id))
+            try
             {
-                // Assign all permissions to admin role
-                var allPermissions = await _context.Permissions.ToListAsync();
-                var adminPermissions = allPermissions.Select(p => new RolePermission
+                var adminRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == "Tenant Admin");
+                var userRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == "User");
+
+                if (adminRole == null)
                 {
-                    RoleId = adminRole.Id,
-                    PermissionId = p.Id,
-                    CreatedBy = Guid.Empty
-                });
+                    _logger.LogWarning("Admin role not found for tenant {TenantId}", _tenantId);
+                    return;
+                }
 
-                await _context.RolePermissions.AddRangeAsync(adminPermissions);
+                if (!await _context.RolePermissions.AnyAsync(rp => rp.RoleId == adminRole.Id))
+                {
+                    _logger.LogInformation("Assigning all permissions to admin role for tenant {TenantId}", _tenantId);
+                    var allPermissions = await _context.Permissions.ToListAsync();
+                    var adminPermissions = allPermissions.Select(p => new RolePermission
+                    {
+                        RoleId = adminRole.Id,
+                        PermissionId = p.Id,
+                        CreatedBy = Guid.Empty
+                    });
+
+                    await _context.RolePermissions.AddRangeAsync(adminPermissions);
+                    _logger.LogInformation("Added {Count} permissions to admin role", allPermissions.Count);
+                }
+
+                if (userRole != null && !await _context.RolePermissions.AnyAsync(rp => rp.RoleId == userRole.Id))
+                {
+                    _logger.LogInformation("Assigning view permissions to user role for tenant {TenantId}", _tenantId);
+                    var viewPermissions = await _context.Permissions
+                        .Where(p => p.Action == "View")
+                        .ToListAsync();
+
+                    var userPermissions = viewPermissions.Select(p => new RolePermission
+                    {
+                        RoleId = userRole.Id,
+                        PermissionId = p.Id,
+                        CreatedBy = Guid.Empty
+                    });
+
+                    await _context.RolePermissions.AddRangeAsync(userPermissions);
+                    _logger.LogInformation("Added {Count} view permissions to user role", viewPermissions.Count);
+                }
+
+                await _context.SaveChangesAsync();
             }
-
-            if (userRole != null && !await _context.RolePermissions.AnyAsync(rp => rp.RoleId == userRole.Id))
+            catch (Exception ex)
             {
-                // Assign view permissions to user role
-                var viewPermissions = await _context.Permissions
-                    .Where(p => p.Action == "View")
-                    .ToListAsync();
-
-                var userPermissions = viewPermissions.Select(p => new RolePermission
-                {
-                    RoleId = userRole.Id,
-                    PermissionId = p.Id,
-                    CreatedBy = Guid.Empty
-                });
-
-                await _context.RolePermissions.AddRangeAsync(userPermissions);
+                _logger.LogError(ex, "Error assigning permissions to roles for tenant {TenantId}", _tenantId);
+                throw;
             }
-
-            await _context.SaveChangesAsync();
         }
 
         private async Task SeedDefaultRolesAsync()
