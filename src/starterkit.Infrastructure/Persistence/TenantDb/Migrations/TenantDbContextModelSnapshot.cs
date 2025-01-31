@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using starterkit.Infrastructure.Persistence.TenantDb;
 
-
 #nullable disable
 
 namespace starterkit.Infrastructure.Data.TenantDb.Migrations
@@ -23,7 +22,7 @@ namespace starterkit.Infrastructure.Data.TenantDb.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("starterkit.Core.Entities.Tenant.Address", b =>
+            modelBuilder.Entity("starterkit.Core.Modules.Tenant.Address", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -73,7 +72,7 @@ namespace starterkit.Infrastructure.Data.TenantDb.Migrations
                     b.ToTable("Addresses", (string)null);
                 });
 
-            modelBuilder.Entity("starterkit.Core.Entities.Tenant.RefreshToken", b =>
+            modelBuilder.Entity("starterkit.Core.Modules.Tenant.RefreshToken", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -128,7 +127,46 @@ namespace starterkit.Infrastructure.Data.TenantDb.Migrations
                     b.ToTable("RefreshTokens", (string)null);
                 });
 
-            modelBuilder.Entity("starterkit.Core.Entities.Tenant.User", b =>
+            modelBuilder.Entity("starterkit.Core.Modules.Tenant.Role", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDefault")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Roles", (string)null);
+                });
+
+            modelBuilder.Entity("starterkit.Core.Modules.Tenant.User", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -178,7 +216,7 @@ namespace starterkit.Infrastructure.Data.TenantDb.Migrations
                     b.ToTable("Users", (string)null);
                 });
 
-            modelBuilder.Entity("starterkit.Core.Entities.Tenant.UserProfile", b =>
+            modelBuilder.Entity("starterkit.Core.Modules.Tenant.UserProfile", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -224,9 +262,9 @@ namespace starterkit.Infrastructure.Data.TenantDb.Migrations
                     b.ToTable("UserProfiles", (string)null);
                 });
 
-            modelBuilder.Entity("starterkit.Core.Entities.Tenant.RefreshToken", b =>
+            modelBuilder.Entity("starterkit.Core.Modules.Tenant.RefreshToken", b =>
                 {
-                    b.HasOne("starterkit.Core.Entities.Tenant.User", "User")
+                    b.HasOne("starterkit.Core.Modules.Tenant.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -235,16 +273,16 @@ namespace starterkit.Infrastructure.Data.TenantDb.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("starterkit.Core.Entities.Tenant.UserProfile", b =>
+            modelBuilder.Entity("starterkit.Core.Modules.Tenant.UserProfile", b =>
                 {
-                    b.HasOne("starterkit.Core.Entities.Tenant.Address", "Address")
+                    b.HasOne("starterkit.Core.Modules.Tenant.Address", "Address")
                         .WithOne()
-                        .HasForeignKey("starterkit.Core.Entities.Tenant.UserProfile", "AddressId")
+                        .HasForeignKey("starterkit.Core.Modules.Tenant.UserProfile", "AddressId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.HasOne("starterkit.Core.Entities.Tenant.User", "User")
+                    b.HasOne("starterkit.Core.Modules.Tenant.User", "User")
                         .WithOne("Profile")
-                        .HasForeignKey("starterkit.Core.Entities.Tenant.UserProfile", "UserId")
+                        .HasForeignKey("starterkit.Core.Modules.Tenant.UserProfile", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -253,7 +291,7 @@ namespace starterkit.Infrastructure.Data.TenantDb.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("starterkit.Core.Entities.Tenant.User", b =>
+            modelBuilder.Entity("starterkit.Core.Modules.Tenant.User", b =>
                 {
                     b.Navigation("Profile")
                         .IsRequired();
