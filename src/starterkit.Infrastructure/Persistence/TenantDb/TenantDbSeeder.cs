@@ -3,6 +3,8 @@ using starterkit.Core.Enums;
 using starterkit.Core.Modules.Global;
 using starterkit.Core.Modules.Tenant;
 using starterkit.Infrastructure.Data.RootDb;
+using starterkit.Infrastructure.Persistence.RootDb;
+using starterkit.Infrastructure.Persistence.TenantDb;
 using starterkit.Infrastructure.Services;
 
 namespace starterkit.Infrastructure.Data.TenantDb
@@ -32,6 +34,9 @@ namespace starterkit.Infrastructure.Data.TenantDb
             {
                 // Ensure database is migrated
                 await _context.Database.MigrateAsync();
+
+                // Seed default roles first
+                await SeedDefaultRolesAsync();
 
                 if (!await _context.Users.AnyAsync())
                 {
@@ -118,6 +123,33 @@ namespace starterkit.Infrastructure.Data.TenantDb
             catch (Exception ex)
             {
                 throw new Exception($"Error seeding tenant database {_tenantId}: {ex.Message}", ex);
+            }
+        }
+
+        private async Task SeedDefaultRolesAsync()
+        {
+            if (!await _context.Roles.AnyAsync())
+            {
+                var defaultRoles = new[]
+                {
+                    new Role
+                    {
+                        Name = "Tenant Admin",
+                        Description = "Tenant administrator role with full access",
+                        IsDefault = true,
+                        CreatedBy = Guid.Empty
+                    },
+                    new Role
+                    {
+                        Name = "User",
+                        Description = "Regular user role with standard access",
+                        IsDefault = true,
+                        CreatedBy = Guid.Empty
+                    }
+                };
+
+                await _context.Roles.AddRangeAsync(defaultRoles);
+                await _context.SaveChangesAsync();
             }
         }
 

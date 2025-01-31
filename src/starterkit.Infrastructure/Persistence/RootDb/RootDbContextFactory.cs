@@ -1,8 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
+using starterkit.Infrastructure.Persistence.RootDb;
 
-namespace starterkit.Infrastructure.Data.RootDb
+namespace starterkit.Infrastructure.Persistence.RootDb
 {
     public class RootDbContextFactory : IDesignTimeDbContextFactory<RootDbContext>
     {

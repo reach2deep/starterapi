@@ -2,8 +2,9 @@ using Microsoft.EntityFrameworkCore;
 using starterkit.Application.Persistence;
 using starterkit.Core.Modules.Tenant;
 using starterkit.Infrastructure.Data.TenantDb.Configurations;
+using starterkit.Infrastructure.Persistence.TenantDb.Configurations;
 
-namespace starterkit.Infrastructure.Data.TenantDb
+namespace starterkit.Infrastructure.Persistence.TenantDb
 {
     public class TenantDbContext : DbContext, ITenantDbContext
     {
@@ -18,6 +19,7 @@ namespace starterkit.Infrastructure.Data.TenantDb
         public DbSet<UserProfile> UserProfiles { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<Address> Addresses { get; set; }
+        public DbSet<Role> Roles { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -28,6 +30,7 @@ namespace starterkit.Infrastructure.Data.TenantDb
             modelBuilder.ApplyConfiguration(new UserProfileConfiguration());
             modelBuilder.ApplyConfiguration(new RefreshTokenConfiguration());
             modelBuilder.ApplyConfiguration(new AddressConfiguration());
+            modelBuilder.ApplyConfiguration(new RoleConfiguration());
         }
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

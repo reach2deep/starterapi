@@ -13,6 +13,8 @@ using starterkit.Infrastructure.Data;
 using starterkit.Infrastructure.Data.RootDb;
 using starterkit.Infrastructure.Data.TenantDb;
 using starterkit.Infrastructure.Extensions;
+using starterkit.Infrastructure.Persistence.RootDb;
+using starterkit.Infrastructure.Persistence.TenantDb;
 using starterkit.Infrastructure.Services;
 using starterkit.Infrastructure.Stores;
 using System.Text;

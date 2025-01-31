@@ -3,7 +3,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 using Microsoft.AspNetCore.Http;
-using starterkit.Infrastructure.Data.RootDb;
 using starterkit.Application.Persistence;
 using starterkit.Infrastructure.Stores;
 using starterkit.Infrastructure.Data.TenantDb;
@@ -17,6 +16,8 @@ using n.Modules.Global.Auth.Services;
 using starterkit.Application.Modules.Global.Auth.Mappings;
 using starterkit.Application.Modules.Global.TenantManagement.Interfaces;
 using starterkit.Application.Modules.Global.TenantManagement.Validators;
+using starterkit.Infrastructure.Persistence.RootDb;
+using starterkit.Infrastructure.Persistence.TenantDb;
 
 namespace starterkit.Infrastructure.Extensions
 {

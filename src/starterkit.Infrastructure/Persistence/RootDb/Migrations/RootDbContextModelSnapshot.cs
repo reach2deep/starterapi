@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using starterkit.Infrastructure.Data.RootDb;
+using starterkit.Infrastructure.Persistence.RootDb;
 
 #nullable disable
 
@@ -78,6 +78,53 @@ namespace starterkit.Infrastructure.Persistence.RootDb.Migrations
                         .IsUnique();
 
                     b.ToTable("GlobalUsers", (string)null);
+                });
+
+            modelBuilder.Entity("starterkit.Core.Modules.Global.LoginActivity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("IpAddress")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsSuccessful")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("LoginTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("UserAgent")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("LoginActivities", (string)null);
                 });
 
             modelBuilder.Entity("starterkit.Core.Modules.Global.Tenant", b =>
@@ -175,6 +222,17 @@ namespace starterkit.Infrastructure.Persistence.RootDb.Migrations
                         .IsUnique();
 
                     b.ToTable("TenantUserMappings", (string)null);
+                });
+
+            modelBuilder.Entity("starterkit.Core.Modules.Global.LoginActivity", b =>
+                {
+                    b.HasOne("starterkit.Core.Modules.Global.GlobalUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("starterkit.Core.Modules.Global.TenantUserMapping", b =>
