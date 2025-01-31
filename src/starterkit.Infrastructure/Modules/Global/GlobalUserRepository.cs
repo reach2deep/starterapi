@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using starterkit.Application.Modules.Global.Auth.Interfaces;
+using starterkit.Core.Modules.Global.Auth.Interfaces.Repositories;
 using starterkit.Core.Modules.Global;
 using starterkit.Infrastructure.Persistence.RootDb;
 
@@ -45,6 +45,36 @@ namespace starterkit.Infrastructure.Data.RootDb.Repositories
                     t.UserId == userId &&
                     t.IsActive &&
                     t.Tenant.Status == Core.Enums.TenantStatus.Active);
+        }
+
+        public Task<IEnumerable<GlobalUser>> GetAllAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<GlobalUser> CreateAsync(GlobalUser user)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<GlobalUser> UpdateAsync(GlobalUser user)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> DeleteAsync(Guid id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> ExistsAsync(Guid id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> ExistsByEmailAsync(string email)
+        {
+            throw new NotImplementedException();
         }
     }
 }

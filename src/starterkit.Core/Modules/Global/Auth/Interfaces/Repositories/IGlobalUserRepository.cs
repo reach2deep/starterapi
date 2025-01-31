@@ -1,9 +1,8 @@
-
 using starterkit.Core.Modules.Global;
 
-namespace starterkit.Application.Modules.Global.Auth.Interfaces
+namespace starterkit.Core.Modules.Global.Auth.Interfaces.Repositories
 {
-    public interface IGlobalUserRepository
+     public interface IGlobalUserRepository
     {
         Task<GlobalUser?> GetByEmailAsync(string email);
         Task<GlobalUser?> GetByIdAsync(Guid id);

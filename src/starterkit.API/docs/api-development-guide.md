@@ -3,6 +3,41 @@
 ## Overview
 This guide provides a structured approach to implementing new API features in the starterkit project following clean architecture principles. Each section includes a checklist with scoring criteria.
 
+## Module Organization [10 points]
+### Feature Module Structure [10 points]
+- [ ] Feature has its own module folder (e.g., `PermissionManagement`) [2pts]
+- [ ] Consistent module structure across all layers:
+  ```
+  ├── Core
+  │   └── Modules
+  │       └── [Tenant/Global]
+  │           └── [FeatureModule]
+  │               ├── Entities
+  │               └── Interfaces
+  ├── Application
+  │   └── Modules
+  │       └── [Tenant/Global]
+  │           └── [FeatureModule]
+  │               ├── DTOs
+  │               ├── Services
+  │               ├── Interfaces
+  │               ├── Mappings
+  │               └── Validators
+  ├── Infrastructure
+  │   └── Modules
+  │       └── [Tenant/Global]
+  │           └── [FeatureModule]
+  │               └── Repositories
+  └── API
+      └── Controllers
+         └── Modules
+              └── V1
+                  └── [FeatureModule]
+  ``` 
+[3pts]
+- [ ] Proper namespace hierarchy matching folder structure [3pts]
+- [ ] Related components grouped within feature module [2pts]
+
 ## 1. Core (Domain) Layer [25 points]
 ### Entity Implementation [15 points]
 - [ ] Entity placed in correct module folder (`Core/Modules/[ModuleName]`) [3pts]
@@ -75,6 +110,11 @@ This guide provides a structured approach to implementing new API features in th
 ## Example Implementation Review
 Using our Permission Management implementation as an example:
 
+### Module Organization ❌ [7/10]
+- Feature module structure exists but not consistently applied
+- Controller not in proper module folder (-2)
+- Repository interface not in feature module folder (-1)
+
 ### Core Layer ✅ [23/25]
 - Entity properly defined in Core layer
 - Repository interface with all necessary methods
@@ -128,4 +168,10 @@ Total Score: 97/100 ⭐⭐⭐⭐⭐
 7. ❌ Missing logging
 8. ❌ Tight coupling between layers
 9. ❌ Missing documentation
-10. ❌ Inconsistent response formats 
+10. ❌ Inconsistent response formats
+
+## Areas for Improvement:
+1. Move `PermissionController.cs` to `Controllers/V1/PermissionManagement/`
+2. Move `IPermissionRepository.cs` to `Core/Modules/Tenant/PermissionManagement/Interfaces/`
+3. Ensure consistent module structure across all layers
+4. Update namespaces to reflect new folder structure 

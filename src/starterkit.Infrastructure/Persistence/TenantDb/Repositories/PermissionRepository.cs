@@ -1,8 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using starterkit.Core.Modules.Tenant;
-using starterkit.Core.Modules.Tenant.Interfaces.Repositories;
+
 using starterkit.Application.Persistence;
+using starterkit.Core.Modules.Tenant.PermissionManagement.Interfaces;
 
 namespace starterkit.Infrastructure.Persistence.TenantDb.Repositories
 {

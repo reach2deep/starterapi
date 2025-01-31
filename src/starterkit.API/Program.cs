@@ -18,7 +18,8 @@ using starterkit.Infrastructure.Persistence.TenantDb;
 using starterkit.Infrastructure.Services;
 using starterkit.Infrastructure.Stores;
 using System.Text;
-
+using starterkit.Core.Modules.Global.Auth.Interfaces.Repositories;
+using starterkit.Core.Modules.Tenant.UserManagement.Interfaces.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
