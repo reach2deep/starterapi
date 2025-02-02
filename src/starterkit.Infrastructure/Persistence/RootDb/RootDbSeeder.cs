@@ -86,7 +86,7 @@ namespace starterkit.Infrastructure.Data.RootDb
                         {
                             TenantId = tenant.Id,
                             UserId = rootAdmin.Id,
-                            Role = "Admin", // Root admin gets admin role in all tenants
+                            Role = "RootAdmin", // Root admin should have RootAdmin role in all tenants
                             CreatedBy = Guid.Empty // System
                         };
                         await _context.Set<TenantUserMapping>().AddAsync(mapping);

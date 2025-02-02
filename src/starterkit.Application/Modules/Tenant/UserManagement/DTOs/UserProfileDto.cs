@@ -4,6 +4,8 @@ namespace starterkit.Application.Modules.Tenant.UserManagement.DTOs
     {
         public Guid Id { get; set; }
         public Guid UserId { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
         public DateTime? DateOfBirth { get; set; }
         public string? ProfilePictureUrl { get; set; }
         public DateTime CreatedAt { get; set; }
@@ -13,6 +15,8 @@ namespace starterkit.Application.Modules.Tenant.UserManagement.DTOs
 
     public class UpdateUserProfileRequestDto
     {
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
         public DateTime? DateOfBirth { get; set; }
         public string? ProfilePictureUrl { get; set; }
         public UpdateAddressDto? Address { get; set; }

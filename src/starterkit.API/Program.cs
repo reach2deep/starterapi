@@ -146,6 +146,7 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+
 app.UseHttpsRedirection();
 
 // Add health checks before exception handling
