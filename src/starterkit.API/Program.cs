@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using n.Modules.Global.Auth.Services;
 using starterkit.API.Middlewares;
+using starterkit.API.DependencyInjection;
 using starterkit.Application.Modules.Global.Auth.Interfaces;
 using starterkit.Application.Modules.Global.TenantManagement.Interfaces;
 using starterkit.Application.Modules.Tenant.UserManagement.Interfaces;
@@ -126,6 +127,8 @@ builder.Services.AddScoped<ITenantResolver, TenantResolver>();
 
 // builder.Services.AddApplicationServices();
 
+builder.Services.AddCustomHealthChecks();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -137,7 +140,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// Add global exception handling first
+// Add health checks before exception handling
+app.UseCustomHealthChecks();
+
+// Add global exception handling
 app.UseGlobalExceptionHandling();
 
 // Add authentication & authorization first
