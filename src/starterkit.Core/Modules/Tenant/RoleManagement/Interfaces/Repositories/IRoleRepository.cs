@@ -61,5 +61,15 @@ namespace starterkit.Core.Modules.Tenant.RoleManagement.Interfaces.Repositories
         /// Gets all permissions for a role
         /// </summary>
         Task<IEnumerable<Permission>> GetPermissionsAsync(Guid roleId);
+
+        /// <summary>
+        /// Creates a new user role mapping
+        /// </summary>
+        Task<UserRole> CreateUserRoleAsync(UserRole userRole);
+
+        /// <summary>
+        /// Removes user role mappings
+        /// </summary>
+        Task RemoveUserRolesAsync(Guid userId, IEnumerable<Guid> roleIds);
     }
 } 

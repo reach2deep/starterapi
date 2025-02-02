@@ -338,6 +338,19 @@ rules:
       - "Proper tenant isolation"
       - "Secure configuration management"
 
+  # API Response Pattern Rules
+  - name: "API Response Methods"
+    pattern: "*.cs"
+    rules:
+      - "ALWAYS use CreateSuccess() for successful responses"
+      - "ALWAYS use CreateError() for error responses"
+      - "NEVER use Success(), Error(), or NotFound() directly"
+      - "Error responses must include error code and message"
+      - "Success responses must include proper typed data"
+      - "Maintain consistent response pattern across all modules"
+      - "Use strongly typed ApiResponse<T> for all service methods"
+      - "Document all possible error codes in XML comments"
+
 Code Style:
 - Use async/await for asynchronous operations
 - Use consistent naming conventions for all modules

@@ -57,6 +57,24 @@
 - [ ] Business logic properly encapsulated
 - [ ] Follows Single Responsibility Principle
 
+### API Response Pattern
+- [ ] All service methods return ApiResponse<T>
+- [ ] Response methods use correct naming:
+  - [ ] CreateSuccess() for successful responses
+  - [ ] CreateError() for error responses
+  - [ ] NEVER use Success(), Error(), or NotFound() directly
+- [ ] Error responses include:
+  - [ ] Descriptive error message
+  - [ ] Appropriate error code
+  - [ ] Optional details when relevant
+- [ ] Success responses include:
+  - [ ] Properly typed data
+  - [ ] Mapped to correct response DTO
+- [ ] Consistent error codes across module
+- [ ] XML documentation for all possible error codes
+- [ ] Proper null handling in response creation
+- [ ] No mixing of response patterns within service
+
 ### Validators
 - [ ] Placed in `Modules/[ModuleName]/Validators`
 - [ ] One validator per request DTO

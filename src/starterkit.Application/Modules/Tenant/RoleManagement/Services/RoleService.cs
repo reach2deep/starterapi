@@ -37,255 +37,181 @@ namespace starterkit.Application.Modules.Tenant.RoleManagement.Services
 
         public async Task<ApiResponse<RoleResponse>> GetByIdAsync(Guid id)
         {
-            try
-            {
-                var role = await _roleRepository.GetByIdAsync(id);
-                if (role == null)
-                {
-                    return ApiResponse<RoleResponse>.CreateError("Role not found");
-                }
+            var role = await _roleRepository.GetByIdAsync(id);
+            if (role == null)
+                return ApiResponse<RoleResponse>.CreateError("Role not found", "NOT_FOUND");
 
-                var response = _mapper.Map<RoleResponse>(role);
-                return ApiResponse<RoleResponse>.CreateSuccess(response);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting role by ID {Id}", id);
-                return ApiResponse<RoleResponse>.CreateError("Error getting role");
-            }
+            var response = _mapper.Map<RoleResponse>(role);
+            return ApiResponse<RoleResponse>.CreateSuccess(response);
         }
 
         public async Task<ApiResponse<IEnumerable<RoleResponse>>> GetAllAsync()
         {
-            try
-            {
-                var roles = await _roleRepository.GetAllAsync();
-                var response = _mapper.Map<IEnumerable<RoleResponse>>(roles);
-                return ApiResponse<IEnumerable<RoleResponse>>.CreateSuccess(response);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting all roles");
-                return ApiResponse<IEnumerable<RoleResponse>>.CreateError("Error getting roles");
-            }
+            var roles = await _roleRepository.GetAllAsync();
+            var response = _mapper.Map<IEnumerable<RoleResponse>>(roles);
+            return ApiResponse<IEnumerable<RoleResponse>>.CreateSuccess(response);
         }
 
         public async Task<ApiResponse<PagedResponse<RoleResponse>>> GetPagedAsync(int pageNumber, int pageSize)
         {
-            try
-            {
-                var (roles, totalCount) = await _roleRepository.GetPagedAsync(pageNumber, pageSize);
-                var response = _mapper.Map<IEnumerable<RoleResponse>>(roles);
-                var pagedResponse = new PagedResponse<RoleResponse>(response, totalCount, pageNumber, pageSize);
-                return ApiResponse<PagedResponse<RoleResponse>>.CreateSuccess(pagedResponse);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting paged roles");
-                return ApiResponse<PagedResponse<RoleResponse>>.CreateError("Error getting paged roles");
-            }
+            var (roles, totalCount) = await _roleRepository.GetPagedAsync(pageNumber, pageSize);
+            var mappedRoles = _mapper.Map<IEnumerable<RoleResponse>>(roles);
+            var response = new PagedResponse<RoleResponse>(mappedRoles, totalCount, pageNumber, pageSize);
+            return ApiResponse<PagedResponse<RoleResponse>>.CreateSuccess(response);
         }
 
         public async Task<ApiResponse<RoleResponse>> CreateAsync(CreateRoleRequest request)
         {
-            try
-            {
-                var validationResult = await _createValidator.ValidateAsync(request);
-                if (!validationResult.IsValid)
-                {
-                    return ApiResponse<RoleResponse>.CreateError("Validation failed", details: validationResult.Errors);
-                }
+            if (await _roleRepository.ExistsByNameAsync(request.Name))
+                return ApiResponse<RoleResponse>.CreateError($"Role with name '{request.Name}' already exists", "DUPLICATE_NAME");
 
-                var role = _mapper.Map<Role>(request);
-                var createdRole = await _roleRepository.CreateAsync(role);
-
-                if (request.PermissionIds.Any())
-                {
-                    await _roleRepository.AssignPermissionsAsync(createdRole.Id, request.PermissionIds);
-                }
-
-                var response = _mapper.Map<RoleResponse>(createdRole);
-                return ApiResponse<RoleResponse>.CreateSuccess(response);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error creating role");
-                return ApiResponse<RoleResponse>.CreateError("Error creating role");
-            }
+            var role = _mapper.Map<Role>(request);
+            role = await _roleRepository.CreateAsync(role);
+            var response = _mapper.Map<RoleResponse>(role);
+            return ApiResponse<RoleResponse>.CreateSuccess(response);
         }
 
         public async Task<ApiResponse<RoleResponse>> UpdateAsync(Guid id, UpdateRoleRequest request)
         {
-            try
-            {
-                var validationResult = await _updateValidator.ValidateAsync(request);
-                if (!validationResult.IsValid)
-                {
-                    return ApiResponse<RoleResponse>.CreateError("Validation failed", details: validationResult.Errors);
-                }
+            var role = await _roleRepository.GetByIdAsync(id);
+            if (role == null)
+                return ApiResponse<RoleResponse>.CreateError("Role not found", "NOT_FOUND");
 
-                var existingRole = await _roleRepository.GetByIdAsync(id);
-                if (existingRole == null)
-                {
-                    return ApiResponse<RoleResponse>.CreateError("Role not found");
-                }
+            if (role.Name != request.Name && await _roleRepository.ExistsByNameAsync(request.Name))
+                return ApiResponse<RoleResponse>.CreateError($"Role with name '{request.Name}' already exists", "DUPLICATE_NAME");
 
-                _mapper.Map(request, existingRole);
-                var updatedRole = await _roleRepository.UpdateAsync(existingRole);
-                var response = _mapper.Map<RoleResponse>(updatedRole);
-                return ApiResponse<RoleResponse>.CreateSuccess(response);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error updating role {Id}", id);
-                return ApiResponse<RoleResponse>.CreateError("Error updating role");
-            }
+            _mapper.Map(request, role);
+            role = await _roleRepository.UpdateAsync(role);
+            var response = _mapper.Map<RoleResponse>(role);
+            return ApiResponse<RoleResponse>.CreateSuccess(response);
         }
 
         public async Task<ApiResponse<bool>> DeleteAsync(Guid id)
         {
-            try
-            {
-                var role = await _roleRepository.GetByIdAsync(id);
-                if (role == null)
-                {
-                    return ApiResponse<bool>.CreateError("Role not found");
-                }
+            var role = await _roleRepository.GetByIdAsync(id);
+            if (role == null)
+                return ApiResponse<bool>.CreateError("Role not found", "NOT_FOUND");
 
-                if (role.IsDefault)
-                {
-                    return ApiResponse<bool>.CreateError("Cannot delete default role");
-                }
-
-                await _roleRepository.DeleteAsync(id);
-                return ApiResponse<bool>.CreateSuccess(true);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error deleting role {Id}", id);
-                return ApiResponse<bool>.CreateError("Error deleting role");
-            }
+            await _roleRepository.DeleteAsync(id);
+            return ApiResponse<bool>.CreateSuccess(true);
         }
 
         public async Task<ApiResponse<IEnumerable<RoleResponse>>> GetByUserIdAsync(Guid userId)
         {
-            try
-            {
-                var roles = await _roleRepository.GetByUserIdAsync(userId);
-                var response = _mapper.Map<IEnumerable<RoleResponse>>(roles);
-                return ApiResponse<IEnumerable<RoleResponse>>.CreateSuccess(response);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting roles for user {UserId}", userId);
-                return ApiResponse<IEnumerable<RoleResponse>>.CreateError("Error getting user roles");
-            }
+            var roles = await _roleRepository.GetByUserIdAsync(userId);
+            var response = _mapper.Map<IEnumerable<RoleResponse>>(roles);
+            return ApiResponse<IEnumerable<RoleResponse>>.CreateSuccess(response);
         }
 
         public async Task<ApiResponse<bool>> AssignPermissionsAsync(Guid roleId, AssignPermissionsRequest request)
         {
-            try
-            {
-                var role = await _roleRepository.GetByIdAsync(roleId);
-                if (role == null)
-                {
-                    return ApiResponse<bool>.CreateError("Role not found");
-                }
+            var role = await _roleRepository.GetByIdAsync(roleId);
+            if (role == null)
+                return ApiResponse<bool>.CreateError("Role not found", "NOT_FOUND");
 
-                await _roleRepository.AssignPermissionsAsync(roleId, request.PermissionIds);
-                return ApiResponse<bool>.CreateSuccess(true);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error assigning permissions to role {RoleId}", roleId);
-                return ApiResponse<bool>.CreateError("Error assigning permissions");
-            }
+            await _roleRepository.AssignPermissionsAsync(roleId, request.PermissionIds);
+            return ApiResponse<bool>.CreateSuccess(true);
         }
 
         public async Task<ApiResponse<bool>> RemovePermissionsAsync(Guid roleId, RemovePermissionsRequest request)
         {
-            try
-            {
-                var role = await _roleRepository.GetByIdAsync(roleId);
-                if (role == null)
-                {
-                    return ApiResponse<bool>.CreateError("Role not found");
-                }
+            var role = await _roleRepository.GetByIdAsync(roleId);
+            if (role == null)
+                return ApiResponse<bool>.CreateError("Role not found", "NOT_FOUND");
 
-                await _roleRepository.RemovePermissionsAsync(roleId, request.PermissionIds);
-                return ApiResponse<bool>.CreateSuccess(true);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error removing permissions from role {RoleId}", roleId);
-                return ApiResponse<bool>.CreateError("Error removing permissions");
-            }
+            await _roleRepository.RemovePermissionsAsync(roleId, request.PermissionIds);
+            return ApiResponse<bool>.CreateSuccess(true);
         }
 
         public async Task<ApiResponse<IEnumerable<PermissionResponse>>> GetPermissionsAsync(Guid roleId)
         {
-            try
-            {
-                var role = await _roleRepository.GetByIdAsync(roleId);
-                if (role == null)
-                {
-                    return ApiResponse<IEnumerable<PermissionResponse>>.CreateError("Role not found");
-                }
+            var role = await _roleRepository.GetByIdAsync(roleId);
+            if (role == null)
+                return ApiResponse<IEnumerable<PermissionResponse>>.CreateError("Role not found", "NOT_FOUND");
 
-                var permissions = await _roleRepository.GetPermissionsAsync(roleId);
-                var response = _mapper.Map<IEnumerable<PermissionResponse>>(permissions);
-                return ApiResponse<IEnumerable<PermissionResponse>>.CreateSuccess(response);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting permissions for role {RoleId}", roleId);
-                return ApiResponse<IEnumerable<PermissionResponse>>.CreateError("Error getting role permissions");
-            }
+            var permissions = await _roleRepository.GetPermissionsAsync(roleId);
+            var response = _mapper.Map<IEnumerable<PermissionResponse>>(permissions);
+            return ApiResponse<IEnumerable<PermissionResponse>>.CreateSuccess(response);
         }
 
         public async Task<ApiResponse<RoleResponse>> CopyRoleAsync(Guid sourceRoleId, CopyRoleRequest request)
         {
-            try
+            var sourceRole = await _roleRepository.GetByIdAsync(sourceRoleId);
+            if (sourceRole == null)
+                return ApiResponse<RoleResponse>.CreateError("Source role not found", "NOT_FOUND");
+
+            if (await _roleRepository.ExistsByNameAsync(request.NewName))
+                return ApiResponse<RoleResponse>.CreateError($"Role with name '{request.NewName}' already exists", "DUPLICATE_NAME");
+
+            // Create new role
+            var newRole = new Role
             {
-                var validationResult = await _copyValidator.ValidateAsync(request);
-                if (!validationResult.IsValid)
-                {
-                    return ApiResponse<RoleResponse>.CreateError("Validation failed", details: validationResult.Errors);
-                }
+                Name = request.NewName,
+                Description = request.Description,
+                IsDefault = false
+            };
 
-                var sourceRole = await _roleRepository.GetByIdAsync(sourceRoleId);
-                if (sourceRole == null)
-                {
-                    return ApiResponse<RoleResponse>.CreateError("Source role not found");
-                }
+            // Copy role
+            newRole = await _roleRepository.CreateAsync(newRole);
 
-                var newRole = new Role
-                {
-                    Name = request.NewName,
-                    Description = request.Description ?? sourceRole.Description,
-                    IsDefault = false
-                };
-
-                var createdRole = await _roleRepository.CreateAsync(newRole);
-
-                if (request.CopyPermissions)
-                {
-                    var permissions = await _roleRepository.GetPermissionsAsync(sourceRoleId);
-                    var permissionIds = permissions.Select(p => p.Id).ToList();
-                    if (permissionIds.Any())
-                    {
-                        await _roleRepository.AssignPermissionsAsync(createdRole.Id, permissionIds);
-                    }
-                }
-
-                var response = _mapper.Map<RoleResponse>(createdRole);
-                return ApiResponse<RoleResponse>.CreateSuccess(response);
-            }
-            catch (Exception ex)
+            // Copy permissions
+            var permissions = await _roleRepository.GetPermissionsAsync(sourceRoleId);
+            if (permissions.Any())
             {
-                _logger.LogError(ex, "Error copying role {SourceRoleId}", sourceRoleId);
-                return ApiResponse<RoleResponse>.CreateError("Error copying role");
+                await _roleRepository.AssignPermissionsAsync(newRole.Id, permissions.Select(p => p.Id));
             }
+
+            var response = _mapper.Map<RoleResponse>(newRole);
+            return ApiResponse<RoleResponse>.CreateSuccess(response);
+        }
+
+        public async Task<ApiResponse<bool>> AssignRolesToUserAsync(Guid userId, AssignUserRolesRequest request)
+        {
+            // Validate user exists
+            var userRoles = await _roleRepository.GetByUserIdAsync(userId);
+            var existingRoleIds = userRoles.Select(r => r.Id).ToList();
+
+            // Get new roles to assign (exclude existing ones)
+            var newRoleIds = request.RoleIds.Except(existingRoleIds).ToList();
+
+            if (!newRoleIds.Any())
+                return ApiResponse<bool>.CreateSuccess(true); // Nothing to assign
+
+            // Validate all roles exist
+            foreach (var roleId in newRoleIds)
+            {
+                var role = await _roleRepository.GetByIdAsync(roleId);
+                if (role == null)
+                    return ApiResponse<bool>.CreateError($"Role with ID {roleId} not found", "NOT_FOUND");
+            }
+
+            // Create UserRole entities
+            var userRolesToAdd = newRoleIds.Select(roleId => new UserRole
+            {
+                UserId = userId,
+                RoleId = roleId
+            });
+
+            // Add user roles
+            foreach (var userRole in userRolesToAdd)
+            {
+                await _roleRepository.CreateUserRoleAsync(userRole);
+            }
+
+            return ApiResponse<bool>.CreateSuccess(true);
+        }
+
+        public async Task<ApiResponse<bool>> RemoveRolesFromUserAsync(Guid userId, RemoveUserRolesRequest request)
+        {
+            // Validate user exists
+            var userRoles = await _roleRepository.GetByUserIdAsync(userId);
+            if (!userRoles.Any())
+                return ApiResponse<bool>.CreateError($"No roles found for user with ID {userId}", "NOT_FOUND");
+
+            // Remove roles
+            await _roleRepository.RemoveUserRolesAsync(userId, request.RoleIds);
+
+            return ApiResponse<bool>.CreateSuccess(true);
         }
     }
 } 
