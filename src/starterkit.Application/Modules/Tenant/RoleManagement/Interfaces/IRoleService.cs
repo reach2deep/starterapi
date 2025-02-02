@@ -60,5 +60,15 @@ namespace starterkit.Application.Modules.Tenant.RoleManagement.Interfaces
         /// Creates a copy of an existing role
         /// </summary>
         Task<ApiResponse<RoleResponse>> CopyRoleAsync(Guid sourceRoleId, CopyRoleRequest request);
+
+        /// <summary>
+        /// Assigns roles to a user
+        /// </summary>
+        Task<ApiResponse<bool>> AssignRolesToUserAsync(Guid userId, AssignUserRolesRequest request);
+
+        /// <summary>
+        /// Removes roles from a user
+        /// </summary>
+        Task<ApiResponse<bool>> RemoveRolesFromUserAsync(Guid userId, RemoveUserRolesRequest request);
     }
 } 

@@ -139,5 +139,27 @@ namespace starterkit.API.Controllers.Modules.V1.Tenant.RoleManagement
             var result = await _roleService.CopyRoleAsync(sourceRoleId, request);
             return Ok(result);
         }
+
+        /// <summary>
+        /// Assigns roles to a user
+        /// </summary>
+        [HttpPost("user/{userId}/assign")]
+        [ProducesResponseType(typeof(ApiResponse<bool>), 200)]
+        public async Task<IActionResult> AssignRolesToUser(Guid userId, [FromBody] AssignUserRolesRequest request)
+        {
+            var result = await _roleService.AssignRolesToUserAsync(userId, request);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Removes roles from a user
+        /// </summary>
+        [HttpDelete("user/{userId}/remove")]
+        [ProducesResponseType(typeof(ApiResponse<bool>), 200)]
+        public async Task<IActionResult> RemoveRolesFromUser(Guid userId, [FromBody] RemoveUserRolesRequest request)
+        {
+            var result = await _roleService.RemoveRolesFromUserAsync(userId, request);
+            return Ok(result);
+        }
     }
 } 

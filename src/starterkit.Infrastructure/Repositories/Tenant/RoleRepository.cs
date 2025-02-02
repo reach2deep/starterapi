@@ -127,5 +127,33 @@ namespace starterkit.Infrastructure.Repositories.Tenant
                 .Select(rp => rp.Permission)
                 .ToListAsync();
         }
+
+        public async Task<UserRole> CreateUserRoleAsync(UserRole userRole)
+        {
+            // Check if the user role mapping already exists
+            var exists = await _context.UserRoles
+                .AnyAsync(ur => ur.UserId == userRole.UserId && ur.RoleId == userRole.RoleId);
+
+            if (!exists)
+            {
+                await _context.UserRoles.AddAsync(userRole);
+                await _context.SaveChangesAsync();
+            }
+
+            return userRole;
+        }
+
+        public async Task RemoveUserRolesAsync(Guid userId, IEnumerable<Guid> roleIds)
+        {
+            var userRolesToRemove = await _context.UserRoles
+                .Where(ur => ur.UserId == userId && roleIds.Contains(ur.RoleId))
+                .ToListAsync();
+
+            if (userRolesToRemove.Any())
+            {
+                _context.UserRoles.RemoveRange(userRolesToRemove);
+                await _context.SaveChangesAsync();
+            }
+        }
     }
 } 
