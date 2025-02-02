@@ -8,7 +8,7 @@ using starterkit.Infrastructure.Persistence.TenantDb;
 
 #nullable disable
 
-namespace starterkit.Infrastructure.Data.TenantDb.Migrations
+namespace starterkit.Infrastructure.Persistence.TenantDb.Migrations
 {
     [DbContext(typeof(TenantDbContext))]
     partial class TenantDbContextModelSnapshot : ModelSnapshot

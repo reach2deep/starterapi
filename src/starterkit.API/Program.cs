@@ -26,6 +26,19 @@ using starterkit.Core.Modules.Tenant.UserManagement.Interfaces.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add CORS with all permissions (FOR DEVELOPMENT ONLY)
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(builder =>
+    {
+        builder
+            .SetIsOriginAllowed(_ => true) // Allow any origin
+            .AllowAnyMethod()              // Allow any HTTP method
+            .AllowAnyHeader()              // Allow any header
+            .AllowCredentials();           // Allow credentials
+    });
+});
+
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddControllers()
@@ -146,7 +159,6 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-
 app.UseHttpsRedirection();
 
 // Add health checks before exception handling
@@ -161,6 +173,12 @@ app.UseAuthorization();
 
 // Then add tenant middleware
 app.UseTenantMiddleware();
+
+// Make sure this is placed in the correct order:
+// - After UseRouting() if you have it
+// - Before UseAuthentication() and UseAuthorization()
+// - Before MapControllers()
+app.UseCors();
 
 app.MapControllers();
 

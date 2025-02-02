@@ -38,9 +38,8 @@ namespace starterkit.Infrastructure.Data.TenantDb
             {
                 _logger.LogInformation("Starting database seeding for tenant {TenantId}", _tenantId);
 
-                // Ensure database is migrated
-                _logger.LogInformation("Applying migrations for tenant {TenantId}", _tenantId);
-                await _context.Database.MigrateAsync();
+                // Migrations are already handled by TenantDatabaseInitializer
+                // No need to migrate again here
 
                 // Seed default permissions first
                 _logger.LogInformation("Seeding default permissions for tenant {TenantId}", _tenantId);

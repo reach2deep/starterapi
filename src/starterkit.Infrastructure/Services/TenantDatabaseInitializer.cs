@@ -40,10 +40,7 @@ namespace starterkit.Infrastructure.Services
                 // Set the connection string
                 context.Database.SetConnectionString(tenant.ConnectionString);
 
-                // Ensure database is created
-                await context.Database.EnsureCreatedAsync();
-
-                // Apply migrations
+                // Use migrations to create/update database
                 await context.Database.MigrateAsync();
 
                 // Get the seeder factory
