@@ -218,6 +218,11 @@ starterkit/
   "email": "rootadmin@example.com",
   "password": "Admin@123"
 }
+Alpha
+{
+  "email": "admin@alpha.com",
+  "password": "Admin@123"
+}
 
 So for testing, you can use these credentials:
 F

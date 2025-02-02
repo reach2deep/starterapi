@@ -10,7 +10,7 @@ namespace starterkit.Core.Modules.Global.TenantManagement.Interfaces.Repositorie
         /// <summary>
         /// Creates a new tenant
         /// </summary>
-        Task<Tenant> CreateAsync(Tenant tenant);
+        Task<Tenant> CreateAsync(Core.Modules.Global.Tenant tenant);
 
         /// <summary>
         /// Creates a tenant user mapping

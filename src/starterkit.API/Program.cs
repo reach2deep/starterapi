@@ -5,6 +5,7 @@ using Microsoft.OpenApi.Models;
 using n.Modules.Global.Auth.Services;
 using starterkit.API.Middlewares;
 using starterkit.API.DependencyInjection;
+using starterkit.Application.DependencyInjection;
 using starterkit.Application.Modules.Global.Auth.Interfaces;
 using starterkit.Application.Modules.Global.TenantManagement.Interfaces;
 using starterkit.Application.Modules.Tenant.UserManagement.Interfaces;
@@ -13,6 +14,7 @@ using starterkit.Core.Enums;
 using starterkit.Infrastructure.Data;
 using starterkit.Infrastructure.Data.RootDb;
 using starterkit.Infrastructure.Data.TenantDb;
+using starterkit.Infrastructure.DependencyInjection;
 using starterkit.Infrastructure.Extensions;
 using starterkit.Infrastructure.Persistence.RootDb;
 using starterkit.Infrastructure.Persistence.TenantDb;
@@ -125,7 +127,9 @@ builder.Services.AddScoped<IDataSeeder, RootDbSeeder>();
 builder.Services.AddScoped<ITenantDatabaseInitializer, TenantDatabaseInitializer>();
 builder.Services.AddScoped<ITenantResolver, TenantResolver>();
 
-// builder.Services.AddApplicationServices();
+// Register application and infrastructure services
+builder.Services.AddApplicationServices();
+builder.Services.AddInfrastructureRepositories();
 
 builder.Services.AddCustomHealthChecks();
 
@@ -135,7 +139,11 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.DocExpansion(Swashbuckle.AspNetCore.SwaggerUI.DocExpansion.None); // This collapses all sections
+    
+    });
 }
 
 app.UseHttpsRedirection();
