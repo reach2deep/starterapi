@@ -265,10 +265,38 @@ rules:
     pattern: "*/Repositories/*.cs"
     rules:
       - "Implement repository interfaces from Core layer"
-      - "Use appropriate DbContext (Root or Tenant)"
+      - "NEVER use concrete DbContext classes directly in repositories"
+      - "ALWAYS use ITenantDbContext interface for tenant repositories"
+      - "ALWAYS use IRootDbContext interface for global repositories"
+      - "Repository interfaces must be in Core layer"
+      - "Repository implementations must be in Infrastructure layer"
+      - "Use appropriate DbContext interface (IRootDbContext or ITenantDbContext)"
       - "Ensure proper data isolation"
       - "Handle tenant context in tenant repositories"
       - "Implement proper error handling"
+      - "No direct Entity Framework dependencies in interfaces"
+      - "No leaking of database concerns to other layers"
+
+  # Multi-tenant Repository Pattern
+  - name: "Multi-tenant Repository Implementation"
+    pattern: "*/Repositories/Tenant/*.cs"
+    rules:
+      - "MUST use ITenantDbContext interface, never concrete TenantDbContext"
+      - "Repository must be in Infrastructure/Repositories/Tenant folder"
+      - "Interface must be in Core/Modules/Tenant/[ModuleName]/Interfaces/Repositories"
+      - "Must handle tenant isolation through ITenantDbContext"
+      - "No cross-tenant data access allowed"
+      - "Must include proper error handling for tenant context"
+
+  # Global Repository Pattern
+  - name: "Global Repository Implementation"
+    pattern: "*/Repositories/Global/*.cs"
+    rules:
+      - "MUST use IRootDbContext interface, never concrete RootDbContext"
+      - "Repository must be in Infrastructure/Repositories/Global folder"
+      - "Interface must be in Core/Modules/Global/[ModuleName]/Interfaces/Repositories"
+      - "Must handle global data appropriately"
+      - "No tenant-specific logic allowed"
 
   # API Endpoints
   - name: "API Controllers"

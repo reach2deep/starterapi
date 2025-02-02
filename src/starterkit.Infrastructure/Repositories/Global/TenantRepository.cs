@@ -17,7 +17,7 @@ namespace starterkit.Infrastructure.Repositories.Global
             _context = context;
         }
 
-        public async Task<Tenant> CreateAsync(Tenant tenant)
+        public async Task<Core.Modules.Global.Tenant> CreateAsync(Core.Modules.Global.Tenant tenant)
         {
             _context.Tenants.Add(tenant);
             await _context.SaveChangesAsync();
@@ -54,12 +54,12 @@ namespace starterkit.Infrastructure.Repositories.Global
             return await _context.Tenants.AnyAsync(t => t.Name == name);
         }
 
-        public async Task<Tenant> GetByIdAsync(Guid id)
+        public async Task<Core.Modules.Global.Tenant> GetByIdAsync(Guid id)
         {
             return await _context.Tenants.FindAsync(id);
         }
 
-        public async Task<(IEnumerable<Tenant> Items, int TotalCount)> GetPagedAsync(int pageNumber, int pageSize)
+        public async Task<(IEnumerable<Core.Modules.Global.Tenant> Items, int TotalCount)> GetPagedAsync(int pageNumber, int pageSize)
         {
             var query = _context.Tenants.AsNoTracking();
             var totalCount = await query.CountAsync();
@@ -73,15 +73,15 @@ namespace starterkit.Infrastructure.Repositories.Global
             return (items, totalCount);
         }
 
-        public async Task RemoveAsync(Tenant tenant)
+        public async Task RemoveAsync(Core.Modules.Global.Tenant tenant)
         {
             _context.Tenants.Remove(tenant);
             await _context.SaveChangesAsync();
         }
 
-        public async Task<Tenant> UpdateAsync(Tenant tenant)
+        public async Task<Core.Modules.Global.Tenant> UpdateAsync(Core.Modules.Global.Tenant tenant)
         {
-            _context.Set<Tenant>().Update(tenant);
+            _context.Set<Core.Modules.Global.Tenant>().Update(tenant);
             await _context.SaveChangesAsync();
             return tenant;
         }
