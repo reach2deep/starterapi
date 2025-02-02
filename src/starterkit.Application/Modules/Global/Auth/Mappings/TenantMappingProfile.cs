@@ -12,6 +12,8 @@ namespace starterkit.Application.Modules.Global.Auth.Mappings
             CreateMap<Address, AddressDto>();
 
             CreateMap<UserProfile, UserProfileResponseDto>()
+                .ForMember(dest => dest.FirstName, opt => opt.MapFrom(src => src.FirstName))
+                .ForMember(dest => dest.LastName, opt => opt.MapFrom(src => src.LastName))
                 .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.Address));
 
             CreateMap<UpdateUserProfileRequestDto, UserProfile>()

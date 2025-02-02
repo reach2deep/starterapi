@@ -84,6 +84,8 @@ namespace starterkit.Infrastructure.Data.TenantDb
                         CreatedBy = rootAdmin.Id,
                         Profile = new UserProfile
                         {
+                            FirstName = rootAdmin.FirstName,
+                            LastName = rootAdmin.LastName,
                             CreatedBy = rootAdmin.Id
                         }
                     };
@@ -117,6 +119,8 @@ namespace starterkit.Infrastructure.Data.TenantDb
                         CreatedBy = rootAdminInTenant.Id,
                         Profile = new UserProfile
                         {
+                            FirstName = tenantAdminGlobal.FirstName,
+                            LastName = tenantAdminGlobal.LastName,
                             CreatedBy = rootAdminInTenant.Id
                         }
                     };
@@ -327,6 +331,8 @@ namespace starterkit.Infrastructure.Data.TenantDb
                     CreatedBy = createdBy,
                     Profile = new UserProfile
                     {
+                        FirstName = globalUser.FirstName,
+                        LastName = globalUser.LastName,
                         DateOfBirth = DateTime.UtcNow.AddYears(-25 - users.Count * 5), // Different ages
                         CreatedBy = createdBy,
                         Address = new Address

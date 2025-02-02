@@ -13,6 +13,14 @@ namespace starterkit.Infrastructure.Data.TenantDb.Configurations
 
             builder.HasKey(p => p.Id);
 
+            builder.Property(p => p.FirstName)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            builder.Property(p => p.LastName)
+                .IsRequired()
+                .HasMaxLength(100);
+
             builder.Property(p => p.ProfilePictureUrl)
                 .HasMaxLength(1000);
 

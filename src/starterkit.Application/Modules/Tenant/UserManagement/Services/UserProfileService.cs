@@ -2,20 +2,45 @@ using starterkit.Application.Modules.Tenant.UserManagement.DTOs;
 using starterkit.Core.Modules.Tenant.UserManagement.Interfaces.Repositories;
 using starterkit.Core.Modules.Tenant;
 using starterkit.Application.Modules.Tenant.UserManagement.Interfaces;
+using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
 
 namespace starterkit.Application.Modules.Tenant.UserManagement.Services
 {
     public class UserProfileService : IUserProfileService
     {
         private readonly IUserProfileRepository _profileRepository;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public UserProfileService(IUserProfileRepository profileRepository)
+        public UserProfileService(
+            IUserProfileRepository profileRepository,
+            IHttpContextAccessor httpContextAccessor)
         {
             _profileRepository = profileRepository;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<UserProfileResponseDto> GetMyProfileAsync(Guid userId)
         {
+            // Check if user is root admin from JWT claims
+            var role = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.Role)?.Value;
+            var email = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.Email)?.Value;
+            
+            if (role == "RootAdmin")
+            {
+                // For root admin, return a default profile
+                return new UserProfileResponseDto
+                {
+                    Id = userId,
+                    UserId = userId,
+                    FirstName = "Root",
+                    LastName = "Admin",
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+            }
+
+            // For non-root admin users, get profile from tenant database
             var profile = await _profileRepository.GetByUserIdAsync(userId);
             if (profile == null)
             {
@@ -62,6 +87,8 @@ namespace starterkit.Application.Modules.Tenant.UserManagement.Services
             }
 
             // Update profile fields
+            profile.FirstName = request.FirstName;
+            profile.LastName = request.LastName;
             profile.DateOfBirth = request.DateOfBirth;
             profile.ProfilePictureUrl = request.ProfilePictureUrl;
             profile.UpdatedBy = userId;
@@ -77,6 +104,8 @@ namespace starterkit.Application.Modules.Tenant.UserManagement.Services
             {
                 Id = profile.Id,
                 UserId = profile.UserId,
+                FirstName = profile.FirstName,
+                LastName = profile.LastName,
                 DateOfBirth = profile.DateOfBirth,
                 ProfilePictureUrl = profile.ProfilePictureUrl,
                 CreatedAt = profile.CreatedAt,
