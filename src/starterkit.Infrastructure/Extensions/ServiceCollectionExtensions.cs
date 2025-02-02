@@ -27,6 +27,8 @@ using starterkit.Application.Modules.Tenant.PermissionManagement.Services;
 using starterkit.Infrastructure.Persistence.TenantDb.Repositories;
 using starterkit.Core.Modules.Tenant.UserManagement.Interfaces.Repositories;
 using starterkit.Core.Modules.Tenant.PermissionManagement.Interfaces;
+using starterkit.Core.Modules.Global.TenantManagement.Interfaces.Repositories;
+using starterkit.Infrastructure.Repositories.Global;
 
 namespace starterkit.Infrastructure.Extensions
 {
@@ -123,6 +125,9 @@ namespace starterkit.Infrastructure.Extensions
                 var logger = sp.GetRequiredService<ILogger<TenantDbSeeder>>();
                 return new TenantDbSeeder(context, rootContext, passwordHashService, logger, tenantId);
             });
+
+            // Register repositories
+            services.AddScoped<ITenantRepository, TenantRepository>();
 
             return services;
         }

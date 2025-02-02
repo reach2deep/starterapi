@@ -81,6 +81,37 @@
 - [ ] Proper error handling
 - [ ] No domain logic
 - [ ] Follows repository pattern best practices
+- [ ] Uses correct Entity Framework patterns:
+  - [ ] Uses `_context.Set<T>().Update()` instead of `_context.Set(entity).State`
+  - [ ] Proper entity tracking management
+  - [ ] Consistent usage of async methods
+  - [ ] Proper transaction handling
+- [ ] No direct DbContext exposure to service layer
+- [ ] Repository methods are atomic and focused
+
+### Service Layer Data Access
+- [ ] NO direct DbContext usage in services
+- [ ] ALL database operations go through repositories
+- [ ] Proper abstraction maintained between service and data access
+- [ ] No Entity Framework specific code in services
+- [ ] Services use repository interfaces exclusively
+- [ ] No direct entity manipulation in services
+
+### Repository Pattern Compliance
+- [ ] Clear separation between data access and business logic
+- [ ] Repository interfaces defined in Core layer
+- [ ] Repository implementations in Infrastructure layer only
+- [ ] No leaking of Entity Framework concerns to other layers
+- [ ] Consistent repository pattern across all modules
+- [ ] Proper abstraction of data access operations
+
+### Common Anti-Patterns to Avoid
+- [ ] NO direct DbContext usage in services (e.g., _context.Tenants.Add)
+- [ ] NO Entity Framework specific operations in services (e.g., FindAsync, Add)
+- [ ] NO repository pattern violations
+- [ ] NO mixing of data access and business logic
+- [ ] NO exposing IQueryable outside repositories
+- [ ] NO direct entity manipulation in services
 
 ### Database Configurations
 - [ ] Entity configurations in `Infrastructure/Data/Configurations/[ModuleName]`
