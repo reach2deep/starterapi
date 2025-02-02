@@ -26,16 +26,16 @@ using starterkit.Core.Modules.Tenant.UserManagement.Interfaces.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add CORS with all permissions (FOR DEVELOPMENT ONLY)
+// Add CORS configuration
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(builder =>
     {
         builder
-            .SetIsOriginAllowed(_ => true) // Allow any origin
-            .AllowAnyMethod()              // Allow any HTTP method
-            .AllowAnyHeader()              // Allow any header
-            .AllowCredentials();           // Allow credentials
+            .SetIsOriginAllowed(_ => true)  // Allow any origin
+            .AllowAnyMethod()               // Allow all HTTP methods
+            .AllowAnyHeader()               // Allow all headers
+            .AllowCredentials();            // Allow credentials (important for auth!)
     });
 });
 
@@ -167,18 +167,12 @@ app.UseCustomHealthChecks();
 // Add global exception handling
 app.UseGlobalExceptionHandling();
 
-// Add authentication & authorization first
+// Ensure correct middleware order
+app.UseRouting();
+app.UseCors(); // Must come after UseRouting but before Authentication
 app.UseAuthentication();
 app.UseAuthorization();
-
-// Then add tenant middleware
 app.UseTenantMiddleware();
-
-// Make sure this is placed in the correct order:
-// - After UseRouting() if you have it
-// - Before UseAuthentication() and UseAuthorization()
-// - Before MapControllers()
-app.UseCors();
 
 app.MapControllers();
 
