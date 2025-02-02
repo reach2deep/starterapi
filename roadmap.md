@@ -5,7 +5,7 @@ Let me outline a comprehensive feature roadmap for the starter kit API with comm
 **1. Core Infrastructure Features**
 - [x] Multi-tenant Database Separation
 - [x] Tenant Middleware
-- [ ] Health Checks
+- [x] Health Checks
 - [ ] API Versioning
 - [ ] Rate Limiting
 - [ ] Caching Infrastructure
