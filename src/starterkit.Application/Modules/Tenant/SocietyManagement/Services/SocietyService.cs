@@ -167,5 +167,22 @@ namespace starterkit.Application.Modules.Tenant.SocietyManagement.Services
                 return ApiResponse<SocietyResponse>.CreateError("Failed to retrieve society details");
             }
         }
+
+        /// <inheritdoc/>
+        public async Task<ApiResponse<PagedResponse<SocietyResponse>>> GetPagedAsync(int pageNumber, int pageSize)
+        {
+            try
+            {
+                var (societies, totalCount) = await _repository.GetPagedAsync(pageNumber, pageSize);
+                var mappedSocieties = _mapper.Map<IEnumerable<SocietyResponse>>(societies);
+                var response = new PagedResponse<SocietyResponse>(mappedSocieties, totalCount, pageNumber, pageSize);
+                return ApiResponse<PagedResponse<SocietyResponse>>.CreateSuccess(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while retrieving paged societies");
+                return ApiResponse<PagedResponse<SocietyResponse>>.CreateError("Failed to retrieve paged societies");
+            }
+        }
     }
 } 

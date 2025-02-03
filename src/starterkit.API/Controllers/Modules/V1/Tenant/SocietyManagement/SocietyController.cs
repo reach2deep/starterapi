@@ -44,6 +44,17 @@ namespace starterkit.API.Controllers.Modules.V1.Tenant.SocietyManagement
         }
 
         /// <summary>
+        /// Gets a paged list of societies
+        /// </summary>
+        [HttpGet("paged")]
+        [ProducesResponseType(typeof(ApiResponse<PagedResponse<SocietyResponse>>), 200)]
+        public async Task<IActionResult> GetPaged([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            var result = await _societyService.GetPagedAsync(pageNumber, pageSize);
+            return Ok(result);
+        }
+
+        /// <summary>
         /// Creates a new society
         /// </summary>
         [HttpPost]
@@ -89,7 +100,5 @@ namespace starterkit.API.Controllers.Modules.V1.Tenant.SocietyManagement
             var result = await _societyService.GetByIdWithDetailsAsync(id);
             return Ok(result);
         }
-
-  
     }
 } 
