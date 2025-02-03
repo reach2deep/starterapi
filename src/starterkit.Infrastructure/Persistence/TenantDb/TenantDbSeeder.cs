@@ -7,6 +7,7 @@ using starterkit.Infrastructure.Data.RootDb;
 using starterkit.Infrastructure.Persistence.RootDb;
 using starterkit.Infrastructure.Persistence.TenantDb;
 using starterkit.Infrastructure.Services;
+using starterkit.Core.Interfaces.Services;
 
 namespace starterkit.Infrastructure.Data.TenantDb
 {

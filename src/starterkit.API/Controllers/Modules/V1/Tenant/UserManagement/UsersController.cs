@@ -10,7 +10,7 @@ namespace starterkit.API.Controllers.Modules.V1.Tenant.UserManagement
     /// Controller for managing users in tenant context
     /// </summary>
     [Route("api/v1/tenant/users")]
-    [Authorize(Policy = "RequireUserManagement")]
+    [Authorize]
     public class UsersController : BaseApiController
     {
         private readonly IUserService _userService;

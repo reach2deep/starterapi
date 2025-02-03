@@ -29,6 +29,7 @@ using starterkit.Core.Modules.Tenant.UserManagement.Interfaces.Repositories;
 using starterkit.Core.Modules.Tenant.PermissionManagement.Interfaces;
 using starterkit.Core.Modules.Global.TenantManagement.Interfaces.Repositories;
 using starterkit.Infrastructure.Repositories.Global;
+using starterkit.Core.Interfaces.Services;
 
 namespace starterkit.Infrastructure.Extensions
 {
@@ -128,6 +129,9 @@ namespace starterkit.Infrastructure.Extensions
 
             // Register repositories
             services.AddScoped<ITenantRepository, TenantRepository>();
+
+            // Register core services
+            services.AddScoped<IPasswordHashService, PasswordHashService>();
 
             return services;
         }

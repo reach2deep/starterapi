@@ -24,10 +24,10 @@ namespace starterkit.Application.DependencyInjection
             services.AddScoped<IValidator<CopyRoleRequest>, CopyRoleRequestValidator>();
 
             // Add user validators
-            // services.AddScoped<IValidator<CreateUserRequest>, CreateUserRequestValidator>();
-            // services.AddScoped<IValidator<UpdateUserRequest>, UpdateUserRequestValidator>();
-            // services.AddScoped<IValidator<ChangePasswordRequest>, ChangePasswordRequestValidator>();
-            // services.AddScoped<IValidator<ResetPasswordRequest>, ResetPasswordRequestValidator>();
+            services.AddScoped<IValidator<CreateUserRequest>, CreateUserRequestValidator>();
+            services.AddScoped<IValidator<UpdateUserRequest>, UpdateUserRequestValidator>();
+            services.AddScoped<IValidator<ChangePasswordRequest>, ChangePasswordRequestValidator>();
+            services.AddScoped<IValidator<ResetPasswordRequest>, ResetPasswordRequestValidator>();
 
             // Register all validators in the assembly
             services.AddValidatorsFromAssemblyContaining<CreateRoleRequestValidator>();
