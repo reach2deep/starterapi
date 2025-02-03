@@ -100,5 +100,20 @@ namespace starterkit.API.Controllers.Modules.V1.Tenant.SocietyManagement
             var result = await _societyService.GetByIdWithDetailsAsync(id);
             return Ok(result);
         }
+
+        /// <summary>
+        /// Gets societies for dropdown/lookup controls
+        /// </summary>
+        /// <remarks>
+        /// Optimized endpoint for populating dropdown/lookup controls with society data.
+        /// Supports searching, filtering and pagination.
+        /// </remarks>
+        [HttpGet("lookup")]
+        [ProducesResponseType(typeof(ApiResponse<LookupResponse<LookupDto>>), 200)]
+        public async Task<IActionResult> GetLookup([FromQuery] LookupRequest request)
+        {
+            var result = await _societyService.GetLookupAsync(request);
+            return Ok(result);
+        }
     }
 } 

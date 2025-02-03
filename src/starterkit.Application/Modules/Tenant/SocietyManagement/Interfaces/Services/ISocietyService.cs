@@ -46,5 +46,10 @@ namespace starterkit.Application.Modules.Tenant.SocietyManagement.Interfaces.Ser
         /// Gets a society with all its related details
         /// </summary>
         Task<ApiResponse<SocietyResponse>> GetByIdWithDetailsAsync(Guid id);
+
+        /// <summary>
+        /// Gets societies data optimized for dropdown/lookup controls
+        /// </summary>
+        Task<ApiResponse<LookupResponse<LookupDto>>> GetLookupAsync(LookupRequest request);
     }
 } 
