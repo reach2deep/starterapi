@@ -63,24 +63,7 @@ namespace starterkit.Application.Modules.Tenant.SocietyManagement.Services
             }
         }
 
-        /// <inheritdoc/>
-        public async Task<ApiResponse<Society>> GetByRegistrationNumberAsync(string registrationNumber)
-        {
-            try
-            {
-                var society = await _societyRepository.GetByRegistrationNumberAsync(registrationNumber);
-                if (society == null)
-                    return ApiResponse<Society>.CreateError("Society not found");
-
-                return ApiResponse<Society>.CreateSuccess(society);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error occurred while retrieving society with registration number: {RegistrationNumber}", registrationNumber);
-                return ApiResponse<Society>.CreateError("Failed to retrieve society");
-            }
-        }
-
+       
         /// <inheritdoc/>
         public async Task<ApiResponse<Society>> CreateAsync(Society society)
         {
@@ -163,49 +146,5 @@ namespace starterkit.Application.Modules.Tenant.SocietyManagement.Services
             }
         }
 
-        /// <inheritdoc/>
-        public async Task<ApiResponse<IEnumerable<Society>>> GetAllWithDetailsAsync()
-        {
-            try
-            {
-                var societies = await _societyRepository.GetAllWithDetailsAsync();
-                return ApiResponse<IEnumerable<Society>>.CreateSuccess(societies);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error occurred while retrieving all societies with details");
-                return ApiResponse<IEnumerable<Society>>.CreateError("Failed to retrieve societies with details");
-            }
-        }
-
-        /// <inheritdoc/>
-        public async Task<ApiResponse<bool>> ExistsAsync(Guid id)
-        {
-            try
-            {
-                var exists = await _societyRepository.ExistsAsync(id);
-                return ApiResponse<bool>.CreateSuccess(exists);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error occurred while checking existence of society with ID: {Id}", id);
-                return ApiResponse<bool>.CreateError("Failed to check society existence");
-            }
-        }
-
-        /// <inheritdoc/>
-        public async Task<ApiResponse<bool>> ExistsByRegistrationNumberAsync(string registrationNumber)
-        {
-            try
-            {
-                var exists = await _societyRepository.ExistsByRegistrationNumberAsync(registrationNumber);
-                return ApiResponse<bool>.CreateSuccess(exists);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error occurred while checking existence of society with registration number: {RegistrationNumber}", registrationNumber);
-                return ApiResponse<bool>.CreateError("Failed to check society existence");
-            }
-        }
     }
 } 
