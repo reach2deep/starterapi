@@ -209,5 +209,32 @@ namespace starterkit.Infrastructure.Repositories.Tenant
                 throw;
             }
         }
+
+        /// <inheritdoc/>
+        public async Task<(IEnumerable<Society> Items, int TotalCount)> GetPagedAsync(int pageNumber, int pageSize)
+        {
+            try
+            {
+                _logger.LogInformation("Retrieving paged societies. Page: {PageNumber}, Size: {PageSize}", pageNumber, pageSize);
+                
+                var query = _context.Societies
+                    .Include(s => s.Address)
+                    .Where(s => s.IsActive);
+
+                var totalCount = await query.CountAsync();
+                var items = await query
+                    .OrderByDescending(s => s.CreatedAt)
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+
+                return (items, totalCount);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while retrieving paged societies. Page: {PageNumber}, Size: {PageSize}", pageNumber, pageSize);
+                throw;
+            }
+        }
     }
 } 

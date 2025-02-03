@@ -25,6 +25,14 @@ namespace starterkit.Core.Modules.Tenant.SocietyManagement.Interfaces.Repositori
         Task<Society> GetByIdAsync(Guid id);
 
         /// <summary>
+        /// Retrieves a paged list of societies.
+        /// </summary>
+        /// <param name="pageNumber">The page number to retrieve.</param>
+        /// <param name="pageSize">The number of items per page.</param>
+        /// <returns>A tuple containing the paged societies and total count.</returns>
+        Task<(IEnumerable<Society> Items, int TotalCount)> GetPagedAsync(int pageNumber, int pageSize);
+
+        /// <summary>
         /// Retrieves a society by its registration number.
         /// </summary>
         /// <param name="registrationNumber">The official registration number of the society.</param>

@@ -23,6 +23,11 @@ namespace starterkit.Application.Modules.Tenant.SocietyManagement.Interfaces.Ser
         Task<ApiResponse<SocietyResponse>> GetByIdAsync(Guid id);
 
         /// <summary>
+        /// Gets a paged list of societies
+        /// </summary>
+        Task<ApiResponse<PagedResponse<SocietyResponse>>> GetPagedAsync(int pageNumber, int pageSize);
+
+        /// <summary>
         /// Creates a new society
         /// </summary>
         Task<ApiResponse<SocietyResponse>> CreateAsync(CreateSocietyRequest request);

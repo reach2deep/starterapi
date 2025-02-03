@@ -182,68 +182,74 @@ namespace starterkit.Infrastructure.Data.TenantDb
                 _logger.LogInformation("Creating/Updating default permissions for tenant {TenantId}", _tenantId);
                 var defaultPermissions = new[]
                 {
-                    new Permission { Name = "Tenant Management", Module = "TenantManagement", Action = "Module", IsDefault = true, Description = "User Management Module", Parent = null },
+                    new Permission { Name = "Admin", Module = "Admin", Action = "Module", IsDefault = true, Description = "Admin Management Module", Parent = null },
                     
                     // User Management Module
-                    new Permission { Name = "User Management", Module = "UserManagement", Action = "Module", IsDefault = true, Description = "User Management Module", Parent = "TenantManagement" },
+                    new Permission { Name = "User Management", Module = "UserManagement", Action = "Module", IsDefault = true, Description = "User Management Module", Parent = "Admin" },
                     new Permission { Name = "View Users", Module = "Users", Action = "View", IsDefault = true, Description = "Allows viewing the list of users and user details", Parent = "UserManagement" },
                     new Permission { Name = "Create User", Module = "Users", Action = "Create", IsDefault = true, Description = "Allows creating new users in the system", Parent = "UserManagement" },
                     new Permission { Name = "Edit User", Module = "Users", Action = "Edit", IsDefault = true, Description = "Allows editing existing user information", Parent = "UserManagement" },
                     new Permission { Name = "Delete User", Module = "Users", Action = "Delete", IsDefault = true, Description = "Allows deleting users from the system", Parent = "UserManagement" },
 
                     // Role Management Module
-                    new Permission { Name = "Role Management", Module = "RoleManagement", Action = "Module", IsDefault = true, Description = "Role Management Module", Parent = "TenantManagement" },
+                    new Permission { Name = "Role Management", Module = "RoleManagement", Action = "Module", IsDefault = true, Description = "Role Management Module", Parent = "Admin" },
                     new Permission { Name = "View Roles", Module = "Roles", Action = "View", IsDefault = true, Description = "Allows viewing the list of roles and role details", Parent = "RoleManagement" },
                     new Permission { Name = "Create Role", Module = "Roles", Action = "Create", IsDefault = true, Description = "Allows creating new roles in the system", Parent = "RoleManagement" },
                     new Permission { Name = "Edit Role", Module = "Roles", Action = "Edit", IsDefault = true, Description = "Allows editing existing role information", Parent = "RoleManagement" },
                     new Permission { Name = "Delete Role", Module = "Roles", Action = "Delete", IsDefault = true, Description = "Allows deleting roles from the system", Parent = "RoleManagement" },
 
                     // Permission Management Module
-                    new Permission { Name = "Permission Management", Module = "PermissionManagement", Action = "Module", IsDefault = true, Description = "Permission Management Module", Parent = "TenantManagement" },
+                    new Permission { Name = "Permission Management", Module = "PermissionManagement", Action = "Module", IsDefault = true, Description = "Permission Management Module", Parent = "Admin" },
                     new Permission { Name = "View Permissions", Module = "Permissions", Action = "View", IsDefault = true, Description = "Allows viewing the list of permissions and their details", Parent = "PermissionManagement" },
                     new Permission { Name = "Assign Permissions", Module = "Permissions", Action = "Assign", IsDefault = true, Description = "Allows assigning permissions to roles", Parent = "PermissionManagement" },
 
                     // Society Management Module
-                    new Permission { Name = "Society Management", Module = "SocietyManagement", Action = "Module", IsDefault = true, Description = "Society Management Module", Parent = "TenantManagement" },
+                    new Permission { Name = "Society Management", Module = "SocietyManagement", Action = "Module", IsDefault = true, Description = "Allows managing societies, blocks, floors, units, and residents", Parent = null },
                     
                     // Society Permissions
-                    new Permission { Name = "View Societies", Module = "Societies", Action = "View", IsDefault = true, Description = "Allows viewing the list of societies and their details", Parent = "SocietyManagement" },
-                    new Permission { Name = "Create Society", Module = "Societies", Action = "Create", IsDefault = true, Description = "Allows creating new societies", Parent = "SocietyManagement" },
-                    new Permission { Name = "Edit Society", Module = "Societies", Action = "Edit", IsDefault = true, Description = "Allows editing existing society information", Parent = "SocietyManagement" },
-                    new Permission { Name = "Delete Society", Module = "Societies", Action = "Delete", IsDefault = true, Description = "Allows deleting societies", Parent = "SocietyManagement" },
+                    new Permission { Name = "Society", Module = "Society", Action = "Module", IsDefault = true, Description = "Allows managing societies", Parent = "SocietyManagement" },  
+                    new Permission { Name = "View Societies", Module = "Society", Action = "View", IsDefault = true, Description = "Allows viewing the list of societies and their details", Parent = "Society" },
+                    new Permission { Name = "Create Society", Module = "Society", Action = "Create", IsDefault = true, Description = "Allows creating new societies", Parent = "Society" },
+                    new Permission { Name = "Edit Society", Module = "Society", Action = "Edit", IsDefault = true, Description = "Allows editing existing society information", Parent = "Society" },   
+                    new Permission { Name = "Delete Society", Module = "Society", Action = "Delete", IsDefault = true, Description = "Allows deleting societies", Parent = "Society" },
 
                     // Block Permissions
-                    new Permission { Name = "View Blocks", Module = "Blocks", Action = "View", IsDefault = true, Description = "Allows viewing the list of blocks and their details", Parent = "SocietyManagement" },
-                    new Permission { Name = "Create Block", Module = "Blocks", Action = "Create", IsDefault = true, Description = "Allows creating new blocks in societies", Parent = "SocietyManagement" },
-                    new Permission { Name = "Edit Block", Module = "Blocks", Action = "Edit", IsDefault = true, Description = "Allows editing existing block information", Parent = "SocietyManagement" },
-                    new Permission { Name = "Delete Block", Module = "Blocks", Action = "Delete", IsDefault = true, Description = "Allows deleting blocks", Parent = "SocietyManagement" },
+                    new Permission { Name = "Blocks", Module = "Blocks", Action = "Module", IsDefault = true, Description = "Allows managing blocks", Parent = "SocietyManagement" },
+                    new Permission { Name = "View Blocks", Module = "Blocks", Action = "View", IsDefault = true, Description = "Allows viewing the list of blocks and their details", Parent = "Blocks" },
+                    new Permission { Name = "Create Block", Module = "Blocks", Action = "Create", IsDefault = true, Description = "Allows creating new blocks in societies", Parent = "Blocks" },
+                    new Permission { Name = "Edit Block", Module = "Blocks", Action = "Edit", IsDefault = true, Description = "Allows editing existing block information", Parent = "Blocks" },
+                    new Permission { Name = "Delete Block", Module = "Blocks", Action = "Delete", IsDefault = true, Description = "Allows deleting blocks", Parent = "Blocks" },
 
                     // Floor Permissions
-                    new Permission { Name = "View Floors", Module = "Floors", Action = "View", IsDefault = true, Description = "Allows viewing the list of floors and their details", Parent = "SocietyManagement" },
-                    new Permission { Name = "Create Floor", Module = "Floors", Action = "Create", IsDefault = true, Description = "Allows creating new floors in blocks", Parent = "SocietyManagement" },
-                    new Permission { Name = "Edit Floor", Module = "Floors", Action = "Edit", IsDefault = true, Description = "Allows editing existing floor information", Parent = "SocietyManagement" },
-                    new Permission { Name = "Delete Floor", Module = "Floors", Action = "Delete", IsDefault = true, Description = "Allows deleting floors", Parent = "SocietyManagement" },
+                    new Permission { Name = "Floors", Module = "Floors", Action = "Module", IsDefault = true, Description = "Allows managing floors", Parent = "SocietyManagement" },   
+                    new Permission { Name = "View Floors", Module = "Floors", Action = "View", IsDefault = true, Description = "Allows viewing the list of floors and their details", Parent = "Floors" }, 
+                    new Permission { Name = "Create Floor", Module = "Floors", Action = "Create", IsDefault = true, Description = "Allows creating new floors in blocks", Parent = "Floors" },
+                    new Permission { Name = "Edit Floor", Module = "Floors", Action = "Edit", IsDefault = true, Description = "Allows editing existing floor information", Parent = "Floors" },
+                    new Permission { Name = "Delete Floor", Module = "Floors", Action = "Delete", IsDefault = true, Description = "Allows deleting floors", Parent = "Floors" },
 
                     // Unit Permissions
-                    new Permission { Name = "View Units", Module = "Units", Action = "View", IsDefault = true, Description = "Allows viewing the list of units and their details", Parent = "SocietyManagement" },
-                    new Permission { Name = "Create Unit", Module = "Units", Action = "Create", IsDefault = true, Description = "Allows creating new units in floors", Parent = "SocietyManagement" },
-                    new Permission { Name = "Edit Unit", Module = "Units", Action = "Edit", IsDefault = true, Description = "Allows editing existing unit information", Parent = "SocietyManagement" },
-                    new Permission { Name = "Delete Unit", Module = "Units", Action = "Delete", IsDefault = true, Description = "Allows deleting units", Parent = "SocietyManagement" },
+                    new Permission { Name = "Units", Module = "Units", Action = "Module", IsDefault = true, Description = "Allows managing units", Parent = "SocietyManagement" },
+                    new Permission { Name = "View Units", Module = "Units", Action = "View", IsDefault = true, Description = "Allows viewing the list of units and their details", Parent = "Units" },
+                    new Permission { Name = "Create Unit", Module = "Units", Action = "Create", IsDefault = true, Description = "Allows creating new units in floors", Parent = "Units" },
+                    new Permission { Name = "Edit Unit", Module = "Units", Action = "Edit", IsDefault = true, Description = "Allows editing existing unit information", Parent = "Units" },
+                    new Permission { Name = "Delete Unit", Module = "Units", Action = "Delete", IsDefault = true, Description = "Allows deleting units", Parent = "Units" },
 
                     // Unit Ownership Permissions
-                    new Permission { Name = "View Unit Ownerships", Module = "UnitOwnerships", Action = "View", IsDefault = true, Description = "Allows viewing unit ownership records", Parent = "SocietyManagement" },
-                    new Permission { Name = "Create Unit Ownership", Module = "UnitOwnerships", Action = "Create", IsDefault = true, Description = "Allows creating new unit ownership records", Parent = "SocietyManagement" },
-                    new Permission { Name = "Edit Unit Ownership", Module = "UnitOwnerships", Action = "Edit", IsDefault = true, Description = "Allows editing unit ownership records", Parent = "SocietyManagement" },
-                    new Permission { Name = "Delete Unit Ownership", Module = "UnitOwnerships", Action = "Delete", IsDefault = true, Description = "Allows deleting unit ownership records", Parent = "SocietyManagement" },
-                    new Permission { Name = "Transfer Unit Ownership", Module = "UnitOwnerships", Action = "Transfer", IsDefault = true, Description = "Allows transferring unit ownership", Parent = "SocietyManagement" },
+                    new Permission { Name = "Unit Ownerships", Module = "UnitOwnerships", Action = "Module", IsDefault = true, Description = "Allows managing unit ownership records", Parent = "SocietyManagement" }, 
+                    new Permission { Name = "View Unit Ownerships", Module = "UnitOwnerships", Action = "View", IsDefault = true, Description = "Allows viewing unit ownership records", Parent = "UnitOwnerships" },
+                    new Permission { Name = "Create Unit Ownership", Module = "UnitOwnerships", Action = "Create", IsDefault = true, Description = "Allows creating new unit ownership records", Parent = "UnitOwnerships" },
+                    new Permission { Name = "Edit Unit Ownership", Module = "UnitOwnerships", Action = "Edit", IsDefault = true, Description = "Allows editing unit ownership records", Parent = "UnitOwnerships" },
+                    new Permission { Name = "Delete Unit Ownership", Module = "UnitOwnerships", Action = "Delete", IsDefault = true, Description = "Allows deleting unit ownership records", Parent = "UnitOwnerships" },
+                    new Permission { Name = "Transfer Unit Ownership", Module = "UnitOwnerships", Action = "Transfer", IsDefault = true, Description = "Allows transferring unit ownership", Parent = "UnitOwnerships" },
 
                     // Unit Resident Permissions
-                    new Permission { Name = "View Unit Residents", Module = "UnitResidents", Action = "View", IsDefault = true, Description = "Allows viewing unit resident records", Parent = "SocietyManagement" },
-                    new Permission { Name = "Create Unit Resident", Module = "UnitResidents", Action = "Create", IsDefault = true, Description = "Allows creating new unit resident records", Parent = "SocietyManagement" },
-                    new Permission { Name = "Edit Unit Resident", Module = "UnitResidents", Action = "Edit", IsDefault = true, Description = "Allows editing unit resident records", Parent = "SocietyManagement" },
-                    new Permission { Name = "Delete Unit Resident", Module = "UnitResidents", Action = "Delete", IsDefault = true, Description = "Allows deleting unit resident records", Parent = "SocietyManagement" },
-                    new Permission { Name = "Manage Primary Resident", Module = "UnitResidents", Action = "ManagePrimary", IsDefault = true, Description = "Allows managing primary resident status", Parent = "SocietyManagement" },
-                    new Permission { Name = "Move Out Resident", Module = "UnitResidents", Action = "MoveOut", IsDefault = true, Description = "Allows moving out residents from units", Parent = "SocietyManagement" }
+                    new Permission { Name = "Residents", Module = "Residents", Action = "Module", IsDefault = true, Description = "Allows managing residents", Parent = "SocietyManagement" },
+                    new Permission { Name = "View Residents", Module = "Residents", Action = "View", IsDefault = true, Description = "Allows viewing unit resident records", Parent = "Residents" },
+                    new Permission { Name = "Create Resident", Module = "Residents", Action = "Create", IsDefault = true, Description = "Allows creating new unit resident records", Parent = "Residents" },
+                    new Permission { Name = "Edit Resident", Module = "Residents", Action = "Edit", IsDefault = true, Description = "Allows editing unit resident records", Parent = "Residents" },
+                    new Permission { Name = "Delete Resident", Module = "Residents", Action = "Delete", IsDefault = true, Description = "Allows deleting unit resident records", Parent = "Residents" },
+                    new Permission { Name = "Manage Primary Resident", Module = "Residents", Action = "ManagePrimary", IsDefault = true, Description = "Allows managing primary resident status", Parent = "Residents" },
+                    new Permission { Name = "Move Out Resident", Module = "Residents", Action = "MoveOut", IsDefault = true, Description = "Allows moving out residents from units", Parent = "Residents" }
                 };
 
                 // Get existing permissions
