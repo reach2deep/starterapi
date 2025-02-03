@@ -32,6 +32,14 @@ namespace starterkit.Core.Modules.Tenant.SocietyManagement.Interfaces.Repositori
         Task<Floor> GetByIdAsync(Guid id);
 
         /// <summary>
+        /// Retrieves a paged list of floors
+        /// </summary>
+        /// <param name="pageNumber">The page number to retrieve.</param>
+        /// <param name="pageSize">The number of items per page.</param>
+        /// <returns>A tuple containing the paged floors and total count.</returns>
+        Task<(IEnumerable<Floor> Items, int TotalCount)> GetPagedAsync(int pageNumber, int pageSize);
+
+        /// <summary>
         /// Adds a new floor to the database.
         /// </summary>
         /// <param name="floor">The floor entity to add.</param>

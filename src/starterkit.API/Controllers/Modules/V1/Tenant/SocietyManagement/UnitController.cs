@@ -44,6 +44,28 @@ namespace starterkit.API.Controllers.Modules.V1.Tenant.SocietyManagement
         }
 
         /// <summary>
+        /// Gets a paged list of units
+        /// </summary>
+        [HttpGet("paged")]
+        [ProducesResponseType(typeof(ApiResponse<PagedResponse<UnitResponse>>), 200)]
+        public async Task<IActionResult> GetPaged([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            var result = await _unitService.GetPagedAsync(pageNumber, pageSize);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Gets units data optimized for dropdown/lookup controls
+        /// </summary>
+        [HttpGet("lookup")]
+        [ProducesResponseType(typeof(ApiResponse<LookupResponse<LookupDto>>), 200)]
+        public async Task<IActionResult> GetLookup([FromQuery] LookupRequest request)
+        {
+            var result = await _unitService.GetLookupAsync(request);
+            return Ok(result);
+        }
+
+        /// <summary>
         /// Gets all units for a specific floor
         /// </summary>
         [HttpGet("floor/{floorId}")]
@@ -89,6 +111,5 @@ namespace starterkit.API.Controllers.Modules.V1.Tenant.SocietyManagement
             var result = await _unitService.DeleteAsync(id);
             return Ok(result);
         }
-
     }
 } 

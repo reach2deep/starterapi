@@ -194,5 +194,31 @@ namespace starterkit.Infrastructure.Repositories.Tenant
                 throw;
             }
         }
+
+        /// <inheritdoc/>
+        public async Task<(IEnumerable<Floor>, int)> GetPagedAsync(int pageNumber, int pageSize)
+        {
+            try
+            {
+                _logger.LogInformation("Retrieving paged floors. Page: {PageNumber}, Size: {PageSize}", pageNumber, pageSize);
+                
+                var query = _context.Floors.Where(f => f.IsActive);
+                var totalCount = await query.CountAsync();
+                
+                var floors = await query
+                    .OrderBy(f => f.Block.Name)
+                    .ThenBy(f => f.FloorNumber)
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+
+                return (floors, totalCount);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while retrieving paged floors");
+                throw;
+            }
+        }
     }
 } 

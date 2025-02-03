@@ -323,5 +323,147 @@ namespace starterkit.Application.Modules.Tenant.SocietyManagement.Services
                 return ApiResponse<UnitOwnershipResponse>.CreateError("Failed to transfer ownership");
             }
         }
+
+        /// <inheritdoc/>
+        public async Task<ApiResponse<PagedResponse<UnitOwnershipResponse>>> GetPagedAsync(int pageNumber, int pageSize)
+        {
+            try
+            {
+                var (ownerships, totalCount) = await _ownershipRepository.GetPagedAsync(pageNumber, pageSize);
+                var mappedOwnerships = _mapper.Map<IEnumerable<UnitOwnershipResponse>>(ownerships);
+                var response = new PagedResponse<UnitOwnershipResponse>(mappedOwnerships, totalCount, pageNumber, pageSize);
+                return ApiResponse<PagedResponse<UnitOwnershipResponse>>.CreateSuccess(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while retrieving paged ownership records");
+                return ApiResponse<PagedResponse<UnitOwnershipResponse>>.CreateError("Failed to retrieve paged ownership records");
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task<ApiResponse<LookupResponse<LookupDto>>> GetLookupAsync(LookupRequest request)
+        {
+            try
+            {
+                // Get all ownership records
+                var ownerships = await _ownershipRepository.GetAllAsync();
+                
+                // Start with base query
+                var filteredOwnerships = ownerships.AsQueryable();
+
+                // Apply active filter unless specifically requested to include inactive
+                if (!request.IncludeInactive)
+                {
+                    filteredOwnerships = filteredOwnerships.Where(o => o.Status.ToLower() == "active");
+                }
+
+                // Apply search if provided
+                if (!string.IsNullOrWhiteSpace(request.SearchTerm))
+                {
+                    var searchTerm = request.SearchTerm.ToLower();
+                    filteredOwnerships = filteredOwnerships.Where(o => 
+                        (o.Unit != null && o.Unit.UnitNumber.ToLower().Contains(searchTerm)) ||
+                        o.Status.ToLower().Contains(searchTerm));
+                }
+
+                // Apply optional filters if provided
+                if (request.Filters?.Any() == true)
+                {
+                    foreach (var filter in request.Filters)
+                    {
+                        if (string.IsNullOrWhiteSpace(filter.Value)) continue;
+
+                        switch (filter.Key.ToLower())
+                        {
+                            case "unitid":
+                                if (Guid.TryParse(filter.Value, out var unitId))
+                                {
+                                    filteredOwnerships = filteredOwnerships.Where(o => o.UnitId == unitId);
+                                }
+                                break;
+                            case "ownerid":
+                                if (Guid.TryParse(filter.Value, out var ownerId))
+                                {
+                                    filteredOwnerships = filteredOwnerships.Where(o => o.OwnerId == ownerId);
+                                }
+                                break;
+                            case "status":
+                                filteredOwnerships = filteredOwnerships.Where(o => o.Status.ToLower() == filter.Value.ToLower());
+                                break;
+                        }
+                    }
+                }
+
+                // Apply sorting if requested
+                if (!string.IsNullOrWhiteSpace(request.SortBy))
+                {
+                    var isAscending = string.IsNullOrWhiteSpace(request.SortDirection) || 
+                                    request.SortDirection.ToLower() == "asc";
+
+                    filteredOwnerships = request.SortBy.ToLower() switch
+                    {
+                        "startdate" => isAscending 
+                            ? filteredOwnerships.OrderBy(o => o.StartDate)
+                            : filteredOwnerships.OrderByDescending(o => o.StartDate),
+                        "enddate" => isAscending 
+                            ? filteredOwnerships.OrderBy(o => o.EndDate)
+                            : filteredOwnerships.OrderByDescending(o => o.EndDate),
+                        "status" => isAscending 
+                            ? filteredOwnerships.OrderBy(o => o.Status)
+                            : filteredOwnerships.OrderByDescending(o => o.Status),
+                        _ => filteredOwnerships.OrderByDescending(o => o.StartDate) // Default sort by start date desc
+                    };
+                }
+
+                // Convert to list for pagination
+                var ownershipsList = filteredOwnerships.ToList();
+                var totalCount = ownershipsList.Count;
+
+                // Apply pagination if requested
+                if (request.Page.HasValue && request.PageSize.HasValue)
+                {
+                    var pageNumber = Math.Max(1, request.Page.Value);
+                    var pageSize = Math.Max(1, request.PageSize.Value);
+                    ownershipsList = ownershipsList
+                        .Skip((pageNumber - 1) * pageSize)
+                        .Take(pageSize)
+                        .ToList();
+                }
+
+                // Map to lookup DTOs
+                var lookupItems = ownershipsList.Select(o => new LookupDto
+                {
+                    Id = o.Id,
+                    Label = $"Unit {o.Unit?.UnitNumber} - {(o.EndDate.HasValue ? "Previous" : "Current")} Owner",
+                    Value = o.Id.ToString(),
+                    Group = o.Status,
+                    AdditionalData = new Dictionary<string, string>
+                    {
+                        { "unitId", o.UnitId.ToString() },
+                        { "unitNumber", o.Unit?.UnitNumber ?? "" },
+                        { "ownerId", o.OwnerId.ToString() },
+                        { "startDate", o.StartDate.ToString("yyyy-MM-dd") },
+                        { "endDate", o.EndDate?.ToString("yyyy-MM-dd") ?? "" },
+                        { "status", o.Status }
+                    }
+                });
+
+                var response = new LookupResponse<LookupDto>
+                {
+                    Items = lookupItems,
+                    TotalCount = totalCount,
+                    Page = request.Page,
+                    PageSize = request.PageSize
+                };
+
+                return ApiResponse<LookupResponse<LookupDto>>.CreateSuccess(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while retrieving ownership lookup data");
+                return ApiResponse<LookupResponse<LookupDto>>.CreateError("Failed to retrieve ownership lookup data");
+            }
+        }
     }
 } 

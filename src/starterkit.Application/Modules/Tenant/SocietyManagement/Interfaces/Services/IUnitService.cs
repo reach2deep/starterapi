@@ -28,6 +28,16 @@ namespace starterkit.Application.Modules.Tenant.SocietyManagement.Interfaces.Ser
         Task<ApiResponse<UnitResponse>> GetByIdAsync(Guid id);
 
         /// <summary>
+        /// Gets a paged list of units
+        /// </summary>
+        Task<ApiResponse<PagedResponse<UnitResponse>>> GetPagedAsync(int pageNumber, int pageSize);
+
+        /// <summary>
+        /// Gets units data optimized for dropdown/lookup controls
+        /// </summary>
+        Task<ApiResponse<LookupResponse<LookupDto>>> GetLookupAsync(LookupRequest request);
+
+        /// <summary>
         /// Creates a new unit
         /// </summary>
         Task<ApiResponse<UnitResponse>> CreateAsync(CreateUnitRequest request);
@@ -41,7 +51,5 @@ namespace starterkit.Application.Modules.Tenant.SocietyManagement.Interfaces.Ser
         /// Deletes a unit
         /// </summary>
         Task<ApiResponse<bool>> DeleteAsync(Guid id);
-
-     
     }
 } 

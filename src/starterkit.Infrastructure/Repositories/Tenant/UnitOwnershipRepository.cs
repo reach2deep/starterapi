@@ -216,5 +216,35 @@ namespace starterkit.Infrastructure.Repositories.Tenant
                 throw;
             }
         }
+
+        /// <inheritdoc/>
+        public async Task<(IEnumerable<UnitOwnership>, int)> GetPagedAsync(int pageNumber, int pageSize)
+        {
+            try
+            {
+                _logger.LogInformation("Retrieving paged ownership records. Page: {PageNumber}, Size: {PageSize}", pageNumber, pageSize);
+                
+                var query = _context.UnitOwnerships
+                    .Include(uo => uo.Unit)
+                        .ThenInclude(u => u.Floor)
+                            .ThenInclude(f => f.Block)
+                    .Where(uo => uo.IsActive);
+                
+                var totalCount = await query.CountAsync();
+                
+                var ownerships = await query
+                    .OrderByDescending(uo => uo.StartDate)
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+
+                return (ownerships, totalCount);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while retrieving paged ownership records");
+                throw;
+            }
+        }
     }
 } 

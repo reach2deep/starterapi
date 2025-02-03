@@ -28,6 +28,16 @@ namespace starterkit.Application.Modules.Tenant.SocietyManagement.Interfaces.Ser
         Task<ApiResponse<BlockResponse>> GetByIdAsync(Guid id);
 
         /// <summary>
+        /// Gets a paged list of blocks
+        /// </summary>
+        Task<ApiResponse<PagedResponse<BlockResponse>>> GetPagedAsync(int pageNumber, int pageSize);
+
+        /// <summary>
+        /// Gets blocks data optimized for dropdown/lookup controls
+        /// </summary>
+        Task<ApiResponse<LookupResponse<LookupDto>>> GetLookupAsync(LookupRequest request);
+
+        /// <summary>
         /// Creates a new block.
         /// </summary>
         /// <param name="request">The block creation request.</param>

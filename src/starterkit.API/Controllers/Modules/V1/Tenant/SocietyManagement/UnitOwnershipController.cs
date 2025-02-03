@@ -44,6 +44,28 @@ namespace starterkit.API.Controllers.Modules.V1.Tenant.SocietyManagement
         }
 
         /// <summary>
+        /// Gets a paged list of ownership records
+        /// </summary>
+        [HttpGet("paged")]
+        [ProducesResponseType(typeof(ApiResponse<PagedResponse<UnitOwnershipResponse>>), 200)]
+        public async Task<IActionResult> GetPaged([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            var result = await _ownershipService.GetPagedAsync(pageNumber, pageSize);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Gets ownership records data optimized for dropdown/lookup controls
+        /// </summary>
+        [HttpGet("lookup")]
+        [ProducesResponseType(typeof(ApiResponse<LookupResponse<LookupDto>>), 200)]
+        public async Task<IActionResult> GetLookup([FromQuery] LookupRequest request)
+        {
+            var result = await _ownershipService.GetLookupAsync(request);
+            return Ok(result);
+        }
+
+        /// <summary>
         /// Gets all ownership records for a specific unit
         /// </summary>
         [HttpGet("unit/{unitId}")]

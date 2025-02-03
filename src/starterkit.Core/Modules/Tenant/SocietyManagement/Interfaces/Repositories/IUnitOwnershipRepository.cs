@@ -46,6 +46,14 @@ namespace starterkit.Core.Modules.Tenant.SocietyManagement.Interfaces.Repositori
         Task<UnitOwnership> GetByIdAsync(Guid id);
 
         /// <summary>
+        /// Gets a paged list of ownership records
+        /// </summary>
+        /// <param name="pageNumber">The page number to retrieve.</param>
+        /// <param name="pageSize">The number of items per page.</param>
+        /// <returns>A tuple containing the paged ownership records and total count.</returns>
+        Task<(IEnumerable<UnitOwnership> Items, int TotalCount)> GetPagedAsync(int pageNumber, int pageSize);
+
+        /// <summary>
         /// Adds a new unit ownership record to the database.
         /// </summary>
         /// <param name="ownership">The ownership record to add.</param>
