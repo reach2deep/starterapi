@@ -4,6 +4,15 @@ using starterkit.Core.Enums;
 namespace starterkit.Application.Modules.Tenant.UserManagement.DTOs
 {
     /// <summary>
+    /// Response DTO for role information in user response
+    /// </summary>
+    public class UserRoleDto
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; }
+    }
+
+    /// <summary>
     /// Response DTO for user information
     /// </summary>
     public class UserResponse
@@ -15,7 +24,7 @@ namespace starterkit.Application.Modules.Tenant.UserManagement.DTOs
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public UserProfileResponseDto Profile { get; set; }
-        public List<string> Roles { get; set; } = new();
+        public List<UserRoleDto> Roles { get; set; } = new();
     }
 
     /// <summary>

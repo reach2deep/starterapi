@@ -10,7 +10,11 @@ namespace starterkit.Application.Modules.Tenant.UserManagement.Mappings
         {
             CreateMap<User, UserResponse>()
                 .ForMember(dest => dest.Roles, opt => opt.MapFrom(src => 
-                    src.UserRoles.Select(ur => ur.Role.Name).ToList()));
+                    src.UserRoles.Select(ur => new UserRoleDto 
+                    { 
+                        Id = ur.Role.Id,
+                        Name = ur.Role.Name 
+                    }).ToList()));
 
             CreateMap<CreateUserRequest, User>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
