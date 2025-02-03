@@ -90,26 +90,5 @@ namespace starterkit.API.Controllers.Modules.V1.Tenant.SocietyManagement
             return Ok(result);
         }
 
-        /// <summary>
-        /// Gets a floor with all its related details
-        /// </summary>
-        [HttpGet("{id}/details")]
-        [ProducesResponseType(typeof(ApiResponse<FloorResponse>), 200)]
-        public async Task<IActionResult> GetByIdWithDetails(Guid id)
-        {
-            var result = await _floorService.GetByIdWithDetailsAsync(id);
-            return Ok(result);
-        }
-
-        /// <summary>
-        /// Checks if a floor number is unique within a block
-        /// </summary>
-        [HttpGet("block/{blockId}/number-unique")]
-        [ProducesResponseType(typeof(ApiResponse<bool>), 200)]
-        public async Task<IActionResult> IsFloorNumberUniqueInBlock(Guid blockId, [FromQuery] int floorNumber, [FromQuery] Guid? excludeId = null)
-        {
-            var result = await _floorService.IsFloorNumberUniqueInBlockAsync(blockId, floorNumber, excludeId);
-            return Ok(result);
-        }
     }
 } 

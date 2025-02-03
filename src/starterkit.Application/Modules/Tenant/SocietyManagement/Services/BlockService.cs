@@ -66,24 +66,7 @@ namespace starterkit.Application.Modules.Tenant.SocietyManagement.Services
             }
         }
 
-        /// <inheritdoc/>
-        public async Task<ApiResponse<IEnumerable<BlockResponse>>> GetBySocietyIdAsync(Guid societyId)
-        {
-            try
-            {
-                if (!await _societyRepository.ExistsAsync(societyId))
-                    return ApiResponse<IEnumerable<BlockResponse>>.CreateError("Society not found");
-
-                var blocks = await _blockRepository.GetBySocietyIdAsync(societyId);
-                var response = _mapper.Map<IEnumerable<BlockResponse>>(blocks);
-                return ApiResponse<IEnumerable<BlockResponse>>.CreateSuccess(response);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error occurred while retrieving blocks for society ID: {SocietyId}", societyId);
-                return ApiResponse<IEnumerable<BlockResponse>>.CreateError("Failed to retrieve blocks");
-            }
-        }
+ 
 
         /// <inheritdoc/>
         public async Task<ApiResponse<BlockResponse>> GetByIdAsync(Guid id)
@@ -185,56 +168,6 @@ namespace starterkit.Application.Modules.Tenant.SocietyManagement.Services
             }
         }
 
-        /// <inheritdoc/>
-        public async Task<ApiResponse<bool>> ExistsAsync(Guid id)
-        {
-            try
-            {
-                var exists = await _blockRepository.ExistsAsync(id);
-                return ApiResponse<bool>.CreateSuccess(exists);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error occurred while checking existence of block with ID: {Id}", id);
-                return ApiResponse<bool>.CreateError("Failed to check block existence");
-            }
-        }
 
-        /// <inheritdoc/>
-        public async Task<ApiResponse<bool>> IsNameUniqueInSocietyAsync(Guid societyId, string name, Guid? excludeId = null)
-        {
-            try
-            {
-                if (!await _societyRepository.ExistsAsync(societyId))
-                    return ApiResponse<bool>.CreateError("Society not found");
-
-                var isUnique = await _blockRepository.IsNameUniqueInSocietyAsync(societyId, name, excludeId);
-                return ApiResponse<bool>.CreateSuccess(isUnique);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error occurred while checking uniqueness of block name {Name} in society {SocietyId}", name, societyId);
-                return ApiResponse<bool>.CreateError("Failed to check block name uniqueness");
-            }
-        }
-
-        /// <inheritdoc/>
-        public async Task<ApiResponse<BlockResponse>> GetByIdWithDetailsAsync(Guid id)
-        {
-            try
-            {
-                var block = await _blockRepository.GetByIdWithDetailsAsync(id);
-                if (block == null)
-                    return ApiResponse<BlockResponse>.CreateError("Block not found");
-
-                var response = _mapper.Map<BlockResponse>(block);
-                return ApiResponse<BlockResponse>.CreateSuccess(response);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error occurred while retrieving block details with ID: {Id}", id);
-                return ApiResponse<BlockResponse>.CreateError("Failed to retrieve block details");
-            }
-        }
     }
 } 
