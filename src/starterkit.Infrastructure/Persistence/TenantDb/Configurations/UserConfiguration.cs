@@ -38,6 +38,12 @@ namespace starterkit.Infrastructure.Data.TenantDb.Configurations
                 .WithOne(p => p.User)
                 .HasForeignKey<UserProfile>(p => p.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // Configure one-to-many relationship with UserRoles
+            builder.HasMany(u => u.UserRoles)
+                .WithOne(ur => ur.User)
+                .HasForeignKey(ur => ur.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
