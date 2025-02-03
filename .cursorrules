@@ -351,6 +351,36 @@ rules:
       - "Use strongly typed ApiResponse<T> for all service methods"
       - "Document all possible error codes in XML comments"
 
+  # Module Service Registration Rules
+  - name: "Module Service Registration"
+    pattern: "*/DependencyInjection/*.cs"
+    rules:
+      - "Each module must have its own registration method (Add[ModuleName]Module)"
+      - "Services must be registered in consistent order (Auth → User → Role → Permission)"
+      - "Each registration method must be private static"
+      - "Use AddScoped for request-scoped dependencies"
+      - "Register interfaces and implementations in pairs"
+      - "Follow registration pattern: services.AddScoped<IService, ServiceImplementation>()"
+      - "Register repositories after services in each module"
+      - "Register cross-cutting concerns last (AutoMapper, FluentValidation)"
+      - "Document module dependencies in XML comments"
+      - "Keep module registrations isolated and focused"
+
+  # Module Dependencies
+  - name: "Module Dependencies"
+    pattern: "*/DependencyInjection/*.cs"
+    rules:
+      - "Auth module must be registered first"
+      - "User management module must be registered after Auth"
+      - "Role management module must be registered after User"
+      - "Permission management module must be registered after Role"
+      - "Cross-cutting concerns must be registered last"
+      - "Each module must declare all its dependencies"
+      - "No circular dependencies between modules"
+      - "Clear separation between module registrations"
+      - "Proper error handling for missing dependencies"
+      - "Document dependencies between modules"
+
 Code Style:
 - Use async/await for asynchronous operations
 - Use consistent naming conventions for all modules

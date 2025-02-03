@@ -15,10 +15,17 @@
     </PackageReference>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+    <PackageReference Include="FluentValidation" Version="11.11.0" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.9.0" />
+    <PackageReference Include="AutoMapper" Version="12.0.1" />
+    <PackageReference Include="AutoMapper.Collection" Version="9.0.0" />
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
   </ItemGroup>
 
   <ItemGroup>
+    <!-- API layer references Application for business logic -->
     <ProjectReference Include="..\starterkit.Application\starterkit.Application.csproj" />
+    <!-- Infrastructure reference needed for DI configuration only -->
     <ProjectReference Include="..\starterkit.Infrastructure\starterkit.Infrastructure.csproj" />
   </ItemGroup>
 
