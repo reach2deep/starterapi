@@ -194,56 +194,9 @@ namespace starterkit.Application.Modules.Tenant.SocietyManagement.Services
             }
         }
 
-        /// <inheritdoc/>
-        public async Task<ApiResponse<bool>> ExistsAsync(Guid id)
-        {
-            try
-            {
-                var exists = await _floorRepository.ExistsAsync(id);
-                return ApiResponse<bool>.CreateSuccess(exists);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error occurred while checking existence of floor with ID: {Id}", id);
-                return ApiResponse<bool>.CreateError("Failed to check floor existence");
-            }
-        }
+ 
 
-        /// <inheritdoc/>
-        public async Task<ApiResponse<bool>> IsFloorNumberUniqueInBlockAsync(Guid blockId, int floorNumber, Guid? excludeId = null)
-        {
-            try
-            {
-                if (!await _blockRepository.ExistsAsync(blockId))
-                    return ApiResponse<bool>.CreateError("Block not found");
 
-                var isUnique = await _floorRepository.IsFloorNumberUniqueInBlockAsync(blockId, floorNumber, excludeId);
-                return ApiResponse<bool>.CreateSuccess(isUnique);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error occurred while checking uniqueness of floor number {FloorNumber} in block {BlockId}", floorNumber, blockId);
-                return ApiResponse<bool>.CreateError("Failed to check floor number uniqueness");
-            }
-        }
 
-        /// <inheritdoc/>
-        public async Task<ApiResponse<FloorResponse>> GetByIdWithDetailsAsync(Guid id)
-        {
-            try
-            {
-                var floor = await _floorRepository.GetByIdWithDetailsAsync(id);
-                if (floor == null)
-                    return ApiResponse<FloorResponse>.CreateError("Floor not found");
-
-                var response = _mapper.Map<FloorResponse>(floor);
-                return ApiResponse<FloorResponse>.CreateSuccess(response);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error occurred while retrieving floor details with ID: {Id}", id);
-                return ApiResponse<FloorResponse>.CreateError("Failed to retrieve floor details");
-            }
-        }
     }
 } 

@@ -113,28 +113,6 @@ namespace starterkit.API.Controllers.Modules.V1.Tenant.SocietyManagement
         }
 
         /// <summary>
-        /// Gets an ownership record with all its related details
-        /// </summary>
-        [HttpGet("{id}/details")]
-        [ProducesResponseType(typeof(ApiResponse<UnitOwnershipResponse>), 200)]
-        public async Task<IActionResult> GetByIdWithDetails(Guid id)
-        {
-            var result = await _ownershipService.GetByIdWithDetailsAsync(id);
-            return Ok(result);
-        }
-
-        /// <summary>
-        /// Checks if a unit has any active ownership records
-        /// </summary>
-        [HttpGet("unit/{unitId}/has-active")]
-        [ProducesResponseType(typeof(ApiResponse<bool>), 200)]
-        public async Task<IActionResult> HasActiveOwnership(Guid unitId)
-        {
-            var result = await _ownershipService.HasActiveOwnershipAsync(unitId);
-            return Ok(result);
-        }
-
-        /// <summary>
         /// Transfers ownership of a unit from one owner to another
         /// </summary>
         [HttpPost("transfer")]

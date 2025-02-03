@@ -43,17 +43,6 @@ namespace starterkit.API.Controllers.Modules.V1.Tenant.SocietyManagement
             return Ok(result);
         }
 
-        // /// <summary>
-        // /// Gets a society by registration number
-        // /// </summary>
-        // [HttpGet("by-registration/{registrationNumber}")]
-        // [ProducesResponseType(typeof(ApiResponse<Society>), 200)]
-        // public async Task<IActionResult> GetByRegistrationNumber(string registrationNumber)
-        // {
-        //     var result = await _societyService.GetByRegistrationNumberAsync(registrationNumber);
-        //     return Ok(result);
-        // }
-
         /// <summary>
         /// Creates a new society
         /// </summary>
@@ -101,26 +90,6 @@ namespace starterkit.API.Controllers.Modules.V1.Tenant.SocietyManagement
             return Ok(result);
         }
 
-        // /// <summary>
-        // /// Gets all societies with their related details
-        // /// </summary>
-        // [HttpGet("with-details")]
-        // [ProducesResponseType(typeof(ApiResponse<IEnumerable<Society>>), 200)]
-        // public async Task<IActionResult> GetAllWithDetails()
-        // {
-        //     var result = await _societyService.GetAllWithDetailsAsync();
-        //     return Ok(result);
-        // }
-
-        // /// <summary>
-        // /// Checks if a society exists by registration number
-        // /// </summary>
-        // [HttpGet("exists/registration/{registrationNumber}")]
-        // [ProducesResponseType(typeof(ApiResponse<bool>), 200)]
-        // public async Task<IActionResult> ExistsByRegistrationNumber(string registrationNumber)
-        // {
-        //     var result = await _societyService.ExistsByRegistrationNumberAsync(registrationNumber);
-        //     return Ok(result);
-        // }
+  
     }
 } 

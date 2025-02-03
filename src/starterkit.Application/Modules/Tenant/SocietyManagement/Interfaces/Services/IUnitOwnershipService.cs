@@ -52,20 +52,7 @@ namespace starterkit.Application.Modules.Tenant.SocietyManagement.Interfaces.Ser
         /// </summary>
         Task<ApiResponse<bool>> DeleteAsync(Guid id);
 
-        /// <summary>
-        /// Checks if a unit ownership record exists
-        /// </summary>
-        Task<ApiResponse<bool>> ExistsAsync(Guid id);
 
-        /// <summary>
-        /// Checks if a unit has any active ownership records
-        /// </summary>
-        Task<ApiResponse<bool>> HasActiveOwnershipAsync(Guid unitId);
-
-        /// <summary>
-        /// Gets a unit ownership record with all its related details
-        /// </summary>
-        Task<ApiResponse<UnitOwnershipResponse>> GetByIdWithDetailsAsync(Guid id);
 
         /// <summary>
         /// Transfers ownership of a unit from one owner to another

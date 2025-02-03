@@ -123,16 +123,6 @@ namespace starterkit.API.Controllers.Modules.V1.Tenant.SocietyManagement
             return Ok(result);
         }
 
-        /// <summary>
-        /// Gets a resident record with all its related details
-        /// </summary>
-        [HttpGet("{id}/details")]
-        [ProducesResponseType(typeof(ApiResponse<UnitResidentResponse>), 200)]
-        public async Task<IActionResult> GetByIdWithDetails(Guid id)
-        {
-            var result = await _residentService.GetByIdWithDetailsAsync(id);
-            return Ok(result);
-        }
 
         /// <summary>
         /// Checks if a user is currently a resident in any unit
