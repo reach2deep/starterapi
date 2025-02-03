@@ -254,6 +254,18 @@ public class SocietyService : ISocietyService
 
 ### 9. Controllers (API Layer)
 ```csharp
+
+**Key Points for Repository Implementation:**
+- use Only DTOs for request and response
+- Use generic ApiResponse for all responses
+- Implement all interface methods
+- Use proper exception handling and logging
+- Include relevant entity includes (eager loading)
+- Handle soft delete with IsActive flag
+- Use async/await consistently
+- Keep methods focused and clean
+- Add XML documentation
+
 [Route("api/v1/tenant/societies")]
 [Authorize]
 public class SocietyController : BaseApiController
