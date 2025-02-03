@@ -458,9 +458,9 @@ namespace starterkit.Infrastructure.Persistence.TenantDb.Migrations
                         .IsRequired();
 
                     b.HasOne("starterkit.Core.Modules.Tenant.User", "User")
-                        .WithMany()
+                        .WithMany("UserRoles")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Role");
@@ -479,6 +479,8 @@ namespace starterkit.Infrastructure.Persistence.TenantDb.Migrations
                 {
                     b.Navigation("Profile")
                         .IsRequired();
+
+                    b.Navigation("UserRoles");
                 });
 #pragma warning restore 612, 618
         }
