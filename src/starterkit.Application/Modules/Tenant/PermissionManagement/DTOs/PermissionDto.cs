@@ -8,6 +8,7 @@ namespace starterkit.Application.Modules.Tenant.PermissionManagement.DTOs
         public string Module { get; set; }
         public string Action { get; set; }
         public bool IsDefault { get; set; }
+        public string? Parent { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
     }
@@ -19,6 +20,7 @@ namespace starterkit.Application.Modules.Tenant.PermissionManagement.DTOs
         public string Module { get; set; }
         public string Action { get; set; }
         public bool IsDefault { get; set; }
+        public string? Parent { get; set; }
     }
 
     public class UpdatePermissionRequest
@@ -28,5 +30,6 @@ namespace starterkit.Application.Modules.Tenant.PermissionManagement.DTOs
         public string Module { get; set; }
         public string Action { get; set; }
         public bool IsDefault { get; set; }
+        public string? Parent { get; set; }
     }
 } 

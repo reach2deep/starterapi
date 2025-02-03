@@ -57,10 +57,16 @@ namespace starterkit.Infrastructure.Repositories.Tenant
             }
         }
 
-        public async Task<bool> ExistsByNameAsync(string name)
+        public async Task<bool> ExistsByNameAsync(string name, Guid? excludeId = null)
         {
-            return await _context.Roles
-                .AnyAsync(r => r.Name.ToLower() == name.ToLower() && r.IsActive);
+            var query = _context.Roles.Where(r => r.Name.ToLower() == name.ToLower() && r.IsActive);
+            
+            if (excludeId.HasValue)
+            {
+                query = query.Where(r => r.Id != excludeId.Value);
+            }
+            
+            return await query.AnyAsync();
         }
 
         public async Task<IEnumerable<Role>> GetByUserIdAsync(Guid userId)

@@ -93,8 +93,9 @@ namespace starterkit.API.Controllers.Modules.V1.Tenant.UserManagement
             if (!rolesResult.Success)
             {
                 return BadRequest(ApiResponse<UserPermissionsResponse>.CreateError(
-                    rolesResult.Error?.Message ?? "Failed to get user roles",
-                    rolesResult.Error?.Code));
+                    "Failed to retrieve user roles",  // Generic error message
+                    "ROLES_RETRIEVAL_ERROR"          // Error code
+                ));
             }
 
             // Get unique permissions from all roles

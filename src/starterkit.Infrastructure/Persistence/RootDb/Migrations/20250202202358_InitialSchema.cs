@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace starterkit.Infrastructure.Persistence.RootDb.Migrations
 {
     /// <inheritdoc />
-    public partial class LoginActivity : Migration
+    public partial class InitialSchema : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

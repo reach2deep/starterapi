@@ -77,12 +77,16 @@ namespace starterkit.Application.Modules.Tenant.RoleManagement.Services
             if (role == null)
                 return ApiResponse<RoleResponse>.CreateError("Role not found", "NOT_FOUND");
 
-            if (role.Name != request.Name && await _roleRepository.ExistsByNameAsync(request.Name))
+            if (await _roleRepository.ExistsByNameAsync(request.Name, id))
                 return ApiResponse<RoleResponse>.CreateError($"Role with name '{request.Name}' already exists", "DUPLICATE_NAME");
 
-            _mapper.Map(request, role);
-            role = await _roleRepository.UpdateAsync(role);
-            var response = _mapper.Map<RoleResponse>(role);
+            role.Name = request.Name;
+            role.Description = request.Description;
+            role.IsDefault = request.IsDefault;
+            role.IsActive = request.IsActive;
+
+            var updatedRole = await _roleRepository.UpdateAsync(role);
+            var response = _mapper.Map<RoleResponse>(updatedRole);
             return ApiResponse<RoleResponse>.CreateSuccess(response);
         }
 

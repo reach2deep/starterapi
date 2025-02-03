@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace starterkit.Infrastructure.Persistence.TenantDb.Migrations
 {
     /// <inheritdoc />
-    public partial class RolesSchema : Migration
+    public partial class InitialSchema : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -42,6 +42,7 @@ namespace starterkit.Infrastructure.Persistence.TenantDb.Migrations
                     Module = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Action = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     IsDefault = table.Column<bool>(type: "bit", nullable: false),
+                    Parent = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
