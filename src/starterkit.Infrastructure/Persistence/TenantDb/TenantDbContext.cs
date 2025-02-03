@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using starterkit.Application.Persistence;
 using starterkit.Core.Modules.Tenant;
+using starterkit.Core.Modules.Tenant.SocietyManagement.Entities;
 using starterkit.Infrastructure.Data.TenantDb.Configurations;
 using starterkit.Infrastructure.Persistence.TenantDb.Configurations;
 
@@ -23,6 +24,20 @@ namespace starterkit.Infrastructure.Persistence.TenantDb
         public DbSet<Permission> Permissions { get; set; }
         public DbSet<UserRole> UserRoles { get; set; }
         public DbSet<RolePermission> RolePermissions { get; set; }
+        public DbSet<Society> Societies { get; set; }
+        public DbSet<Block> Blocks { get; set; }
+        public DbSet<Floor> Floors { get; set; }
+        public DbSet<Unit> Units { get; set; }
+        public DbSet<UnitOwnership> UnitOwnerships { get; set; }
+        public DbSet<SocietySubscription> SocietySubscriptions { get; set; }
+        public DbSet<FeatureAccess> FeatureAccesses { get; set; }
+        public DbSet<UnitResident> UnitResidents { get; set; }
+
+    
+        
+
+
+        
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

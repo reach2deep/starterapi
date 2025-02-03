@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using starterkit.Core.Modules.Tenant;
+using starterkit.Core.Modules.Tenant.SocietyManagement.Entities;
 
 
 namespace starterkit.Application.Persistence
@@ -14,6 +15,15 @@ namespace starterkit.Application.Persistence
         DbSet<Permission> Permissions { get; set; }
         DbSet<UserRole> UserRoles { get; set; }
         DbSet<RolePermission> RolePermissions { get; set; }
+        DbSet<Society> Societies { get; set; }
+        DbSet<Block> Blocks { get; set; }
+        DbSet<Floor> Floors { get; set; }
+        DbSet<Unit> Units { get; set; }
+        DbSet<UnitOwnership> UnitOwnerships { get; set; }
+        DbSet<UnitResident> UnitResidents { get; set; }
+        DbSet<SocietySubscription> SocietySubscriptions { get; set; }
+        DbSet<FeatureAccess> FeatureAccesses { get; set; }
+
         DbSet<TEntity> Set<TEntity>() where TEntity : class;
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }
