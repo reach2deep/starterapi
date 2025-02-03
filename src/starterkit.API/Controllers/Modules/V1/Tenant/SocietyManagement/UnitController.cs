@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using starterkit.Application.Modules.Tenant.SocietyManagement.Interfaces.Services;
-using starterkit.Core.Modules.Tenant.SocietyManagement.Entities;
+using starterkit.Application.Modules.Tenant.SocietyManagement.DTOs.Requests;
+using starterkit.Application.Modules.Tenant.SocietyManagement.DTOs.Responses;
 using starterkit.Core.Modules.Common;
 
 namespace starterkit.API.Controllers.Modules.V1.Tenant.SocietyManagement
@@ -24,7 +25,7 @@ namespace starterkit.API.Controllers.Modules.V1.Tenant.SocietyManagement
         /// Gets a unit by ID
         /// </summary>
         [HttpGet("{id}")]
-        [ProducesResponseType(typeof(ApiResponse<Unit>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<UnitResponse>), 200)]
         public async Task<IActionResult> GetById(Guid id)
         {
             var result = await _unitService.GetByIdAsync(id);
@@ -35,7 +36,7 @@ namespace starterkit.API.Controllers.Modules.V1.Tenant.SocietyManagement
         /// Gets all units
         /// </summary>
         [HttpGet]
-        [ProducesResponseType(typeof(ApiResponse<IEnumerable<Unit>>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<IEnumerable<UnitResponse>>), 200)]
         public async Task<IActionResult> GetAll()
         {
             var result = await _unitService.GetAllAsync();
@@ -46,7 +47,7 @@ namespace starterkit.API.Controllers.Modules.V1.Tenant.SocietyManagement
         /// Gets all units for a specific floor
         /// </summary>
         [HttpGet("floor/{floorId}")]
-        [ProducesResponseType(typeof(ApiResponse<IEnumerable<Unit>>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<IEnumerable<UnitResponse>>), 200)]
         public async Task<IActionResult> GetByFloorId(Guid floorId)
         {
             var result = await _unitService.GetByFloorIdAsync(floorId);
@@ -54,46 +55,13 @@ namespace starterkit.API.Controllers.Modules.V1.Tenant.SocietyManagement
         }
 
         /// <summary>
-        /// Gets all units for a specific block
-        /// </summary>
-        [HttpGet("block/{blockId}")]
-        [ProducesResponseType(typeof(ApiResponse<IEnumerable<Unit>>), 200)]
-        public async Task<IActionResult> GetByBlockId(Guid blockId)
-        {
-            var result = await _unitService.GetByBlockIdAsync(blockId);
-            return Ok(result);
-        }
-
-        /// <summary>
-        /// Gets all units for a specific society
-        /// </summary>
-        [HttpGet("society/{societyId}")]
-        [ProducesResponseType(typeof(ApiResponse<IEnumerable<Unit>>), 200)]
-        public async Task<IActionResult> GetBySocietyId(Guid societyId)
-        {
-            var result = await _unitService.GetBySocietyIdAsync(societyId);
-            return Ok(result);
-        }
-
-        /// <summary>
-        /// Gets a unit by its unit number within a society
-        /// </summary>
-        [HttpGet("society/{societyId}/unit-number/{unitNumber}")]
-        [ProducesResponseType(typeof(ApiResponse<Unit>), 200)]
-        public async Task<IActionResult> GetByUnitNumber(Guid societyId, string unitNumber)
-        {
-            var result = await _unitService.GetByUnitNumberAsync(societyId, unitNumber);
-            return Ok(result);
-        }
-
-        /// <summary>
         /// Creates a new unit
         /// </summary>
         [HttpPost]
-        [ProducesResponseType(typeof(ApiResponse<Unit>), 200)]
-        public async Task<IActionResult> Create([FromBody] Unit unit)
+        [ProducesResponseType(typeof(ApiResponse<UnitResponse>), 200)]
+        public async Task<IActionResult> Create([FromBody] CreateUnitRequest request)
         {
-            var result = await _unitService.CreateAsync(unit);
+            var result = await _unitService.CreateAsync(request);
             return Ok(result);
         }
 
@@ -101,13 +69,13 @@ namespace starterkit.API.Controllers.Modules.V1.Tenant.SocietyManagement
         /// Updates an existing unit
         /// </summary>
         [HttpPut("{id}")]
-        [ProducesResponseType(typeof(ApiResponse<Unit>), 200)]
-        public async Task<IActionResult> Update(Guid id, [FromBody] Unit unit)
+        [ProducesResponseType(typeof(ApiResponse<UnitResponse>), 200)]
+        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateUnitRequest request)
         {
-            if (id != unit.Id)
+            if (id != request.Id)
                 return BadRequest("ID mismatch");
 
-            var result = await _unitService.UpdateAsync(unit);
+            var result = await _unitService.UpdateAsync(request);
             return Ok(result);
         }
 
@@ -122,26 +90,5 @@ namespace starterkit.API.Controllers.Modules.V1.Tenant.SocietyManagement
             return Ok(result);
         }
 
-        /// <summary>
-        /// Gets a unit with all its related details
-        /// </summary>
-        [HttpGet("{id}/details")]
-        [ProducesResponseType(typeof(ApiResponse<Unit>), 200)]
-        public async Task<IActionResult> GetByIdWithDetails(Guid id)
-        {
-            var result = await _unitService.GetByIdWithDetailsAsync(id);
-            return Ok(result);
-        }
-
-        /// <summary>
-        /// Checks if a unit number is unique within a society
-        /// </summary>
-        [HttpGet("society/{societyId}/number-unique")]
-        [ProducesResponseType(typeof(ApiResponse<bool>), 200)]
-        public async Task<IActionResult> IsUnitNumberUniqueInSociety(Guid societyId, [FromQuery] string unitNumber, [FromQuery] Guid? excludeId = null)
-        {
-            var result = await _unitService.IsUnitNumberUniqueInSocietyAsync(societyId, unitNumber, excludeId);
-            return Ok(result);
-        }
     }
 } 

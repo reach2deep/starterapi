@@ -1,56 +1,45 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using starterkit.Core.Modules.Tenant.SocietyManagement.Entities;
 using starterkit.Core.Modules.Common;
+using starterkit.Application.Modules.Tenant.SocietyManagement.DTOs.Requests;
+using starterkit.Application.Modules.Tenant.SocietyManagement.DTOs.Responses;
 
 namespace starterkit.Application.Modules.Tenant.SocietyManagement.Interfaces.Services
 {
     /// <summary>
-    /// Service interface for managing Floor entities.
-    /// Provides business logic operations for floors within blocks.
+    /// Service interface for managing Floor entities
     /// </summary>
     public interface IFloorService
     {
         /// <summary>
-        /// Retrieves all floors.
+        /// Gets all floors
         /// </summary>
-        /// <returns>ApiResponse containing a collection of floors.</returns>
-        Task<ApiResponse<IEnumerable<Floor>>> GetAllAsync();
+        Task<ApiResponse<IEnumerable<FloorResponse>>> GetAllAsync();
 
         /// <summary>
-        /// Retrieves all floors for a specific block.
+        /// Gets all floors for a specific block
         /// </summary>
-        /// <param name="blockId">The ID of the block.</param>
-        /// <returns>ApiResponse containing a collection of floors.</returns>
-        Task<ApiResponse<IEnumerable<Floor>>> GetByBlockIdAsync(Guid blockId);
+        Task<ApiResponse<IEnumerable<FloorResponse>>> GetByBlockIdAsync(Guid blockId);
 
         /// <summary>
-        /// Retrieves a floor by its ID.
+        /// Gets a floor by ID
         /// </summary>
-        /// <param name="id">The unique identifier of the floor.</param>
-        /// <returns>ApiResponse containing the floor if found.</returns>
-        Task<ApiResponse<Floor>> GetByIdAsync(Guid id);
+        Task<ApiResponse<FloorResponse>> GetByIdAsync(Guid id);
 
         /// <summary>
-        /// Creates a new floor.
+        /// Creates a new floor
         /// </summary>
-        /// <param name="floor">The floor entity to create.</param>
-        /// <returns>ApiResponse containing the created floor.</returns>
-        Task<ApiResponse<Floor>> CreateAsync(Floor floor);
+        Task<ApiResponse<FloorResponse>> CreateAsync(CreateFloorRequest request);
 
         /// <summary>
-        /// Updates an existing floor.
+        /// Updates an existing floor
         /// </summary>
-        /// <param name="floor">The floor entity to update.</param>
-        /// <returns>ApiResponse containing the updated floor.</returns>
-        Task<ApiResponse<Floor>> UpdateAsync(Floor floor);
+        Task<ApiResponse<FloorResponse>> UpdateAsync(UpdateFloorRequest request);
 
         /// <summary>
-        /// Deletes a floor by its ID.
+        /// Deletes a floor
         /// </summary>
-        /// <param name="id">The unique identifier of the floor to delete.</param>
-        /// <returns>ApiResponse indicating success or failure.</returns>
         Task<ApiResponse<bool>> DeleteAsync(Guid id);
 
         /// <summary>
@@ -74,6 +63,6 @@ namespace starterkit.Application.Modules.Tenant.SocietyManagement.Interfaces.Ser
         /// </summary>
         /// <param name="id">The unique identifier of the floor.</param>
         /// <returns>ApiResponse containing the floor with all related entities.</returns>
-        Task<ApiResponse<Floor>> GetByIdWithDetailsAsync(Guid id);
+        Task<ApiResponse<FloorResponse>> GetByIdWithDetailsAsync(Guid id);
     }
 } 

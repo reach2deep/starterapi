@@ -2,138 +2,177 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using AutoMapper;
+using FluentValidation;
 using starterkit.Core.Modules.Common;
 using starterkit.Core.Modules.Tenant.SocietyManagement.Entities;
 using starterkit.Core.Modules.Tenant.SocietyManagement.Interfaces.Repositories;
 using starterkit.Application.Modules.Tenant.SocietyManagement.Interfaces.Services;
+using starterkit.Application.Modules.Tenant.SocietyManagement.DTOs.Requests;
+using starterkit.Application.Modules.Tenant.SocietyManagement.DTOs.Responses;
 
 namespace starterkit.Application.Modules.Tenant.SocietyManagement.Services
 {
     /// <summary>
-    /// Implementation of IFloorService.
-    /// Provides business logic operations for managing floors.
+    /// Implementation of IFloorService
     /// </summary>
     public class FloorService : IFloorService
     {
         private readonly IFloorRepository _floorRepository;
         private readonly IBlockRepository _blockRepository;
+        private readonly IMapper _mapper;
         private readonly ILogger<FloorService> _logger;
+        private readonly IValidator<CreateFloorRequest> _createValidator;
+        private readonly IValidator<UpdateFloorRequest> _updateValidator;
 
         /// <summary>
         /// Initializes a new instance of the FloorService class.
         /// </summary>
         /// <param name="floorRepository">The floor repository.</param>
         /// <param name="blockRepository">The block repository.</param>
+        /// <param name="mapper">The mapper instance.</param>
         /// <param name="logger">The logger instance.</param>
+        /// <param name="createValidator">The create validator instance.</param>
+        /// <param name="updateValidator">The update validator instance.</param>
         public FloorService(
             IFloorRepository floorRepository,
             IBlockRepository blockRepository,
-            ILogger<FloorService> logger)
+            IMapper mapper,
+            ILogger<FloorService> logger,
+            IValidator<CreateFloorRequest> createValidator,
+            IValidator<UpdateFloorRequest> updateValidator)
         {
             _floorRepository = floorRepository ?? throw new ArgumentNullException(nameof(floorRepository));
             _blockRepository = blockRepository ?? throw new ArgumentNullException(nameof(blockRepository));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _createValidator = createValidator ?? throw new ArgumentNullException(nameof(createValidator));
+            _updateValidator = updateValidator ?? throw new ArgumentNullException(nameof(updateValidator));
         }
 
         /// <inheritdoc/>
-        public async Task<ApiResponse<IEnumerable<Floor>>> GetAllAsync()
+        public async Task<ApiResponse<IEnumerable<FloorResponse>>> GetAllAsync()
         {
             try
             {
                 var floors = await _floorRepository.GetAllAsync();
-                return ApiResponse<IEnumerable<Floor>>.CreateSuccess(floors);
+                var response = _mapper.Map<IEnumerable<FloorResponse>>(floors);
+                return ApiResponse<IEnumerable<FloorResponse>>.CreateSuccess(response);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error occurred while retrieving all floors");
-                return ApiResponse<IEnumerable<Floor>>.CreateError("Failed to retrieve floors");
+                return ApiResponse<IEnumerable<FloorResponse>>.CreateError("Failed to retrieve floors");
             }
         }
 
         /// <inheritdoc/>
-        public async Task<ApiResponse<IEnumerable<Floor>>> GetByBlockIdAsync(Guid blockId)
+        public async Task<ApiResponse<IEnumerable<FloorResponse>>> GetByBlockIdAsync(Guid blockId)
         {
             try
             {
                 if (!await _blockRepository.ExistsAsync(blockId))
-                    return ApiResponse<IEnumerable<Floor>>.CreateError("Block not found");
+                    return ApiResponse<IEnumerable<FloorResponse>>.CreateError("Block not found");
 
                 var floors = await _floorRepository.GetByBlockIdAsync(blockId);
-                return ApiResponse<IEnumerable<Floor>>.CreateSuccess(floors);
+                var response = _mapper.Map<IEnumerable<FloorResponse>>(floors);
+                return ApiResponse<IEnumerable<FloorResponse>>.CreateSuccess(response);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error occurred while retrieving floors for block ID: {BlockId}", blockId);
-                return ApiResponse<IEnumerable<Floor>>.CreateError("Failed to retrieve floors");
+                return ApiResponse<IEnumerable<FloorResponse>>.CreateError("Failed to retrieve floors");
             }
         }
 
         /// <inheritdoc/>
-        public async Task<ApiResponse<Floor>> GetByIdAsync(Guid id)
+        public async Task<ApiResponse<FloorResponse>> GetByIdAsync(Guid id)
         {
             try
             {
                 var floor = await _floorRepository.GetByIdAsync(id);
                 if (floor == null)
-                    return ApiResponse<Floor>.CreateError("Floor not found");
+                    return ApiResponse<FloorResponse>.CreateError("Floor not found");
 
-                return ApiResponse<Floor>.CreateSuccess(floor);
+                var response = _mapper.Map<FloorResponse>(floor);
+                return ApiResponse<FloorResponse>.CreateSuccess(response);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error occurred while retrieving floor with ID: {Id}", id);
-                return ApiResponse<Floor>.CreateError("Failed to retrieve floor");
+                return ApiResponse<FloorResponse>.CreateError("Failed to retrieve floor");
             }
         }
 
         /// <inheritdoc/>
-        public async Task<ApiResponse<Floor>> CreateAsync(Floor floor)
+        public async Task<ApiResponse<FloorResponse>> CreateAsync(CreateFloorRequest request)
         {
             try
             {
-                if (floor == null)
-                    return ApiResponse<Floor>.CreateError("Floor cannot be null");
+                // 1. Validate request
+                var validationResult = await _createValidator.ValidateAsync(request);
+                if (!validationResult.IsValid)
+                    return ApiResponse<FloorResponse>.CreateError(validationResult.Errors.First().ErrorMessage);
 
-                if (!await _blockRepository.ExistsAsync(floor.BlockId))
-                    return ApiResponse<Floor>.CreateError("Block not found");
+                // 2. Business rules
+                if (!await _blockRepository.ExistsAsync(request.BlockId))
+                    return ApiResponse<FloorResponse>.CreateError("Block not found");
 
-                if (!await _floorRepository.IsFloorNumberUniqueInBlockAsync(floor.BlockId, floor.FloorNumber))
-                    return ApiResponse<Floor>.CreateError("Floor number must be unique within the block");
+                if (!await _floorRepository.IsFloorNumberUniqueInBlockAsync(request.BlockId, request.FloorNumber))
+                    return ApiResponse<FloorResponse>.CreateError("Floor number must be unique within the block");
 
+                // 3. Map to entity
+                var floor = _mapper.Map<Floor>(request);
+
+                // 4. Save to database
                 var createdFloor = await _floorRepository.AddAsync(floor);
-                return ApiResponse<Floor>.CreateSuccess(createdFloor);
+
+                // 5. Return response
+                var response = _mapper.Map<FloorResponse>(createdFloor);
+                return ApiResponse<FloorResponse>.CreateSuccess(response);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while creating floor: {Name}", floor?.Name);
-                return ApiResponse<Floor>.CreateError("Failed to create floor");
+                _logger.LogError(ex, "Error occurred while creating floor: {Name}", request.Name);
+                return ApiResponse<FloorResponse>.CreateError("Failed to create floor");
             }
         }
 
         /// <inheritdoc/>
-        public async Task<ApiResponse<Floor>> UpdateAsync(Floor floor)
+        public async Task<ApiResponse<FloorResponse>> UpdateAsync(UpdateFloorRequest request)
         {
             try
             {
-                if (floor == null)
-                    return ApiResponse<Floor>.CreateError("Floor cannot be null");
+                // 1. Validate request
+                var validationResult = await _updateValidator.ValidateAsync(request);
+                if (!validationResult.IsValid)
+                    return ApiResponse<FloorResponse>.CreateError(validationResult.Errors.First().ErrorMessage);
 
-                if (!await _floorRepository.ExistsAsync(floor.Id))
-                    return ApiResponse<Floor>.CreateError("Floor not found");
+                // 2. Business rules
+                var existingFloor = await _floorRepository.GetByIdAsync(request.Id);
+                if (existingFloor == null)
+                    return ApiResponse<FloorResponse>.CreateError("Floor not found");
 
-                if (!await _blockRepository.ExistsAsync(floor.BlockId))
-                    return ApiResponse<Floor>.CreateError("Block not found");
+                if (!await _blockRepository.ExistsAsync(request.BlockId))
+                    return ApiResponse<FloorResponse>.CreateError("Block not found");
 
-                if (!await _floorRepository.IsFloorNumberUniqueInBlockAsync(floor.BlockId, floor.FloorNumber, floor.Id))
-                    return ApiResponse<Floor>.CreateError("Floor number must be unique within the block");
+                if (!await _floorRepository.IsFloorNumberUniqueInBlockAsync(request.BlockId, request.FloorNumber, request.Id))
+                    return ApiResponse<FloorResponse>.CreateError("Floor number must be unique within the block");
 
-                var updatedFloor = await _floorRepository.UpdateAsync(floor);
-                return ApiResponse<Floor>.CreateSuccess(updatedFloor);
+                // 3. Map to entity
+                _mapper.Map(request, existingFloor);
+
+                // 4. Save to database
+                var updatedFloor = await _floorRepository.UpdateAsync(existingFloor);
+
+                // 5. Return response
+                var response = _mapper.Map<FloorResponse>(updatedFloor);
+                return ApiResponse<FloorResponse>.CreateSuccess(response);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while updating floor with ID: {Id}", floor?.Id);
-                return ApiResponse<Floor>.CreateError("Failed to update floor");
+                _logger.LogError(ex, "Error occurred while updating floor with ID: {Id}", request.Id);
+                return ApiResponse<FloorResponse>.CreateError("Failed to update floor");
             }
         }
 
@@ -189,20 +228,21 @@ namespace starterkit.Application.Modules.Tenant.SocietyManagement.Services
         }
 
         /// <inheritdoc/>
-        public async Task<ApiResponse<Floor>> GetByIdWithDetailsAsync(Guid id)
+        public async Task<ApiResponse<FloorResponse>> GetByIdWithDetailsAsync(Guid id)
         {
             try
             {
                 var floor = await _floorRepository.GetByIdWithDetailsAsync(id);
                 if (floor == null)
-                    return ApiResponse<Floor>.CreateError("Floor not found");
+                    return ApiResponse<FloorResponse>.CreateError("Floor not found");
 
-                return ApiResponse<Floor>.CreateSuccess(floor);
+                var response = _mapper.Map<FloorResponse>(floor);
+                return ApiResponse<FloorResponse>.CreateSuccess(response);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error occurred while retrieving floor details with ID: {Id}", id);
-                return ApiResponse<Floor>.CreateError("Failed to retrieve floor details");
+                return ApiResponse<FloorResponse>.CreateError("Failed to retrieve floor details");
             }
         }
     }
