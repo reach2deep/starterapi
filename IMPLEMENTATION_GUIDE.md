@@ -137,32 +137,109 @@ public class SocietyController : BaseApiController
 
 ### 6. Dependency Injection
 ```csharp
-// Example: Module Service Extensions
-public static class SocietyManagementServiceExtensions
+// 1. First, ensure you have ModuleServiceExtensions.cs in API/DependencyInjection folder
+public static class ModuleServiceExtensions
 {
-    public static IServiceCollection AddSocietyManagementModule(this IServiceCollection services)
+    /// <summary>
+    /// Registers all module services and their dependencies
+    /// </summary>
+    public static IServiceCollection AddModuleServices(this IServiceCollection services)
     {
-        // Register repositories
-        services.AddScoped<ISocietyRepository, SocietyRepository>();
+        // Register modules in dependency order
+        AddAuthModule(services);
+        AddUserManagementModule(services);
+        AddRoleManagementModule(services);
+        AddPermissionManagementModule(services);
+        AddSocietyManagementModule(services);
         
-        // Register services
-        services.AddScoped<ISocietyService, SocietyService>();
-        
-        // Register AutoMapper profiles
-        services.AddAutoMapper(typeof(SocietyMappingProfile));
-        
+        // Register AutoMapper and FluentValidation from application assembly
+        services.AddAutoMapper(typeof(UserService).Assembly);
+        services.AddValidatorsFromAssembly(typeof(UserService).Assembly);
+
         return services;
     }
+
+    // 2. Add private method for your module
+    private static void AddSocietyManagementModule(IServiceCollection services)
+    {
+        // Register repositories first
+        services.AddScoped<ISocietyRepository, SocietyRepository>();
+        services.AddScoped<IBlockRepository, BlockRepository>();
+        services.AddScoped<IFloorRepository, FloorRepository>();
+        services.AddScoped<IUnitRepository, UnitRepository>();
+        services.AddScoped<IUnitOwnershipRepository, UnitOwnershipRepository>();
+        services.AddScoped<IUnitResidentRepository, UnitResidentRepository>();
+
+        // Register services next
+        services.AddScoped<ISocietyService, SocietyService>();
+        services.AddScoped<IBlockService, BlockService>();
+        services.AddScoped<IFloorService, FloorService>();
+        services.AddScoped<IUnitService, UnitService>();
+        services.AddScoped<IUnitOwnershipService, UnitOwnershipService>();
+        services.AddScoped<IUnitResidentService, UnitResidentService>();
+    }
+}
+
+// 3. In Program.cs or Startup.cs, ensure the module services are added
+public void ConfigureServices(IServiceCollection services)
+{
+    // Add infrastructure stack first (database contexts, etc.)
+    services.AddInfrastructureStack(configuration);
+    
+    // Add tenant stack next (tenant services)
+    services.AddTenantStack(configuration);
+    
+    // Add module services last
+    services.AddModuleServices();
+    
+    // Add cross-cutting concerns
+    services.AddCustomHealthChecks();
+    services.AddCustomAuthentication(configuration);
+    services.AddCustomSwagger();
 }
 ```
-- Create extension method for module registration
-- Register all dependencies in one place
-- Follow consistent registration pattern:
-  - Repositories first
-  - Services next
-  - Other dependencies last
-- Use appropriate lifetimes (Scoped/Singleton/Transient)
-- Keep registrations organized by module
+
+**Key Points for Dependency Injection:**
+
+1. **Location and Organization**
+   - Place all module registrations in `ModuleServiceExtensions.cs`
+   - Keep in `API/DependencyInjection` folder
+   - One method per module for better organization
+
+2. **Registration Order**
+   - Infrastructure services first (database, logging)
+   - Tenant services next
+   - Module services after
+   - Cross-cutting concerns last
+
+3. **Within Each Module**
+   - Register repositories before services
+   - Use scoped lifetime for tenant-aware services
+   - Register all interfaces with their implementations
+   - Keep related services together
+
+4. **Lifetime Management**
+   - Use `AddScoped` for tenant-aware services
+   - Use `AddSingleton` for stateless services
+   - Use `AddTransient` for lightweight services
+
+5. **Cross-Cutting Concerns**
+   - Register AutoMapper profiles
+   - Register FluentValidation
+   - Register other module-wide services
+
+6. **Best Practices**
+   - Follow consistent naming (Add[ModuleName]Module)
+   - Register dependencies in logical groups
+   - Document registration methods
+   - Consider dependency order
+   - Keep registrations in one place
+
+7. **Validation**
+   - Ensure all required services are registered
+   - Check for proper scoping
+   - Verify dependency chain
+   - Test with dependency injection container
 
 ### 7. Database Migration
 ```bash
