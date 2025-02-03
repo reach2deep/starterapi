@@ -9,5 +9,6 @@ namespace starterkit.Core.Modules.Tenant
         public string Module { get; set; }
         public string Action { get; set; }
         public bool IsDefault { get; set; }
+        public string? Parent { get; set; }  // Parent module name, null for top-level permissions
     }
 } 

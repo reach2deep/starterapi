@@ -33,9 +33,11 @@ namespace starterkit.Core.Modules.Tenant.RoleManagement.Interfaces.Repositories
         Task DeleteAsync(Guid id);
 
         /// <summary>
-        /// Checks if a role exists by name
+        /// Checks if a role with the given name exists
         /// </summary>
-        Task<bool> ExistsByNameAsync(string name);
+        /// <param name="name">Role name to check</param>
+        /// <param name="excludeId">Optional role ID to exclude from the check</param>
+        Task<bool> ExistsByNameAsync(string name, Guid? excludeId = null);
 
         /// <summary>
         /// Gets roles by user ID

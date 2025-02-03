@@ -243,10 +243,10 @@ Password: Admin@123
 cd src/starterkit.Infrastructure
 
 Root migrations
-dotnet ef migrations add LoginActivity -c RootDbContext -p src/starterkit.Infrastructure -s src/starterkit.API -o Persistence/RootDb/Migrations
+dotnet ef migrations add InitialSchema -c RootDbContext -p src/starterkit.Infrastructure -s src/starterkit.API -o Persistence/RootDb/Migrations
 
 Tenant migrations
-dotnet ef migrations add RolesSchema -c TenantDbContext -p src/starterkit.Infrastructure -s src/starterkit.API -o Persistence/TenantDb/Migrations
+dotnet ef migrations add InitialSchema -c TenantDbContext -p src/starterkit.Infrastructure -s src/starterkit.API -o Persistence/TenantDb/Migrations
 
   # Make sure you're in the Infrastructure project directory
 cd src/StarterApi.Infrastructure

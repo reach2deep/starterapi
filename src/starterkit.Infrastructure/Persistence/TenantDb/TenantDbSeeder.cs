@@ -125,14 +125,33 @@ namespace starterkit.Infrastructure.Data.TenantDb
                     };
 
                     await _context.Users.AddAsync(tenantAdmin);
+                    
+                    // Get the Tenant Admin role
+                    var adminRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == "Tenant Admin");
+                    if (adminRole != null)
+                    {
+                        // Create user role mapping
+                        var userRole = new UserRole
+                        {
+                            UserId = tenantAdmin.Id,
+                            RoleId = adminRole.Id,
+                            CreatedBy = rootAdminInTenant.Id
+                        };
+                        await _context.UserRoles.AddAsync(userRole);
+                    }
+                    else
+                    {
+                        _logger.LogWarning("Tenant Admin role not found when creating tenant admin user for tenant {TenantId}", _tenantId);
+                    }
+
                     await _context.SaveChangesAsync();
 
-                    // Create tenant-user mapping in root database
+                    // Create tenant-user mapping in root database with Admin role
                     var mapping = new TenantUserMapping
                     {
                         TenantId = tenant.Id,
                         UserId = tenantAdminGlobal.Id,
-                        Role = "Admin",
+                        Role = "Tenant Admin", // Updated to match the role name
                         CreatedBy = rootAdmin.Id
                     };
 
@@ -164,21 +183,26 @@ namespace starterkit.Infrastructure.Data.TenantDb
                     _logger.LogInformation("Creating default permissions for tenant {TenantId}", _tenantId);
                     var defaultPermissions = new[]
                     {
-                        // User Management
-                        new Permission { Name = "View Users", Module = "Users", Action = "View", IsDefault = true, Description = "Allows viewing the list of users and user details" },
-                        new Permission { Name = "Create User", Module = "Users", Action = "Create", IsDefault = true, Description = "Allows creating new users in the system" },
-                        new Permission { Name = "Edit User", Module = "Users", Action = "Edit", IsDefault = true, Description = "Allows editing existing user information" },
-                        new Permission { Name = "Delete User", Module = "Users", Action = "Delete", IsDefault = true, Description = "Allows deleting users from the system" },
+                        new Permission { Name = "Tenant Management", Module = "TenantManagement", Action = "Module", IsDefault = true, Description = "User Management Module", Parent = null },
+                        
+                        // User Management Module
+                        new Permission { Name = "User Management", Module = "UserManagement", Action = "Module", IsDefault = true, Description = "User Management Module", Parent = "TenantManagement" },
+                        new Permission { Name = "View Users", Module = "Users", Action = "View", IsDefault = true, Description = "Allows viewing the list of users and user details", Parent = "UserManagement" },
+                        new Permission { Name = "Create User", Module = "Users", Action = "Create", IsDefault = true, Description = "Allows creating new users in the system", Parent = "UserManagement" },
+                        new Permission { Name = "Edit User", Module = "Users", Action = "Edit", IsDefault = true, Description = "Allows editing existing user information", Parent = "UserManagement" },
+                        new Permission { Name = "Delete User", Module = "Users", Action = "Delete", IsDefault = true, Description = "Allows deleting users from the system", Parent = "UserManagement" },
 
-                        // Role Management
-                        new Permission { Name = "View Roles", Module = "Roles", Action = "View", IsDefault = true, Description = "Allows viewing the list of roles and role details" },
-                        new Permission { Name = "Create Role", Module = "Roles", Action = "Create", IsDefault = true, Description = "Allows creating new roles in the system" },
-                        new Permission { Name = "Edit Role", Module = "Roles", Action = "Edit", IsDefault = true, Description = "Allows editing existing role information" },
-                        new Permission { Name = "Delete Role", Module = "Roles", Action = "Delete", IsDefault = true, Description = "Allows deleting roles from the system" },
+                        // Role Management Module
+                        new Permission { Name = "Role Management", Module = "RoleManagement", Action = "Module", IsDefault = true, Description = "Role Management Module", Parent = "TenantManagement" },
+                        new Permission { Name = "View Roles", Module = "Roles", Action = "View", IsDefault = true, Description = "Allows viewing the list of roles and role details", Parent = "RoleManagement" },
+                        new Permission { Name = "Create Role", Module = "Roles", Action = "Create", IsDefault = true, Description = "Allows creating new roles in the system", Parent = "RoleManagement" },
+                        new Permission { Name = "Edit Role", Module = "Roles", Action = "Edit", IsDefault = true, Description = "Allows editing existing role information", Parent = "RoleManagement" },
+                        new Permission { Name = "Delete Role", Module = "Roles", Action = "Delete", IsDefault = true, Description = "Allows deleting roles from the system", Parent = "RoleManagement" },
 
-                        // Permission Management
-                        new Permission { Name = "View Permissions", Module = "Permissions", Action = "View", IsDefault = true, Description = "Allows viewing the list of permissions and their details" },
-                        new Permission { Name = "Assign Permissions", Module = "Permissions", Action = "Assign", IsDefault = true, Description = "Allows assigning permissions to roles" }
+                        // Permission Management Module
+                        new Permission { Name = "Permission Management", Module = "PermissionManagement", Action = "Module", IsDefault = true, Description = "Permission Management Module", Parent = "TenantManagement" },
+                        new Permission { Name = "View Permissions", Module = "Permissions", Action = "View", IsDefault = true, Description = "Allows viewing the list of permissions and their details", Parent = "PermissionManagement" },
+                        new Permission { Name = "Assign Permissions", Module = "Permissions", Action = "Assign", IsDefault = true, Description = "Allows assigning permissions to roles", Parent = "PermissionManagement" }
                     };
 
                     foreach (var permission in defaultPermissions)

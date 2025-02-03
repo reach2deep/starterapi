@@ -8,7 +8,7 @@ using starterkit.Core.Modules.Common;
 
 namespace starterkit.API.Controllers.Modules.V1.Tenant.RoleManagement
 {
-    [Route("api/tenant/[controller]")]
+    [Route("api/v1/tenant/[controller]")]
     [Authorize]
     public class RoleController : BaseApiController
     {
