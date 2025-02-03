@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using starterkit.Application.Modules.Tenant.SocietyManagement.Interfaces.Services;
-using starterkit.Core.Modules.Tenant.SocietyManagement.Entities;
+using starterkit.Application.Modules.Tenant.SocietyManagement.DTOs.Requests;
+using starterkit.Application.Modules.Tenant.SocietyManagement.DTOs.Responses;
 using starterkit.Core.Modules.Common;
 
 namespace starterkit.API.Controllers.Modules.V1.Tenant.SocietyManagement
@@ -24,7 +25,7 @@ namespace starterkit.API.Controllers.Modules.V1.Tenant.SocietyManagement
         /// Gets an ownership record by ID
         /// </summary>
         [HttpGet("{id}")]
-        [ProducesResponseType(typeof(ApiResponse<UnitOwnership>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<UnitOwnershipResponse>), 200)]
         public async Task<IActionResult> GetById(Guid id)
         {
             var result = await _ownershipService.GetByIdAsync(id);
@@ -35,7 +36,7 @@ namespace starterkit.API.Controllers.Modules.V1.Tenant.SocietyManagement
         /// Gets all ownership records
         /// </summary>
         [HttpGet]
-        [ProducesResponseType(typeof(ApiResponse<IEnumerable<UnitOwnership>>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<IEnumerable<UnitOwnershipResponse>>), 200)]
         public async Task<IActionResult> GetAll()
         {
             var result = await _ownershipService.GetAllAsync();
@@ -46,7 +47,7 @@ namespace starterkit.API.Controllers.Modules.V1.Tenant.SocietyManagement
         /// Gets all ownership records for a specific unit
         /// </summary>
         [HttpGet("unit/{unitId}")]
-        [ProducesResponseType(typeof(ApiResponse<IEnumerable<UnitOwnership>>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<IEnumerable<UnitOwnershipResponse>>), 200)]
         public async Task<IActionResult> GetByUnitId(Guid unitId)
         {
             var result = await _ownershipService.GetByUnitIdAsync(unitId);
@@ -57,7 +58,7 @@ namespace starterkit.API.Controllers.Modules.V1.Tenant.SocietyManagement
         /// Gets all ownership records for a specific owner
         /// </summary>
         [HttpGet("owner/{ownerId}")]
-        [ProducesResponseType(typeof(ApiResponse<IEnumerable<UnitOwnership>>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<IEnumerable<UnitOwnershipResponse>>), 200)]
         public async Task<IActionResult> GetByOwnerId(Guid ownerId)
         {
             var result = await _ownershipService.GetByOwnerIdAsync(ownerId);
@@ -68,7 +69,7 @@ namespace starterkit.API.Controllers.Modules.V1.Tenant.SocietyManagement
         /// Gets current ownership record for a specific unit
         /// </summary>
         [HttpGet("unit/{unitId}/current")]
-        [ProducesResponseType(typeof(ApiResponse<UnitOwnership>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<UnitOwnershipResponse>), 200)]
         public async Task<IActionResult> GetCurrentOwnership(Guid unitId)
         {
             var result = await _ownershipService.GetCurrentOwnershipAsync(unitId);
@@ -79,10 +80,10 @@ namespace starterkit.API.Controllers.Modules.V1.Tenant.SocietyManagement
         /// Creates a new ownership record
         /// </summary>
         [HttpPost]
-        [ProducesResponseType(typeof(ApiResponse<UnitOwnership>), 200)]
-        public async Task<IActionResult> Create([FromBody] UnitOwnership ownership)
+        [ProducesResponseType(typeof(ApiResponse<UnitOwnershipResponse>), 200)]
+        public async Task<IActionResult> Create([FromBody] CreateUnitOwnershipRequest request)
         {
-            var result = await _ownershipService.CreateAsync(ownership);
+            var result = await _ownershipService.CreateAsync(request);
             return Ok(result);
         }
 
@@ -90,13 +91,13 @@ namespace starterkit.API.Controllers.Modules.V1.Tenant.SocietyManagement
         /// Updates an existing ownership record
         /// </summary>
         [HttpPut("{id}")]
-        [ProducesResponseType(typeof(ApiResponse<UnitOwnership>), 200)]
-        public async Task<IActionResult> Update(Guid id, [FromBody] UnitOwnership ownership)
+        [ProducesResponseType(typeof(ApiResponse<UnitOwnershipResponse>), 200)]
+        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateUnitOwnershipRequest request)
         {
-            if (id != ownership.Id)
+            if (id != request.Id)
                 return BadRequest("ID mismatch");
 
-            var result = await _ownershipService.UpdateAsync(ownership);
+            var result = await _ownershipService.UpdateAsync(request);
             return Ok(result);
         }
 
@@ -115,7 +116,7 @@ namespace starterkit.API.Controllers.Modules.V1.Tenant.SocietyManagement
         /// Gets an ownership record with all its related details
         /// </summary>
         [HttpGet("{id}/details")]
-        [ProducesResponseType(typeof(ApiResponse<UnitOwnership>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<UnitOwnershipResponse>), 200)]
         public async Task<IActionResult> GetByIdWithDetails(Guid id)
         {
             var result = await _ownershipService.GetByIdWithDetailsAsync(id);
@@ -137,7 +138,7 @@ namespace starterkit.API.Controllers.Modules.V1.Tenant.SocietyManagement
         /// Transfers ownership of a unit from one owner to another
         /// </summary>
         [HttpPost("transfer")]
-        [ProducesResponseType(typeof(ApiResponse<UnitOwnership>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<UnitOwnershipResponse>), 200)]
         public async Task<IActionResult> TransferOwnership([FromQuery] Guid unitId, [FromQuery] Guid currentOwnerId, [FromQuery] Guid newOwnerId, [FromQuery] DateTime transferDate)
         {
             var result = await _ownershipService.TransferOwnershipAsync(unitId, currentOwnerId, newOwnerId, transferDate);

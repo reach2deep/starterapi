@@ -2,171 +2,212 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using AutoMapper;
+using FluentValidation;
 using starterkit.Core.Modules.Common;
 using starterkit.Core.Modules.Tenant.SocietyManagement.Entities;
 using starterkit.Core.Modules.Tenant.SocietyManagement.Interfaces.Repositories;
 using starterkit.Application.Modules.Tenant.SocietyManagement.Interfaces.Services;
+using starterkit.Application.Modules.Tenant.SocietyManagement.DTOs.Requests;
+using starterkit.Application.Modules.Tenant.SocietyManagement.DTOs.Responses;
 
 namespace starterkit.Application.Modules.Tenant.SocietyManagement.Services
 {
     /// <summary>
-    /// Implementation of IUnitOwnershipService.
-    /// Provides business logic operations for managing unit ownership records.
+    /// Implementation of IUnitOwnershipService
     /// </summary>
     public class UnitOwnershipService : IUnitOwnershipService
     {
         private readonly IUnitOwnershipRepository _ownershipRepository;
         private readonly IUnitRepository _unitRepository;
+        private readonly IMapper _mapper;
         private readonly ILogger<UnitOwnershipService> _logger;
+        private readonly IValidator<CreateUnitOwnershipRequest> _createValidator;
+        private readonly IValidator<UpdateUnitOwnershipRequest> _updateValidator;
 
         /// <summary>
         /// Initializes a new instance of the UnitOwnershipService class.
         /// </summary>
         /// <param name="ownershipRepository">The unit ownership repository.</param>
         /// <param name="unitRepository">The unit repository.</param>
+        /// <param name="mapper">The mapper instance.</param>
         /// <param name="logger">The logger instance.</param>
+        /// <param name="createValidator">The create validator instance.</param>
+        /// <param name="updateValidator">The update validator instance.</param>
         public UnitOwnershipService(
             IUnitOwnershipRepository ownershipRepository,
             IUnitRepository unitRepository,
-            ILogger<UnitOwnershipService> logger)
+            IMapper mapper,
+            ILogger<UnitOwnershipService> logger,
+            IValidator<CreateUnitOwnershipRequest> createValidator,
+            IValidator<UpdateUnitOwnershipRequest> updateValidator)
         {
             _ownershipRepository = ownershipRepository ?? throw new ArgumentNullException(nameof(ownershipRepository));
             _unitRepository = unitRepository ?? throw new ArgumentNullException(nameof(unitRepository));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _createValidator = createValidator ?? throw new ArgumentNullException(nameof(createValidator));
+            _updateValidator = updateValidator ?? throw new ArgumentNullException(nameof(updateValidator));
         }
 
         /// <inheritdoc/>
-        public async Task<ApiResponse<IEnumerable<UnitOwnership>>> GetAllAsync()
+        public async Task<ApiResponse<IEnumerable<UnitOwnershipResponse>>> GetAllAsync()
         {
             try
             {
                 var ownerships = await _ownershipRepository.GetAllAsync();
-                return ApiResponse<IEnumerable<UnitOwnership>>.CreateSuccess(ownerships);
+                var response = _mapper.Map<IEnumerable<UnitOwnershipResponse>>(ownerships);
+                return ApiResponse<IEnumerable<UnitOwnershipResponse>>.CreateSuccess(response);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while retrieving all unit ownership records");
-                return ApiResponse<IEnumerable<UnitOwnership>>.CreateError("Failed to retrieve ownership records");
+                _logger.LogError(ex, "Error occurred while retrieving all ownership records");
+                return ApiResponse<IEnumerable<UnitOwnershipResponse>>.CreateError("Failed to retrieve ownership records");
             }
         }
 
         /// <inheritdoc/>
-        public async Task<ApiResponse<IEnumerable<UnitOwnership>>> GetByUnitIdAsync(Guid unitId)
+        public async Task<ApiResponse<IEnumerable<UnitOwnershipResponse>>> GetByUnitIdAsync(Guid unitId)
         {
             try
             {
                 if (!await _unitRepository.ExistsAsync(unitId))
-                    return ApiResponse<IEnumerable<UnitOwnership>>.CreateError("Unit not found");
+                    return ApiResponse<IEnumerable<UnitOwnershipResponse>>.CreateError("Unit not found");
 
                 var ownerships = await _ownershipRepository.GetByUnitIdAsync(unitId);
-                return ApiResponse<IEnumerable<UnitOwnership>>.CreateSuccess(ownerships);
+                var response = _mapper.Map<IEnumerable<UnitOwnershipResponse>>(ownerships);
+                return ApiResponse<IEnumerable<UnitOwnershipResponse>>.CreateSuccess(response);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error occurred while retrieving ownership records for unit ID: {UnitId}", unitId);
-                return ApiResponse<IEnumerable<UnitOwnership>>.CreateError("Failed to retrieve ownership records");
+                return ApiResponse<IEnumerable<UnitOwnershipResponse>>.CreateError("Failed to retrieve ownership records");
             }
         }
 
         /// <inheritdoc/>
-        public async Task<ApiResponse<IEnumerable<UnitOwnership>>> GetByOwnerIdAsync(Guid ownerId)
+        public async Task<ApiResponse<IEnumerable<UnitOwnershipResponse>>> GetByOwnerIdAsync(Guid ownerId)
         {
             try
             {
                 var ownerships = await _ownershipRepository.GetByOwnerIdAsync(ownerId);
-                return ApiResponse<IEnumerable<UnitOwnership>>.CreateSuccess(ownerships);
+                var response = _mapper.Map<IEnumerable<UnitOwnershipResponse>>(ownerships);
+                return ApiResponse<IEnumerable<UnitOwnershipResponse>>.CreateSuccess(response);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error occurred while retrieving ownership records for owner ID: {OwnerId}", ownerId);
-                return ApiResponse<IEnumerable<UnitOwnership>>.CreateError("Failed to retrieve ownership records");
+                return ApiResponse<IEnumerable<UnitOwnershipResponse>>.CreateError("Failed to retrieve ownership records");
             }
         }
 
         /// <inheritdoc/>
-        public async Task<ApiResponse<UnitOwnership>> GetCurrentOwnershipAsync(Guid unitId)
+        public async Task<ApiResponse<UnitOwnershipResponse>> GetCurrentOwnershipAsync(Guid unitId)
         {
             try
             {
                 if (!await _unitRepository.ExistsAsync(unitId))
-                    return ApiResponse<UnitOwnership>.CreateError("Unit not found");
+                    return ApiResponse<UnitOwnershipResponse>.CreateError("Unit not found");
 
                 var ownership = await _ownershipRepository.GetCurrentOwnershipAsync(unitId);
                 if (ownership == null)
-                    return ApiResponse<UnitOwnership>.CreateError("No current ownership record found");
+                    return ApiResponse<UnitOwnershipResponse>.CreateError("No current ownership record found");
 
-                return ApiResponse<UnitOwnership>.CreateSuccess(ownership);
+                var response = _mapper.Map<UnitOwnershipResponse>(ownership);
+                return ApiResponse<UnitOwnershipResponse>.CreateSuccess(response);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error occurred while retrieving current ownership for unit ID: {UnitId}", unitId);
-                return ApiResponse<UnitOwnership>.CreateError("Failed to retrieve current ownership");
+                return ApiResponse<UnitOwnershipResponse>.CreateError("Failed to retrieve current ownership");
             }
         }
 
         /// <inheritdoc/>
-        public async Task<ApiResponse<UnitOwnership>> GetByIdAsync(Guid id)
+        public async Task<ApiResponse<UnitOwnershipResponse>> GetByIdAsync(Guid id)
         {
             try
             {
                 var ownership = await _ownershipRepository.GetByIdAsync(id);
                 if (ownership == null)
-                    return ApiResponse<UnitOwnership>.CreateError("Ownership record not found");
+                    return ApiResponse<UnitOwnershipResponse>.CreateError("Ownership record not found");
 
-                return ApiResponse<UnitOwnership>.CreateSuccess(ownership);
+                var response = _mapper.Map<UnitOwnershipResponse>(ownership);
+                return ApiResponse<UnitOwnershipResponse>.CreateSuccess(response);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error occurred while retrieving ownership record with ID: {Id}", id);
-                return ApiResponse<UnitOwnership>.CreateError("Failed to retrieve ownership record");
+                return ApiResponse<UnitOwnershipResponse>.CreateError("Failed to retrieve ownership record");
             }
         }
 
         /// <inheritdoc/>
-        public async Task<ApiResponse<UnitOwnership>> CreateAsync(UnitOwnership ownership)
+        public async Task<ApiResponse<UnitOwnershipResponse>> CreateAsync(CreateUnitOwnershipRequest request)
         {
             try
             {
-                if (ownership == null)
-                    return ApiResponse<UnitOwnership>.CreateError("Ownership record cannot be null");
+                // 1. Validate request
+                var validationResult = await _createValidator.ValidateAsync(request);
+                if (!validationResult.IsValid)
+                    return ApiResponse<UnitOwnershipResponse>.CreateError(validationResult.Errors.First().ErrorMessage);
 
-                if (!await _unitRepository.ExistsAsync(ownership.UnitId))
-                    return ApiResponse<UnitOwnership>.CreateError("Unit not found");
+                // 2. Business rules
+                if (!await _unitRepository.ExistsAsync(request.UnitId))
+                    return ApiResponse<UnitOwnershipResponse>.CreateError("Unit not found");
 
-                if (await _ownershipRepository.HasActiveOwnershipAsync(ownership.UnitId))
-                    return ApiResponse<UnitOwnership>.CreateError("Unit already has an active owner");
+                if (await _ownershipRepository.HasActiveOwnershipAsync(request.UnitId))
+                    return ApiResponse<UnitOwnershipResponse>.CreateError("Unit already has an active owner");
 
+                // 3. Map to entity
+                var ownership = _mapper.Map<UnitOwnership>(request);
+
+                // 4. Save to database
                 var createdOwnership = await _ownershipRepository.AddAsync(ownership);
-                return ApiResponse<UnitOwnership>.CreateSuccess(createdOwnership);
+
+                // 5. Return response
+                var response = _mapper.Map<UnitOwnershipResponse>(createdOwnership);
+                return ApiResponse<UnitOwnershipResponse>.CreateSuccess(response);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while creating ownership record for unit ID: {UnitId}", ownership?.UnitId);
-                return ApiResponse<UnitOwnership>.CreateError("Failed to create ownership record");
+                _logger.LogError(ex, "Error occurred while creating ownership record for unit ID: {UnitId}", request.UnitId);
+                return ApiResponse<UnitOwnershipResponse>.CreateError("Failed to create ownership record");
             }
         }
 
         /// <inheritdoc/>
-        public async Task<ApiResponse<UnitOwnership>> UpdateAsync(UnitOwnership ownership)
+        public async Task<ApiResponse<UnitOwnershipResponse>> UpdateAsync(UpdateUnitOwnershipRequest request)
         {
             try
             {
-                if (ownership == null)
-                    return ApiResponse<UnitOwnership>.CreateError("Ownership record cannot be null");
+                // 1. Validate request
+                var validationResult = await _updateValidator.ValidateAsync(request);
+                if (!validationResult.IsValid)
+                    return ApiResponse<UnitOwnershipResponse>.CreateError(validationResult.Errors.First().ErrorMessage);
 
-                if (!await _ownershipRepository.ExistsAsync(ownership.Id))
-                    return ApiResponse<UnitOwnership>.CreateError("Ownership record not found");
+                // 2. Business rules
+                var existingOwnership = await _ownershipRepository.GetByIdAsync(request.Id);
+                if (existingOwnership == null)
+                    return ApiResponse<UnitOwnershipResponse>.CreateError("Ownership record not found");
 
-                if (!await _unitRepository.ExistsAsync(ownership.UnitId))
-                    return ApiResponse<UnitOwnership>.CreateError("Unit not found");
+                if (!await _unitRepository.ExistsAsync(request.UnitId))
+                    return ApiResponse<UnitOwnershipResponse>.CreateError("Unit not found");
 
-                var updatedOwnership = await _ownershipRepository.UpdateAsync(ownership);
-                return ApiResponse<UnitOwnership>.CreateSuccess(updatedOwnership);
+                // 3. Map to entity
+                _mapper.Map(request, existingOwnership);
+
+                // 4. Save to database
+                var updatedOwnership = await _ownershipRepository.UpdateAsync(existingOwnership);
+
+                // 5. Return response
+                var response = _mapper.Map<UnitOwnershipResponse>(updatedOwnership);
+                return ApiResponse<UnitOwnershipResponse>.CreateSuccess(response);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while updating ownership record with ID: {Id}", ownership?.Id);
-                return ApiResponse<UnitOwnership>.CreateError("Failed to update ownership record");
+                _logger.LogError(ex, "Error occurred while updating ownership record with ID: {Id}", request.Id);
+                return ApiResponse<UnitOwnershipResponse>.CreateError("Failed to update ownership record");
             }
         }
 
@@ -222,43 +263,45 @@ namespace starterkit.Application.Modules.Tenant.SocietyManagement.Services
         }
 
         /// <inheritdoc/>
-        public async Task<ApiResponse<UnitOwnership>> GetByIdWithDetailsAsync(Guid id)
+        public async Task<ApiResponse<UnitOwnershipResponse>> GetByIdWithDetailsAsync(Guid id)
         {
             try
             {
                 var ownership = await _ownershipRepository.GetByIdWithDetailsAsync(id);
                 if (ownership == null)
-                    return ApiResponse<UnitOwnership>.CreateError("Ownership record not found");
+                    return ApiResponse<UnitOwnershipResponse>.CreateError("Ownership record not found");
 
-                return ApiResponse<UnitOwnership>.CreateSuccess(ownership);
+                var response = _mapper.Map<UnitOwnershipResponse>(ownership);
+                return ApiResponse<UnitOwnershipResponse>.CreateSuccess(response);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error occurred while retrieving ownership record details with ID: {Id}", id);
-                return ApiResponse<UnitOwnership>.CreateError("Failed to retrieve ownership record details");
+                return ApiResponse<UnitOwnershipResponse>.CreateError("Failed to retrieve ownership record details");
             }
         }
 
         /// <inheritdoc/>
-        public async Task<ApiResponse<UnitOwnership>> TransferOwnershipAsync(Guid unitId, Guid currentOwnerId, Guid newOwnerId, DateTime transferDate)
+        public async Task<ApiResponse<UnitOwnershipResponse>> TransferOwnershipAsync(Guid unitId, Guid currentOwnerId, Guid newOwnerId, DateTime transferDate)
         {
             try
             {
+                // 1. Business rules
                 if (!await _unitRepository.ExistsAsync(unitId))
-                    return ApiResponse<UnitOwnership>.CreateError("Unit not found");
+                    return ApiResponse<UnitOwnershipResponse>.CreateError("Unit not found");
 
                 var currentOwnership = await _ownershipRepository.GetCurrentOwnershipAsync(unitId);
                 if (currentOwnership == null)
-                    return ApiResponse<UnitOwnership>.CreateError("No current ownership record found");
+                    return ApiResponse<UnitOwnershipResponse>.CreateError("No current ownership record found");
 
                 if (currentOwnership.OwnerId != currentOwnerId)
-                    return ApiResponse<UnitOwnership>.CreateError("Current owner ID does not match the unit's current owner");
+                    return ApiResponse<UnitOwnershipResponse>.CreateError("Current owner ID does not match the unit's current owner");
 
-                // End current ownership
+                // 2. End current ownership
                 currentOwnership.EndDate = transferDate;
                 await _ownershipRepository.UpdateAsync(currentOwnership);
 
-                // Create new ownership
+                // 3. Create new ownership
                 var newOwnership = new UnitOwnership
                 {
                     UnitId = unitId,
@@ -268,13 +311,16 @@ namespace starterkit.Application.Modules.Tenant.SocietyManagement.Services
                 };
 
                 var createdOwnership = await _ownershipRepository.AddAsync(newOwnership);
-                return ApiResponse<UnitOwnership>.CreateSuccess(createdOwnership);
+
+                // 4. Return response
+                var response = _mapper.Map<UnitOwnershipResponse>(createdOwnership);
+                return ApiResponse<UnitOwnershipResponse>.CreateSuccess(response);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error occurred while transferring ownership of unit ID: {UnitId} from owner ID: {CurrentOwnerId} to owner ID: {NewOwnerId}",
                     unitId, currentOwnerId, newOwnerId);
-                return ApiResponse<UnitOwnership>.CreateError("Failed to transfer ownership");
+                return ApiResponse<UnitOwnershipResponse>.CreateError("Failed to transfer ownership");
             }
         }
     }
