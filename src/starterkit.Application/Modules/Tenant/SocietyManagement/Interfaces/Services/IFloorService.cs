@@ -28,6 +28,16 @@ namespace starterkit.Application.Modules.Tenant.SocietyManagement.Interfaces.Ser
         Task<ApiResponse<FloorResponse>> GetByIdAsync(Guid id);
 
         /// <summary>
+        /// Gets a paged list of floors
+        /// </summary>
+        Task<ApiResponse<PagedResponse<FloorResponse>>> GetPagedAsync(int pageNumber, int pageSize);
+
+        /// <summary>
+        /// Gets floors data optimized for dropdown/lookup controls
+        /// </summary>
+        Task<ApiResponse<LookupResponse<LookupDto>>> GetLookupAsync(LookupRequest request);
+
+        /// <summary>
         /// Creates a new floor
         /// </summary>
         Task<ApiResponse<FloorResponse>> CreateAsync(CreateFloorRequest request);

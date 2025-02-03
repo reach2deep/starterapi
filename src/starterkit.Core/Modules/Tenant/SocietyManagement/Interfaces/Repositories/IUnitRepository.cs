@@ -97,5 +97,13 @@ namespace starterkit.Core.Modules.Tenant.SocietyManagement.Interfaces.Repositori
         /// <param name="id">The unique identifier of the unit.</param>
         /// <returns>The unit with all related entities if found; null otherwise.</returns>
         Task<Unit> GetByIdWithDetailsAsync(Guid id);
+
+        /// <summary>
+        /// Gets a paged list of units
+        /// </summary>
+        /// <param name="pageNumber">The page number to retrieve.</param>
+        /// <param name="pageSize">The number of items per page.</param>
+        /// <returns>A tuple containing the paged units and total count.</returns>
+        Task<(IEnumerable<Unit> Items, int TotalCount)> GetPagedAsync(int pageNumber, int pageSize);
     }
 } 

@@ -38,21 +38,29 @@ namespace starterkit.Application.Modules.Tenant.SocietyManagement.Interfaces.Ser
         Task<ApiResponse<UnitOwnershipResponse>> GetByIdAsync(Guid id);
 
         /// <summary>
-        /// Creates a new unit ownership record
+        /// Gets a paged list of ownership records
+        /// </summary>
+        Task<ApiResponse<PagedResponse<UnitOwnershipResponse>>> GetPagedAsync(int pageNumber, int pageSize);
+
+        /// <summary>
+        /// Gets ownership records data optimized for dropdown/lookup controls
+        /// </summary>
+        Task<ApiResponse<LookupResponse<LookupDto>>> GetLookupAsync(LookupRequest request);
+
+        /// <summary>
+        /// Creates a new ownership record
         /// </summary>
         Task<ApiResponse<UnitOwnershipResponse>> CreateAsync(CreateUnitOwnershipRequest request);
 
         /// <summary>
-        /// Updates an existing unit ownership record
+        /// Updates an existing ownership record
         /// </summary>
         Task<ApiResponse<UnitOwnershipResponse>> UpdateAsync(UpdateUnitOwnershipRequest request);
 
         /// <summary>
-        /// Deletes a unit ownership record
+        /// Deletes an ownership record
         /// </summary>
         Task<ApiResponse<bool>> DeleteAsync(Guid id);
-
-
 
         /// <summary>
         /// Transfers ownership of a unit from one owner to another

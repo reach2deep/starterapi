@@ -53,6 +53,14 @@ namespace starterkit.Core.Modules.Tenant.SocietyManagement.Interfaces.Repositori
         Task<UnitResident> GetByIdAsync(Guid id);
 
         /// <summary>
+        /// Retrieves a paged list of resident records
+        /// </summary>
+        /// <param name="pageNumber">The page number to retrieve.</param>
+        /// <param name="pageSize">The number of items per page.</param>
+        /// <returns>A tuple containing the paged resident records and total count.</returns>
+        Task<(IEnumerable<UnitResident> Items, int TotalCount)> GetPagedAsync(int pageNumber, int pageSize);
+
+        /// <summary>
         /// Adds a new unit resident record to the database.
         /// </summary>
         /// <param name="resident">The resident record to add.</param>

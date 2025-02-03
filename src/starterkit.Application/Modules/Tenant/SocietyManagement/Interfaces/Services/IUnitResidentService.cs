@@ -38,39 +38,39 @@ namespace starterkit.Application.Modules.Tenant.SocietyManagement.Interfaces.Ser
         Task<ApiResponse<UnitResidentResponse>> GetPrimaryResidentAsync(Guid unitId);
 
         /// <summary>
-        /// Gets a unit resident record by ID
+        /// Gets a resident record by ID
         /// </summary>
         Task<ApiResponse<UnitResidentResponse>> GetByIdAsync(Guid id);
 
         /// <summary>
-        /// Creates a new unit resident record
+        /// Gets a paged list of resident records
+        /// </summary>
+        Task<ApiResponse<PagedResponse<UnitResidentResponse>>> GetPagedAsync(int pageNumber, int pageSize);
+
+        /// <summary>
+        /// Gets resident records data optimized for dropdown/lookup controls
+        /// </summary>
+        Task<ApiResponse<LookupResponse<LookupDto>>> GetLookupAsync(LookupRequest request);
+
+        /// <summary>
+        /// Creates a new resident record
         /// </summary>
         Task<ApiResponse<UnitResidentResponse>> CreateAsync(CreateUnitResidentRequest request);
 
         /// <summary>
-        /// Updates an existing unit resident record
+        /// Updates an existing resident record
         /// </summary>
         Task<ApiResponse<UnitResidentResponse>> UpdateAsync(UpdateUnitResidentRequest request);
 
         /// <summary>
-        /// Deletes a unit resident record
+        /// Deletes a resident record
         /// </summary>
         Task<ApiResponse<bool>> DeleteAsync(Guid id);
-
-        /// <summary>
-        /// Checks if a unit resident record exists
-        /// </summary>
-        Task<ApiResponse<bool>> ExistsAsync(Guid id);
 
         /// <summary>
         /// Checks if a user is currently a resident in any unit
         /// </summary>
         Task<ApiResponse<bool>> IsActiveResidentAsync(Guid residentId);
-
-        /// <summary>
-        /// Gets a unit resident record with all its related details
-        /// </summary>
-        Task<ApiResponse<UnitResidentResponse>> GetByIdWithDetailsAsync(Guid id);
 
         /// <summary>
         /// Sets a resident as the primary resident for a unit

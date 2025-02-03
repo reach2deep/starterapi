@@ -44,6 +44,28 @@ namespace starterkit.API.Controllers.Modules.V1.Tenant.SocietyManagement
         }
 
         /// <summary>
+        /// Gets a paged list of resident records
+        /// </summary>
+        [HttpGet("paged")]
+        [ProducesResponseType(typeof(ApiResponse<PagedResponse<UnitResidentResponse>>), 200)]
+        public async Task<IActionResult> GetPaged([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            var result = await _residentService.GetPagedAsync(pageNumber, pageSize);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Gets resident records data optimized for dropdown/lookup controls
+        /// </summary>
+        [HttpGet("lookup")]
+        [ProducesResponseType(typeof(ApiResponse<LookupResponse<LookupDto>>), 200)]
+        public async Task<IActionResult> GetLookup([FromQuery] LookupRequest request)
+        {
+            var result = await _residentService.GetLookupAsync(request);
+            return Ok(result);
+        }
+
+        /// <summary>
         /// Gets all resident records for a specific unit
         /// </summary>
         [HttpGet("unit/{unitId}")]

@@ -385,5 +385,149 @@ namespace starterkit.Application.Modules.Tenant.SocietyManagement.Services
                 return ApiResponse<UnitResidentResponse>.CreateError("Failed to move out resident");
             }
         }
+
+        /// <inheritdoc/>
+        public async Task<ApiResponse<PagedResponse<UnitResidentResponse>>> GetPagedAsync(int pageNumber, int pageSize)
+        {
+            try
+            {
+                var (residents, totalCount) = await _residentRepository.GetPagedAsync(pageNumber, pageSize);
+                var mappedResidents = _mapper.Map<IEnumerable<UnitResidentResponse>>(residents);
+                var response = new PagedResponse<UnitResidentResponse>(mappedResidents, totalCount, pageNumber, pageSize);
+                return ApiResponse<PagedResponse<UnitResidentResponse>>.CreateSuccess(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while retrieving paged resident records");
+                return ApiResponse<PagedResponse<UnitResidentResponse>>.CreateError("Failed to retrieve paged resident records");
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task<ApiResponse<LookupResponse<LookupDto>>> GetLookupAsync(LookupRequest request)
+        {
+            try
+            {
+                // Get all resident records
+                var residents = await _residentRepository.GetAllAsync();
+                
+                // Start with base query
+                var filteredResidents = residents.AsQueryable();
+
+                // Apply active filter unless specifically requested to include inactive
+                if (!request.IncludeInactive)
+                {
+                    filteredResidents = filteredResidents.Where(r => r.EndDate == null);
+                }
+
+                // Apply search if provided
+                if (!string.IsNullOrWhiteSpace(request.SearchTerm))
+                {
+                    var searchTerm = request.SearchTerm.ToLower();
+                    filteredResidents = filteredResidents.Where(r => 
+                        (r.Unit != null && r.Unit.UnitNumber.ToLower().Contains(searchTerm)));
+                }
+
+                // Apply optional filters if provided
+                if (request.Filters?.Any() == true)
+                {
+                    foreach (var filter in request.Filters)
+                    {
+                        if (string.IsNullOrWhiteSpace(filter.Value)) continue;
+
+                        switch (filter.Key.ToLower())
+                        {
+                            case "unitid":
+                                if (Guid.TryParse(filter.Value, out var unitId))
+                                {
+                                    filteredResidents = filteredResidents.Where(r => r.UnitId == unitId);
+                                }
+                                break;
+                            case "residentid":
+                                if (Guid.TryParse(filter.Value, out var residentId))
+                                {
+                                    filteredResidents = filteredResidents.Where(r => r.ResidentId == residentId);
+                                }
+                                break;
+                            case "isprimary":
+                                if (bool.TryParse(filter.Value, out var isPrimary))
+                                {
+                                    filteredResidents = filteredResidents.Where(r => r.IsPrimary == isPrimary);
+                                }
+                                break;
+                        }
+                    }
+                }
+
+                // Apply sorting if requested
+                if (!string.IsNullOrWhiteSpace(request.SortBy))
+                {
+                    var isAscending = string.IsNullOrWhiteSpace(request.SortDirection) || 
+                                    request.SortDirection.ToLower() == "asc";
+
+                    filteredResidents = request.SortBy.ToLower() switch
+                    {
+                        "startdate" => isAscending 
+                            ? filteredResidents.OrderBy(r => r.StartDate)
+                            : filteredResidents.OrderByDescending(r => r.StartDate),
+                        "enddate" => isAscending 
+                            ? filteredResidents.OrderBy(r => r.EndDate)
+                            : filteredResidents.OrderByDescending(r => r.EndDate),
+                        "isprimary" => isAscending 
+                            ? filteredResidents.OrderBy(r => r.IsPrimary)
+                            : filteredResidents.OrderByDescending(r => r.IsPrimary),
+                        _ => filteredResidents.OrderByDescending(r => r.StartDate) // Default sort by start date desc
+                    };
+                }
+
+                // Convert to list for pagination
+                var residentsList = filteredResidents.ToList();
+                var totalCount = residentsList.Count;
+
+                // Apply pagination if requested
+                if (request.Page.HasValue && request.PageSize.HasValue)
+                {
+                    var pageNumber = Math.Max(1, request.Page.Value);
+                    var pageSize = Math.Max(1, request.PageSize.Value);
+                    residentsList = residentsList
+                        .Skip((pageNumber - 1) * pageSize)
+                        .Take(pageSize)
+                        .ToList();
+                }
+
+                // Map to lookup DTOs
+                var lookupItems = residentsList.Select(r => new LookupDto
+                {
+                    Id = r.Id,
+                    Label = $"Unit {r.Unit?.UnitNumber} - {(r.IsPrimary ? "Primary" : "Secondary")} Resident",
+                    Value = r.Id.ToString(),
+                    Group = r.EndDate.HasValue ? "Previous Residents" : "Current Residents",
+                    AdditionalData = new Dictionary<string, string>
+                    {
+                        { "unitId", r.UnitId.ToString() },
+                        { "unitNumber", r.Unit?.UnitNumber ?? "" },
+                        { "residentId", r.ResidentId.ToString() },
+                        { "startDate", r.StartDate.ToString("yyyy-MM-dd") },
+                        { "endDate", r.EndDate?.ToString("yyyy-MM-dd") ?? "" },
+                        { "isPrimary", r.IsPrimary.ToString() }
+                    }
+                });
+
+                var response = new LookupResponse<LookupDto>
+                {
+                    Items = lookupItems,
+                    TotalCount = totalCount,
+                    Page = request.Page,
+                    PageSize = request.PageSize
+                };
+
+                return ApiResponse<LookupResponse<LookupDto>>.CreateSuccess(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while retrieving resident lookup data");
+                return ApiResponse<LookupResponse<LookupDto>>.CreateError("Failed to retrieve resident lookup data");
+            }
+        }
     }
 } 

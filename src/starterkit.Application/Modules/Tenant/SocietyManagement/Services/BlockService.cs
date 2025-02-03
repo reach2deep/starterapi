@@ -66,7 +66,108 @@ namespace starterkit.Application.Modules.Tenant.SocietyManagement.Services
             }
         }
 
- 
+        /// <inheritdoc/>
+        public async Task<ApiResponse<PagedResponse<BlockResponse>>> GetPagedAsync(int pageNumber, int pageSize)
+        {
+            try
+            {
+                var (blocks, totalCount) = await _blockRepository.GetPagedAsync(pageNumber, pageSize);
+                var mappedBlocks = _mapper.Map<IEnumerable<BlockResponse>>(blocks);
+                var response = new PagedResponse<BlockResponse>(mappedBlocks, totalCount, pageNumber, pageSize);
+                return ApiResponse<PagedResponse<BlockResponse>>.CreateSuccess(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while retrieving paged blocks");
+                return ApiResponse<PagedResponse<BlockResponse>>.CreateError("Failed to retrieve paged blocks");
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task<ApiResponse<LookupResponse<LookupDto>>> GetLookupAsync(LookupRequest request)
+        {
+            try
+            {
+                // Get all blocks
+                var blocks = await _blockRepository.GetAllAsync();
+                
+                // Start with base query
+                var filteredBlocks = blocks.AsQueryable();
+
+                // Apply active filter unless specifically requested to include inactive
+                if (!request.IncludeInactive)
+                {
+                    filteredBlocks = filteredBlocks.Where(b => b.IsActive);
+                }
+
+                // Apply search if provided
+                if (!string.IsNullOrWhiteSpace(request.SearchTerm))
+                {
+                    var searchTerm = request.SearchTerm.ToLower();
+                    filteredBlocks = filteredBlocks.Where(b => b.Name.ToLower().Contains(searchTerm));
+                }
+
+                // Apply sorting if requested
+                if (!string.IsNullOrWhiteSpace(request.SortBy))
+                {
+                    var isAscending = string.IsNullOrWhiteSpace(request.SortDirection) || 
+                                    request.SortDirection.ToLower() == "asc";
+
+                    filteredBlocks = request.SortBy.ToLower() switch
+                    {
+                        "name" => isAscending 
+                            ? filteredBlocks.OrderBy(b => b.Name)
+                            : filteredBlocks.OrderByDescending(b => b.Name),
+                        _ => filteredBlocks.OrderBy(b => b.Name) // Default sort by name
+                    };
+                }
+
+                // Convert to list for pagination
+                var blocksList = filteredBlocks.ToList();
+                var totalCount = blocksList.Count;
+
+                // Apply pagination if requested
+                if (request.Page.HasValue && request.PageSize.HasValue)
+                {
+                    var pageNumber = Math.Max(1, request.Page.Value);
+                    var pageSize = Math.Max(1, request.PageSize.Value);
+                    blocksList = blocksList
+                        .Skip((pageNumber - 1) * pageSize)
+                        .Take(pageSize)
+                        .ToList();
+                }
+
+                // Map to lookup DTOs
+                var lookupItems = blocksList.Select(b => new LookupDto
+                {
+                    Id = b.Id,
+                    Label = b.Name,
+                    Value = b.Id.ToString(),
+                    Group = b.Society?.Name, // Optional grouping by society
+                    AdditionalData = new Dictionary<string, string>
+                    {
+                        { "societyId", b.SocietyId.ToString() },
+                        { "societyName", b.Society?.Name ?? "" },
+                        { "totalFloors", b.TotalFloors.ToString() }
+                    }
+                });
+
+                var response = new LookupResponse<LookupDto>
+                {
+                    Items = lookupItems,
+                    TotalCount = totalCount,
+                    Page = request.Page,
+                    PageSize = request.PageSize
+                };
+
+                return ApiResponse<LookupResponse<LookupDto>>.CreateSuccess(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while retrieving block lookup data");
+                return ApiResponse<LookupResponse<LookupDto>>.CreateError("Failed to retrieve block lookup data");
+            }
+        }
 
         /// <inheritdoc/>
         public async Task<ApiResponse<BlockResponse>> GetByIdAsync(Guid id)
@@ -167,7 +268,5 @@ namespace starterkit.Application.Modules.Tenant.SocietyManagement.Services
                 return ApiResponse<bool>.CreateError("Failed to delete block");
             }
         }
-
-
     }
 } 

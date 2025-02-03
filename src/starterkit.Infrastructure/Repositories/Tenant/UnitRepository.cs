@@ -254,5 +254,36 @@ namespace starterkit.Infrastructure.Repositories.Tenant
                 throw;
             }
         }
+
+        /// <inheritdoc/>
+        public async Task<(IEnumerable<Unit>, int)> GetPagedAsync(int pageNumber, int pageSize)
+        {
+            try
+            {
+                _logger.LogInformation("Retrieving paged units. Page: {PageNumber}, Size: {PageSize}", pageNumber, pageSize);
+                
+                var query = _context.Units
+                    .Include(u => u.Floor)
+                        .ThenInclude(f => f.Block)
+                    .Where(u => u.IsActive);
+                
+                var totalCount = await query.CountAsync();
+                
+                var units = await query
+                    .OrderBy(u => u.Floor.Block.Name)
+                    .ThenBy(u => u.Floor.FloorNumber)
+                    .ThenBy(u => u.UnitNumber)
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+
+                return (units, totalCount);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while retrieving paged units");
+                throw;
+            }
+        }
     }
 } 

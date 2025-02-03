@@ -44,6 +44,28 @@ namespace starterkit.API.Controllers.Modules.V1.Tenant.SocietyManagement
         }
 
         /// <summary>
+        /// Gets a paged list of blocks
+        /// </summary>
+        [HttpGet("paged")]
+        [ProducesResponseType(typeof(ApiResponse<PagedResponse<BlockResponse>>), 200)]
+        public async Task<IActionResult> GetPaged([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            var result = await _blockService.GetPagedAsync(pageNumber, pageSize);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Gets blocks data optimized for dropdown/lookup controls
+        /// </summary>
+        [HttpGet("lookup")]
+        [ProducesResponseType(typeof(ApiResponse<LookupResponse<LookupDto>>), 200)]
+        public async Task<IActionResult> GetLookup([FromQuery] LookupRequest request)
+        {
+            var result = await _blockService.GetLookupAsync(request);
+            return Ok(result);
+        }
+
+        /// <summary>
         /// Creates a new block
         /// </summary>
         [HttpPost]
