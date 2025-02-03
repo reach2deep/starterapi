@@ -14,6 +14,10 @@ using starterkit.Application.Modules.Tenant.PermissionManagement.Interfaces;
 using starterkit.Application.Modules.Tenant.PermissionManagement.Services;
 using starterkit.Core.Modules.Tenant.PermissionManagement.Interfaces;
 using starterkit.Infrastructure.Persistence.TenantDb.Repositories;
+using starterkit.Application.Modules.Tenant.SocietyManagement.Interfaces.Services;
+using starterkit.Application.Modules.Tenant.SocietyManagement.Services;
+using starterkit.Core.Modules.Tenant.SocietyManagement.Interfaces.Repositories;
+using starterkit.Infrastructure.Repositories.Tenant;
 
 namespace starterkit.API.DependencyInjection;
 
@@ -38,6 +42,9 @@ public static class ModuleServiceExtensions
         
         // Register permission management module
         AddPermissionManagementModule(services);
+        
+        // Register society management module
+        AddSocietyManagementModule(services);
         
         // Register AutoMapper and FluentValidation from application assembly
         services.AddAutoMapper(typeof(UserService).Assembly);
@@ -70,5 +77,26 @@ public static class ModuleServiceExtensions
     {
         services.AddScoped<IPermissionService, PermissionService>();
         services.AddScoped<IPermissionRepository, PermissionRepository>();
+    }
+
+    private static IServiceCollection AddSocietyManagementModule(this IServiceCollection services)
+    {
+        // Register repositories
+        services.AddScoped<ISocietyRepository, SocietyRepository>();
+        services.AddScoped<IBlockRepository, BlockRepository>();
+        services.AddScoped<IFloorRepository, FloorRepository>();
+        services.AddScoped<IUnitRepository, UnitRepository>();
+        services.AddScoped<IUnitOwnershipRepository, UnitOwnershipRepository>();
+        services.AddScoped<IUnitResidentRepository, UnitResidentRepository>();
+
+        // Register services
+        services.AddScoped<ISocietyService, SocietyService>();
+        services.AddScoped<IBlockService, BlockService>();
+        services.AddScoped<IFloorService, FloorService>();
+        services.AddScoped<IUnitService, UnitService>();
+        services.AddScoped<IUnitOwnershipService, UnitOwnershipService>();
+        services.AddScoped<IUnitResidentService, UnitResidentService>();
+
+        return services;
     }
 } 
