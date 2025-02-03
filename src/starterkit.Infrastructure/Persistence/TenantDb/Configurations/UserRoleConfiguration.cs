@@ -16,9 +16,9 @@ namespace starterkit.Infrastructure.Persistence.TenantDb.Configurations
 
             // Configure relationships
             builder.HasOne(x => x.User)
-                .WithMany()
+                .WithMany(u => u.UserRoles)
                 .HasForeignKey(x => x.UserId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne(x => x.Role)
                 .WithMany(r => r.UserRoles)
