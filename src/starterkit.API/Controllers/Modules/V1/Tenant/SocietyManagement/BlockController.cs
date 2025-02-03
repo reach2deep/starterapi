@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using starterkit.Application.Modules.Tenant.SocietyManagement.Interfaces.Services;
-using starterkit.Core.Modules.Tenant.SocietyManagement.Entities;
+using starterkit.Application.Modules.Tenant.SocietyManagement.DTOs.Requests;
+using starterkit.Application.Modules.Tenant.SocietyManagement.DTOs.Responses;
 using starterkit.Core.Modules.Common;
 
 namespace starterkit.API.Controllers.Modules.V1.Tenant.SocietyManagement
@@ -24,7 +25,7 @@ namespace starterkit.API.Controllers.Modules.V1.Tenant.SocietyManagement
         /// Gets a block by ID
         /// </summary>
         [HttpGet("{id}")]
-        [ProducesResponseType(typeof(ApiResponse<Block>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<BlockResponse>), 200)]
         public async Task<IActionResult> GetById(Guid id)
         {
             var result = await _blockService.GetByIdAsync(id);
@@ -35,7 +36,7 @@ namespace starterkit.API.Controllers.Modules.V1.Tenant.SocietyManagement
         /// Gets all blocks
         /// </summary>
         [HttpGet]
-        [ProducesResponseType(typeof(ApiResponse<IEnumerable<Block>>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<IEnumerable<BlockResponse>>), 200)]
         public async Task<IActionResult> GetAll()
         {
             var result = await _blockService.GetAllAsync();
@@ -46,7 +47,7 @@ namespace starterkit.API.Controllers.Modules.V1.Tenant.SocietyManagement
         /// Gets all blocks for a specific society
         /// </summary>
         [HttpGet("society/{societyId}")]
-        [ProducesResponseType(typeof(ApiResponse<IEnumerable<Block>>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<IEnumerable<BlockResponse>>), 200)]
         public async Task<IActionResult> GetBySocietyId(Guid societyId)
         {
             var result = await _blockService.GetBySocietyIdAsync(societyId);
@@ -57,10 +58,10 @@ namespace starterkit.API.Controllers.Modules.V1.Tenant.SocietyManagement
         /// Creates a new block
         /// </summary>
         [HttpPost]
-        [ProducesResponseType(typeof(ApiResponse<Block>), 200)]
-        public async Task<IActionResult> Create([FromBody] Block block)
+        [ProducesResponseType(typeof(ApiResponse<BlockResponse>), 200)]
+        public async Task<IActionResult> Create([FromBody] CreateBlockRequest request)
         {
-            var result = await _blockService.CreateAsync(block);
+            var result = await _blockService.CreateAsync(request);
             return Ok(result);
         }
 
@@ -68,13 +69,13 @@ namespace starterkit.API.Controllers.Modules.V1.Tenant.SocietyManagement
         /// Updates an existing block
         /// </summary>
         [HttpPut("{id}")]
-        [ProducesResponseType(typeof(ApiResponse<Block>), 200)]
-        public async Task<IActionResult> Update(Guid id, [FromBody] Block block)
+        [ProducesResponseType(typeof(ApiResponse<BlockResponse>), 200)]
+        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateBlockRequest request)
         {
-            if (id != block.Id)
+            if (id != request.Id)
                 return BadRequest("ID mismatch");
 
-            var result = await _blockService.UpdateAsync(block);
+            var result = await _blockService.UpdateAsync(request);
             return Ok(result);
         }
 
@@ -93,7 +94,7 @@ namespace starterkit.API.Controllers.Modules.V1.Tenant.SocietyManagement
         /// Gets a block with all its related details
         /// </summary>
         [HttpGet("{id}/details")]
-        [ProducesResponseType(typeof(ApiResponse<Block>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<BlockResponse>), 200)]
         public async Task<IActionResult> GetByIdWithDetails(Guid id)
         {
             var result = await _blockService.GetByIdWithDetailsAsync(id);

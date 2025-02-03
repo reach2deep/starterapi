@@ -2,139 +2,168 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-
+using AutoMapper;
+using FluentValidation;
+using starterkit.Core.Modules.Common;
 using starterkit.Core.Modules.Tenant.SocietyManagement.Entities;
 using starterkit.Core.Modules.Tenant.SocietyManagement.Interfaces.Repositories;
 using starterkit.Application.Modules.Tenant.SocietyManagement.Interfaces.Services;
-using starterkit.Core.Modules.Common;
+using starterkit.Application.Modules.Tenant.SocietyManagement.DTOs.Requests;
+using starterkit.Application.Modules.Tenant.SocietyManagement.DTOs.Responses;
 
 namespace starterkit.Application.Modules.Tenant.SocietyManagement.Services
 {
     /// <summary>
-    /// Implementation of IBlockService.
-    /// Provides business logic operations for managing blocks.
+    /// Implementation of IBlockService
     /// </summary>
     public class BlockService : IBlockService
     {
         private readonly IBlockRepository _blockRepository;
         private readonly ISocietyRepository _societyRepository;
+        private readonly IMapper _mapper;
         private readonly ILogger<BlockService> _logger;
+        private readonly IValidator<CreateBlockRequest> _createValidator;
+        private readonly IValidator<UpdateBlockRequest> _updateValidator;
 
         /// <summary>
         /// Initializes a new instance of the BlockService class.
         /// </summary>
         /// <param name="blockRepository">The block repository.</param>
         /// <param name="societyRepository">The society repository.</param>
+        /// <param name="mapper">The mapper instance.</param>
         /// <param name="logger">The logger instance.</param>
+        /// <param name="createValidator">The create validator instance.</param>
+        /// <param name="updateValidator">The update validator instance.</param>
         public BlockService(
             IBlockRepository blockRepository,
             ISocietyRepository societyRepository,
-            ILogger<BlockService> logger)
+            IMapper mapper,
+            ILogger<BlockService> logger,
+            IValidator<CreateBlockRequest> createValidator,
+            IValidator<UpdateBlockRequest> updateValidator)
         {
             _blockRepository = blockRepository ?? throw new ArgumentNullException(nameof(blockRepository));
             _societyRepository = societyRepository ?? throw new ArgumentNullException(nameof(societyRepository));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _createValidator = createValidator ?? throw new ArgumentNullException(nameof(createValidator));
+            _updateValidator = updateValidator ?? throw new ArgumentNullException(nameof(updateValidator));
         }
 
         /// <inheritdoc/>
-        public async Task<ApiResponse<IEnumerable<Block>>> GetAllAsync()
+        public async Task<ApiResponse<IEnumerable<BlockResponse>>> GetAllAsync()
         {
             try
             {
                 var blocks = await _blockRepository.GetAllAsync();
-                return ApiResponse<IEnumerable<Block>>.CreateSuccess(blocks);
+                var response = _mapper.Map<IEnumerable<BlockResponse>>(blocks);
+                return ApiResponse<IEnumerable<BlockResponse>>.CreateSuccess(response);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error occurred while retrieving all blocks");
-                return ApiResponse<IEnumerable<Block>>.CreateError("Failed to retrieve blocks");
+                return ApiResponse<IEnumerable<BlockResponse>>.CreateError("Failed to retrieve blocks");
             }
         }
 
         /// <inheritdoc/>
-        public async Task<ApiResponse<IEnumerable<Block>>> GetBySocietyIdAsync(Guid societyId)
+        public async Task<ApiResponse<IEnumerable<BlockResponse>>> GetBySocietyIdAsync(Guid societyId)
         {
             try
             {
                 if (!await _societyRepository.ExistsAsync(societyId))
-                    return ApiResponse<IEnumerable<Block>>.CreateError("Society not found");
+                    return ApiResponse<IEnumerable<BlockResponse>>.CreateError("Society not found");
 
                 var blocks = await _blockRepository.GetBySocietyIdAsync(societyId);
-                return ApiResponse<IEnumerable<Block>>.CreateSuccess(blocks);
+                var response = _mapper.Map<IEnumerable<BlockResponse>>(blocks);
+                return ApiResponse<IEnumerable<BlockResponse>>.CreateSuccess(response);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error occurred while retrieving blocks for society ID: {SocietyId}", societyId);
-                return ApiResponse<IEnumerable<Block>>.CreateError("Failed to retrieve blocks");
+                return ApiResponse<IEnumerable<BlockResponse>>.CreateError("Failed to retrieve blocks");
             }
         }
 
         /// <inheritdoc/>
-        public async Task<ApiResponse<Block>> GetByIdAsync(Guid id)
+        public async Task<ApiResponse<BlockResponse>> GetByIdAsync(Guid id)
         {
             try
             {
                 var block = await _blockRepository.GetByIdAsync(id);
                 if (block == null)
-                    return ApiResponse<Block>.CreateError("Block not found");
+                    return ApiResponse<BlockResponse>.CreateError("Block not found");
 
-                return ApiResponse<Block>.CreateSuccess(block);
+                var response = _mapper.Map<BlockResponse>(block);
+                return ApiResponse<BlockResponse>.CreateSuccess(response);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error occurred while retrieving block with ID: {Id}", id);
-                return ApiResponse<Block>.CreateError("Failed to retrieve block");
+                return ApiResponse<BlockResponse>.CreateError("Failed to retrieve block");
             }
         }
 
         /// <inheritdoc/>
-        public async Task<ApiResponse<Block>> CreateAsync(Block block)
+        public async Task<ApiResponse<BlockResponse>> CreateAsync(CreateBlockRequest request)
         {
             try
             {
-                if (block == null)
-                    return ApiResponse<Block>.CreateError("Block cannot be null");
+                // Validate request
+                var validationResult = await _createValidator.ValidateAsync(request);
+                if (!validationResult.IsValid)
+                    return ApiResponse<BlockResponse>.CreateError(validationResult.Errors.First().ErrorMessage);
 
-                if (!await _societyRepository.ExistsAsync(block.SocietyId))
-                    return ApiResponse<Block>.CreateError("Society not found");
+                // Check if society exists
+                if (!await _societyRepository.ExistsAsync(request.SocietyId))
+                    return ApiResponse<BlockResponse>.CreateError("Society not found");
 
-                if (!await _blockRepository.IsNameUniqueInSocietyAsync(block.SocietyId, block.Name))
-                    return ApiResponse<Block>.CreateError("Block name must be unique within the society");
+                // Check for unique name within society
+                if (!await _blockRepository.IsNameUniqueInSocietyAsync(request.SocietyId, request.Name))
+                    return ApiResponse<BlockResponse>.CreateError("Block name must be unique within the society");
 
+                // Map and create
+                var block = _mapper.Map<Block>(request);
                 var createdBlock = await _blockRepository.AddAsync(block);
-                return ApiResponse<Block>.CreateSuccess(createdBlock);
+                var response = _mapper.Map<BlockResponse>(createdBlock);
+                return ApiResponse<BlockResponse>.CreateSuccess(response);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while creating block: {Name}", block?.Name);
-                return ApiResponse<Block>.CreateError("Failed to create block");
+                _logger.LogError(ex, "Error occurred while creating block: {Name}", request.Name);
+                return ApiResponse<BlockResponse>.CreateError("Failed to create block");
             }
         }
 
         /// <inheritdoc/>
-        public async Task<ApiResponse<Block>> UpdateAsync(Block block)
+        public async Task<ApiResponse<BlockResponse>> UpdateAsync(UpdateBlockRequest request)
         {
             try
             {
-                if (block == null)
-                    return ApiResponse<Block>.CreateError("Block cannot be null");
+                // Validate request
+                var validationResult = await _updateValidator.ValidateAsync(request);
+                if (!validationResult.IsValid)
+                    return ApiResponse<BlockResponse>.CreateError(validationResult.Errors.First().ErrorMessage);
 
-                if (!await _blockRepository.ExistsAsync(block.Id))
-                    return ApiResponse<Block>.CreateError("Block not found");
+                // Check if block exists
+                var existingBlock = await _blockRepository.GetByIdAsync(request.Id);
+                if (existingBlock == null)
+                    return ApiResponse<BlockResponse>.CreateError("Block not found");
 
-                if (!await _societyRepository.ExistsAsync(block.SocietyId))
-                    return ApiResponse<Block>.CreateError("Society not found");
+                // Check for unique name within society
+                if (!await _blockRepository.IsNameUniqueInSocietyAsync(existingBlock.SocietyId, request.Name, request.Id))
+                    return ApiResponse<BlockResponse>.CreateError("Block name must be unique within the society");
 
-                if (!await _blockRepository.IsNameUniqueInSocietyAsync(block.SocietyId, block.Name, block.Id))
-                    return ApiResponse<Block>.CreateError("Block name must be unique within the society");
-
-                var updatedBlock = await _blockRepository.UpdateAsync(block);
-                return ApiResponse<Block>.CreateSuccess(updatedBlock);
+                // Map and update
+                _mapper.Map(request, existingBlock);
+                var updatedBlock = await _blockRepository.UpdateAsync(existingBlock);
+                var response = _mapper.Map<BlockResponse>(updatedBlock);
+                return ApiResponse<BlockResponse>.CreateSuccess(response);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while updating block with ID: {Id}", block?.Id);
-                return ApiResponse<Block>.CreateError("Failed to update block");
+                _logger.LogError(ex, "Error occurred while updating block with ID: {Id}", request.Id);
+                return ApiResponse<BlockResponse>.CreateError("Failed to update block");
             }
         }
 
@@ -190,20 +219,21 @@ namespace starterkit.Application.Modules.Tenant.SocietyManagement.Services
         }
 
         /// <inheritdoc/>
-        public async Task<ApiResponse<Block>> GetByIdWithDetailsAsync(Guid id)
+        public async Task<ApiResponse<BlockResponse>> GetByIdWithDetailsAsync(Guid id)
         {
             try
             {
                 var block = await _blockRepository.GetByIdWithDetailsAsync(id);
                 if (block == null)
-                    return ApiResponse<Block>.CreateError("Block not found");
+                    return ApiResponse<BlockResponse>.CreateError("Block not found");
 
-                return ApiResponse<Block>.CreateSuccess(block);
+                var response = _mapper.Map<BlockResponse>(block);
+                return ApiResponse<BlockResponse>.CreateSuccess(response);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error occurred while retrieving block details with ID: {Id}", id);
-                return ApiResponse<Block>.CreateError("Failed to retrieve block details");
+                return ApiResponse<BlockResponse>.CreateError("Failed to retrieve block details");
             }
         }
     }
