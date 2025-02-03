@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using starterkit.Application.Modules.Tenant.SocietyManagement.Interfaces.Services;
-using starterkit.Core.Modules.Tenant.SocietyManagement.Entities;
+using starterkit.Application.Modules.Tenant.SocietyManagement.DTOs.Requests;
+using starterkit.Application.Modules.Tenant.SocietyManagement.DTOs.Responses;
 using starterkit.Core.Modules.Common;
 
 namespace starterkit.API.Controllers.Modules.V1.Tenant.SocietyManagement
@@ -24,7 +25,7 @@ namespace starterkit.API.Controllers.Modules.V1.Tenant.SocietyManagement
         /// Gets a society by ID
         /// </summary>
         [HttpGet("{id}")]
-        [ProducesResponseType(typeof(ApiResponse<Society>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<SocietyResponse>), 200)]
         public async Task<IActionResult> GetById(Guid id)
         {
             var result = await _societyService.GetByIdAsync(id);
@@ -35,7 +36,7 @@ namespace starterkit.API.Controllers.Modules.V1.Tenant.SocietyManagement
         /// Gets all societies
         /// </summary>
         [HttpGet]
-        [ProducesResponseType(typeof(ApiResponse<IEnumerable<Society>>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<IEnumerable<SocietyResponse>>), 200)]
         public async Task<IActionResult> GetAll()
         {
             var result = await _societyService.GetAllAsync();
@@ -57,10 +58,10 @@ namespace starterkit.API.Controllers.Modules.V1.Tenant.SocietyManagement
         /// Creates a new society
         /// </summary>
         [HttpPost]
-        [ProducesResponseType(typeof(ApiResponse<Society>), 200)]
-        public async Task<IActionResult> Create([FromBody] Society society)
+        [ProducesResponseType(typeof(ApiResponse<SocietyResponse>), 200)]
+        public async Task<IActionResult> Create([FromBody] CreateSocietyRequest request)
         {
-            var result = await _societyService.CreateAsync(society);
+            var result = await _societyService.CreateAsync(request);
             return Ok(result);
         }
 
@@ -68,13 +69,13 @@ namespace starterkit.API.Controllers.Modules.V1.Tenant.SocietyManagement
         /// Updates an existing society
         /// </summary>
         [HttpPut("{id}")]
-        [ProducesResponseType(typeof(ApiResponse<Society>), 200)]
-        public async Task<IActionResult> Update(Guid id, [FromBody] Society society)
+        [ProducesResponseType(typeof(ApiResponse<SocietyResponse>), 200)]
+        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateSocietyRequest request)
         {
-            if (id != society.Id)
+            if (id != request.Id)
                 return BadRequest("ID mismatch");
 
-            var result = await _societyService.UpdateAsync(society);
+            var result = await _societyService.UpdateAsync(request);
             return Ok(result);
         }
 
@@ -92,13 +93,13 @@ namespace starterkit.API.Controllers.Modules.V1.Tenant.SocietyManagement
         /// <summary>
         /// Gets a society with all its related details
         /// </summary>
-        // [HttpGet("{id}/details")]
-        // [ProducesResponseType(typeof(ApiResponse<Society>), 200)]
-        // public async Task<IActionResult> GetByIdWithDetails(Guid id)
-        // {
-        //     var result = await _societyService.GetByIdWithDetailsAsync(id);
-        //     return Ok(result);
-        // }
+        [HttpGet("{id}/details")]
+        [ProducesResponseType(typeof(ApiResponse<SocietyResponse>), 200)]
+        public async Task<IActionResult> GetByIdWithDetails(Guid id)
+        {
+            var result = await _societyService.GetByIdWithDetailsAsync(id);
+            return Ok(result);
+        }
 
         // /// <summary>
         // /// Gets all societies with their related details

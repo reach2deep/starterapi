@@ -1,52 +1,45 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using starterkit.Core.Modules.Tenant.SocietyManagement.Entities;
-
 using starterkit.Core.Modules.Common;
+using starterkit.Application.Modules.Tenant.SocietyManagement.DTOs.Requests;
+using starterkit.Application.Modules.Tenant.SocietyManagement.DTOs.Responses;
 
 namespace starterkit.Application.Modules.Tenant.SocietyManagement.Interfaces.Services
 {
     /// <summary>
-    /// Service interface for managing Society entities.
-    /// Provides business logic operations for societies.
+    /// Service interface for managing societies
     /// </summary>
     public interface ISocietyService
     {
         /// <summary>
-        /// Retrieves all societies.
+        /// Gets all societies
         /// </summary>
-        /// <returns>ApiResponse containing a collection of societies.</returns>
-        Task<ApiResponse<IEnumerable<Society>>> GetAllAsync();
+        Task<ApiResponse<IEnumerable<SocietyResponse>>> GetAllAsync();
 
         /// <summary>
-        /// Retrieves a society by its ID.
+        /// Gets a society by ID
         /// </summary>
-        /// <param name="id">The unique identifier of the society.</param>
-        /// <returns>ApiResponse containing the society if found.</returns>
-        Task<ApiResponse<Society>> GetByIdAsync(Guid id);
+        Task<ApiResponse<SocietyResponse>> GetByIdAsync(Guid id);
 
         /// <summary>
-        /// Creates a new society.
+        /// Creates a new society
         /// </summary>
-        /// <param name="society">The society entity to create.</param>
-        /// <returns>ApiResponse containing the created society.</returns>
-        Task<ApiResponse<Society>> CreateAsync(Society society);
+        Task<ApiResponse<SocietyResponse>> CreateAsync(CreateSocietyRequest request);
 
         /// <summary>
-        /// Updates an existing society.
+        /// Updates an existing society
         /// </summary>
-        /// <param name="society">The society entity to update.</param>
-        /// <returns>ApiResponse containing the updated society.</returns>
-        Task<ApiResponse<Society>> UpdateAsync(Society society);
+        Task<ApiResponse<SocietyResponse>> UpdateAsync(UpdateSocietyRequest request);
 
         /// <summary>
-        /// Deletes a society by its ID.
+        /// Deletes a society
         /// </summary>
-        /// <param name="id">The unique identifier of the society to delete.</param>
-        /// <returns>ApiResponse indicating success or failure.</returns>
         Task<ApiResponse<bool>> DeleteAsync(Guid id);
 
-  
+        /// <summary>
+        /// Gets a society with all its related details
+        /// </summary>
+        Task<ApiResponse<SocietyResponse>> GetByIdWithDetailsAsync(Guid id);
     }
 } 

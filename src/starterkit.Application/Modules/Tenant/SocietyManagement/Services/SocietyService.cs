@@ -2,111 +2,132 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-
+using AutoMapper;
+using FluentValidation;
+using starterkit.Core.Modules.Common;
 using starterkit.Core.Modules.Tenant.SocietyManagement.Entities;
 using starterkit.Core.Modules.Tenant.SocietyManagement.Interfaces.Repositories;
 using starterkit.Application.Modules.Tenant.SocietyManagement.Interfaces.Services;
-using starterkit.Core.Modules.Common;
+using starterkit.Application.Modules.Tenant.SocietyManagement.DTOs.Requests;
+using starterkit.Application.Modules.Tenant.SocietyManagement.DTOs.Responses;
 
 namespace starterkit.Application.Modules.Tenant.SocietyManagement.Services
 {
     /// <summary>
-    /// Implementation of ISocietyService.
-    /// Provides business logic operations for managing societies.
+    /// Implementation of ISocietyService
     /// </summary>
     public class SocietyService : ISocietyService
     {
-        private readonly ISocietyRepository _societyRepository;
+        private readonly ISocietyRepository _repository;
+        private readonly IMapper _mapper;
         private readonly ILogger<SocietyService> _logger;
+        private readonly IValidator<CreateSocietyRequest> _createValidator;
+        private readonly IValidator<UpdateSocietyRequest> _updateValidator;
 
-        /// <summary>
-        /// Initializes a new instance of the SocietyService class.
-        /// </summary>
-        /// <param name="societyRepository">The society repository.</param>
-        /// <param name="logger">The logger instance.</param>
-        public SocietyService(ISocietyRepository societyRepository, ILogger<SocietyService> logger)
+        public SocietyService(
+            ISocietyRepository repository,
+            IMapper mapper,
+            ILogger<SocietyService> logger,
+            IValidator<CreateSocietyRequest> createValidator,
+            IValidator<UpdateSocietyRequest> updateValidator)
         {
-            _societyRepository = societyRepository ?? throw new ArgumentNullException(nameof(societyRepository));
+            _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _createValidator = createValidator ?? throw new ArgumentNullException(nameof(createValidator));
+            _updateValidator = updateValidator ?? throw new ArgumentNullException(nameof(updateValidator));
         }
 
         /// <inheritdoc/>
-        public async Task<ApiResponse<IEnumerable<Society>>> GetAllAsync()
+        public async Task<ApiResponse<IEnumerable<SocietyResponse>>> GetAllAsync()
         {
             try
             {
-                var societies = await _societyRepository.GetAllAsync();
-                return ApiResponse<IEnumerable<Society>>.CreateSuccess(societies);
+                var societies = await _repository.GetAllAsync();
+                var response = _mapper.Map<IEnumerable<SocietyResponse>>(societies);
+                return ApiResponse<IEnumerable<SocietyResponse>>.CreateSuccess(response);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error occurred while retrieving all societies");
-                return ApiResponse<IEnumerable<Society>>.CreateError("Failed to retrieve societies");
+                return ApiResponse<IEnumerable<SocietyResponse>>.CreateError("Failed to retrieve societies");
             }
         }
 
         /// <inheritdoc/>
-        public async Task<ApiResponse<Society>> GetByIdAsync(Guid id)
+        public async Task<ApiResponse<SocietyResponse>> GetByIdAsync(Guid id)
         {
             try
             {
-                var society = await _societyRepository.GetByIdAsync(id);
+                var society = await _repository.GetByIdAsync(id);
                 if (society == null)
-                    return ApiResponse<Society>.CreateError("Society not found");
+                    return ApiResponse<SocietyResponse>.CreateError("Society not found");
 
-                return ApiResponse<Society>.CreateSuccess(society);
+                var response = _mapper.Map<SocietyResponse>(society);
+                return ApiResponse<SocietyResponse>.CreateSuccess(response);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error occurred while retrieving society with ID: {Id}", id);
-                return ApiResponse<Society>.CreateError("Failed to retrieve society");
-            }
-        }
-
-       
-        /// <inheritdoc/>
-        public async Task<ApiResponse<Society>> CreateAsync(Society society)
-        {
-            try
-            {
-                if (society == null)
-                    return ApiResponse<Society>.CreateError("Society cannot be null");
-
-                if (await _societyRepository.ExistsByRegistrationNumberAsync(society.RegistrationNumber))
-                    return ApiResponse<Society>.CreateError("Society with this registration number already exists");
-
-                var createdSociety = await _societyRepository.AddAsync(society);
-                return ApiResponse<Society>.CreateSuccess(createdSociety);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error occurred while creating society: {Name}", society?.Name);
-                return ApiResponse<Society>.CreateError("Failed to create society");
+                return ApiResponse<SocietyResponse>.CreateError("Failed to retrieve society");
             }
         }
 
         /// <inheritdoc/>
-        public async Task<ApiResponse<Society>> UpdateAsync(Society society)
+        public async Task<ApiResponse<SocietyResponse>> CreateAsync(CreateSocietyRequest request)
         {
             try
             {
-                if (society == null)
-                    return ApiResponse<Society>.CreateError("Society cannot be null");
+                var validationResult = await _createValidator.ValidateAsync(request);
+                if (!validationResult.IsValid)
+                    return ApiResponse<SocietyResponse>.CreateError(validationResult.Errors.First().ErrorMessage);
 
-                if (!await _societyRepository.ExistsAsync(society.Id))
-                    return ApiResponse<Society>.CreateError("Society not found");
+                // if (await _repository.ExistsByNameAsync(request.Name))
+                //     return ApiResponse<SocietyResponse>.CreateError("Society with this name already exists");
 
-                var existingSociety = await _societyRepository.GetByRegistrationNumberAsync(society.RegistrationNumber);
-                if (existingSociety != null && existingSociety.Id != society.Id)
-                    return ApiResponse<Society>.CreateError("Society with this registration number already exists");
+                if (await _repository.ExistsByRegistrationNumberAsync(request.RegistrationNumber))
+                    return ApiResponse<SocietyResponse>.CreateError("Society with this registration number already exists");
 
-                var updatedSociety = await _societyRepository.UpdateAsync(society);
-                return ApiResponse<Society>.CreateSuccess(updatedSociety);
+                var society = _mapper.Map<Society>(request);
+                var createdSociety = await _repository.AddAsync(society);
+                var response = _mapper.Map<SocietyResponse>(createdSociety);
+                return ApiResponse<SocietyResponse>.CreateSuccess(response);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while updating society with ID: {Id}", society?.Id);
-                return ApiResponse<Society>.CreateError("Failed to update society");
+                _logger.LogError(ex, "Error occurred while creating society: {Name}", request.Name);
+                return ApiResponse<SocietyResponse>.CreateError("Failed to create society");
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task<ApiResponse<SocietyResponse>> UpdateAsync(UpdateSocietyRequest request)
+        {
+            try
+            {
+                var validationResult = await _updateValidator.ValidateAsync(request);
+                if (!validationResult.IsValid)
+                    return ApiResponse<SocietyResponse>.CreateError(validationResult.Errors.First().ErrorMessage);
+
+                var existingSociety = await _repository.GetByIdAsync(request.Id);
+                if (existingSociety == null)
+                    return ApiResponse<SocietyResponse>.CreateError("Society not found");
+
+                // if (await _repository.ExistsByNameAsync(request.Name, request.Id))
+                //     return ApiResponse<SocietyResponse>.CreateError("Society with this name already exists");
+
+                // if (await _repository.ExistsByRegistrationNumberAsync(request.RegistrationNumber, request.Id))
+                //     return ApiResponse<SocietyResponse>.CreateError("Society with this registration number already exists");
+
+                _mapper.Map(request, existingSociety);
+                var updatedSociety = await _repository.UpdateAsync(existingSociety);
+                var response = _mapper.Map<SocietyResponse>(updatedSociety);
+                return ApiResponse<SocietyResponse>.CreateSuccess(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while updating society with ID: {Id}", request.Id);
+                return ApiResponse<SocietyResponse>.CreateError("Failed to update society");
             }
         }
 
@@ -115,10 +136,10 @@ namespace starterkit.Application.Modules.Tenant.SocietyManagement.Services
         {
             try
             {
-                if (!await _societyRepository.ExistsAsync(id))
+                if (!await _repository.ExistsAsync(id))
                     return ApiResponse<bool>.CreateError("Society not found");
 
-                var result = await _societyRepository.DeleteAsync(id);
+                var result = await _repository.DeleteAsync(id);
                 return ApiResponse<bool>.CreateSuccess(result);
             }
             catch (Exception ex)
@@ -129,22 +150,22 @@ namespace starterkit.Application.Modules.Tenant.SocietyManagement.Services
         }
 
         /// <inheritdoc/>
-        public async Task<ApiResponse<Society>> GetByIdWithDetailsAsync(Guid id)
+        public async Task<ApiResponse<SocietyResponse>> GetByIdWithDetailsAsync(Guid id)
         {
             try
             {
-                var society = await _societyRepository.GetByIdWithDetailsAsync(id);
+                var society = await _repository.GetByIdWithDetailsAsync(id);
                 if (society == null)
-                    return ApiResponse<Society>.CreateError("Society not found");
+                    return ApiResponse<SocietyResponse>.CreateError("Society not found");
 
-                return ApiResponse<Society>.CreateSuccess(society);
+                var response = _mapper.Map<SocietyResponse>(society);
+                return ApiResponse<SocietyResponse>.CreateSuccess(response);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error occurred while retrieving society details with ID: {Id}", id);
-                return ApiResponse<Society>.CreateError("Failed to retrieve society details");
+                return ApiResponse<SocietyResponse>.CreateError("Failed to retrieve society details");
             }
         }
-
     }
 } 
