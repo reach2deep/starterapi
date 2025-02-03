@@ -166,10 +166,39 @@
 ## 5. Cross-Cutting Concerns
 ### Dependency Injection
 - [ ] Module services registered with appropriate lifetime
-- [ ] Dependencies flow inward
-- [ ] No circular dependencies
-- [ ] Core layer has no external dependencies
-- [ ] Each module's dependencies properly isolated
+  - [ ] Each module has its own registration method (e.g., `AddAuthModule`, `AddUserManagementModule`)
+  - [ ] Services registered with correct scope (Scoped/Singleton/Transient)
+  - [ ] Registration methods follow consistent pattern:
+    ```csharp
+    private static void Add[ModuleName]Module(IServiceCollection services)
+    {
+        services.AddScoped<IService, ServiceImplementation>();
+        services.AddScoped<IRepository, RepositoryImplementation>();
+    }
+    ```
+- [ ] Module Registration Order
+  - [ ] Auth module registered first
+  - [ ] User management module registered second
+  - [ ] Role management module registered third
+  - [ ] Permission management module registered fourth
+  - [ ] Cross-cutting concerns (AutoMapper, FluentValidation) registered last
+
+
+### Service Dependencies Validation
+- [ ] Each service has all required dependencies registered
+- [ ] Dependencies registered in correct order
+- [ ] No circular dependencies between modules
+- [ ] Repository interfaces from Core layer
+- [ ] Repository implementations from Infrastructure layer
+- [ ] Service interfaces from Application layer
+- [ ] Service implementations from Application layer
+
+### Module Integration Validation
+- [ ] Each module's services properly isolated
+- [ ] Cross-module dependencies clearly defined
+- [ ] Proper error handling for missing dependencies
+- [ ] Consistent registration pattern across all modules
+- [ ] Documentation for each module's dependencies
 
 ### Error Handling
 - [ ] Global exception handling
