@@ -3,7 +3,7 @@ using starterkit.Core.Enums;
 using starterkit.Core.Modules.Global;
 using starterkit.Infrastructure.Persistence.RootDb;
 using starterkit.Infrastructure.Services;
-
+using starterkit.Core.Interfaces.Services;
 
 namespace starterkit.Infrastructure.Data.RootDb
 {

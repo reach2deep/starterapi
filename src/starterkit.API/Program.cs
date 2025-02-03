@@ -91,8 +91,17 @@ builder.Services.AddMemoryCache();
 // Add HTTP context accessor
 builder.Services.AddHttpContextAccessor();
 
+// Register core infrastructure services first
+builder.Services.AddInfrastructureServices();
+
 // Add tenant services
 builder.Services.AddTenantServices(builder.Configuration);
+
+// Register remaining services
+builder.Services.AddApplicationServices();
+builder.Services.AddInfrastructureRepositories();
+
+builder.Services.AddCustomHealthChecks();
 
 // Add JWT Authentication
 builder.Services.AddAuthentication(options =>
@@ -135,16 +144,9 @@ builder.Services.AddScoped<Func<string, TenantDbContext>>(serviceProvider => dat
 builder.Services.AddScoped<ITenantStore, CachedTenantStore>();
 builder.Services.AddScoped<IGlobalAuthService, GlobalAuthService>();
 builder.Services.AddScoped<ITenantAuthService, TenantAuthService>();
-builder.Services.AddScoped<IPasswordHashService, PasswordHashService>();
 builder.Services.AddScoped<IDataSeeder, RootDbSeeder>();
 builder.Services.AddScoped<ITenantDatabaseInitializer, TenantDatabaseInitializer>();
 builder.Services.AddScoped<ITenantResolver, TenantResolver>();
-
-// Register application and infrastructure services
-builder.Services.AddApplicationServices();
-builder.Services.AddInfrastructureRepositories();
-
-builder.Services.AddCustomHealthChecks();
 
 var app = builder.Build();
 
