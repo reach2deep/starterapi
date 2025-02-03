@@ -1,4 +1,3 @@
-
 using starterkit.Core.Enums;
 using starterkit.Core.Modules.Common;
 
@@ -12,7 +11,13 @@ namespace starterkit.Core.Modules.Tenant
         public string? MobileNumber { get; set; }
         public UserStatus Status { get; set; }
 
-        // Navigation property
+        // Navigation properties
         public UserProfile Profile { get; set; }
+        public virtual ICollection<UserRole> UserRoles { get; set; }
+
+        public User()
+        {
+            UserRoles = new HashSet<UserRole>();
+        }
     }
 }
