@@ -11,6 +11,7 @@ using starterkit.Core.Modules.Tenant.SocietyManagement.Interfaces.Repositories;
 using starterkit.Application.Modules.Tenant.SocietyManagement.Interfaces.Services;
 using starterkit.Application.Modules.Tenant.SocietyManagement.DTOs.Requests;
 using starterkit.Application.Modules.Tenant.SocietyManagement.DTOs.Responses;
+using starterkit.Core.Modules.Tenant;
 
 namespace starterkit.Application.Modules.Tenant.SocietyManagement.Services
 {
@@ -114,13 +115,26 @@ namespace starterkit.Application.Modules.Tenant.SocietyManagement.Services
                 if (existingSociety == null)
                     return ApiResponse<SocietyResponse>.CreateError("Society not found");
 
-                // if (await _repository.ExistsByNameAsync(request.Name, request.Id))
-                //     return ApiResponse<SocietyResponse>.CreateError("Society with this name already exists");
+                // Update only the fields that are meant to be updated
+                existingSociety.Name = request.Name;
+                existingSociety.RegistrationNumber = request.RegistrationNumber;
+                existingSociety.ContactEmail = request.ContactEmail;
+                existingSociety.ContactPhone = request.ContactPhone;
+                existingSociety.TotalBlocks = request.TotalBlocks;
 
-                // if (await _repository.ExistsByRegistrationNumberAsync(request.RegistrationNumber, request.Id))
-                //     return ApiResponse<SocietyResponse>.CreateError("Society with this registration number already exists");
+                // Handle address update
+                if (request.Address != null)
+                {
+                    if (existingSociety.Address == null)
+                    {
+                        existingSociety.Address = _mapper.Map<Address>(request.Address);
+                    }
+                    else
+                    {
+                        _mapper.Map(request.Address, existingSociety.Address);
+                    }
+                }
 
-                _mapper.Map(request, existingSociety);
                 var updatedSociety = await _repository.UpdateAsync(existingSociety);
                 var response = _mapper.Map<SocietyResponse>(updatedSociety);
                 return ApiResponse<SocietyResponse>.CreateSuccess(response);

@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using starterkit.Core.Modules.Tenant.SocietyManagement.Entities;
 using starterkit.Core.Modules.Tenant.SocietyManagement.Interfaces.Repositories;
 using starterkit.Application.Persistence;
+using starterkit.Core.Modules.Tenant;
 
 namespace starterkit.Infrastructure.Repositories.Tenant
 {
@@ -53,6 +54,7 @@ namespace starterkit.Infrastructure.Repositories.Tenant
             {
                 _logger.LogInformation("Retrieving society with ID: {Id}", id);
                 return await _context.Societies
+                    .Include(s => s.Address)
                     .FirstOrDefaultAsync(s => s.Id == id && s.IsActive);
             }
             catch (Exception ex)
@@ -101,6 +103,21 @@ namespace starterkit.Infrastructure.Repositories.Tenant
             try
             {
                 _logger.LogInformation("Updating society with ID: {Id}", society.Id);
+                
+                // Update address first if it exists
+                if (society.Address != null)
+                {
+                    if (society.Address.Id == Guid.Empty)
+                    {
+                        _context.Set<Address>().Add(society.Address);
+                    }
+                    else
+                    {
+                        _context.Set<Address>().Update(society.Address);
+                    }
+                }
+
+                // Update society
                 _context.Societies.Update(society);
                 await _context.SaveChangesAsync();
                 return society;
