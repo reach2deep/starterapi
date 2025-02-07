@@ -16,9 +16,19 @@ namespace starterkit.Application.Modules.Tenant.SocietyManagement.DTOs.Responses
         public Guid UnitId { get; set; }
 
         /// <summary>
+        /// Unit number/name for display purposes
+        /// </summary>
+        public string UnitName { get; set; }
+
+        /// <summary>
         /// ID of the owner (User)
         /// </summary>
         public Guid OwnerId { get; set; }
+
+        /// <summary>
+        /// Owner's full name for display purposes
+        /// </summary>
+        public string OwnerName { get; set; }
 
         /// <summary>
         /// Start date of the ownership

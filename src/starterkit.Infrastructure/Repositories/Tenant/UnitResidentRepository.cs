@@ -36,6 +36,9 @@ namespace starterkit.Infrastructure.Repositories.Tenant
             {
                 _logger.LogInformation("Retrieving all unit resident records");
                 return await _context.UnitResidents
+                    .Include(ur => ur.Unit)
+                    .Include(ur => ur.Resident)
+                        .ThenInclude(r => r.Profile)
                     .Where(ur => ur.IsActive)
                     .ToListAsync();
             }
@@ -53,6 +56,9 @@ namespace starterkit.Infrastructure.Repositories.Tenant
             {
                 _logger.LogInformation("Retrieving resident records for unit ID: {UnitId}", unitId);
                 return await _context.UnitResidents
+                    .Include(ur => ur.Unit)
+                    .Include(ur => ur.Resident)
+                        .ThenInclude(r => r.Profile)
                     .Where(ur => ur.UnitId == unitId && ur.IsActive)
                     .OrderByDescending(ur => ur.StartDate)
                     .ToListAsync();
@@ -71,6 +77,9 @@ namespace starterkit.Infrastructure.Repositories.Tenant
             {
                 _logger.LogInformation("Retrieving resident records for resident ID: {ResidentId}", residentId);
                 return await _context.UnitResidents
+                    .Include(ur => ur.Unit)
+                    .Include(ur => ur.Resident)
+                        .ThenInclude(r => r.Profile)
                     .Where(ur => ur.ResidentId == residentId && ur.IsActive)
                     .OrderByDescending(ur => ur.StartDate)
                     .ToListAsync();
@@ -89,6 +98,9 @@ namespace starterkit.Infrastructure.Repositories.Tenant
             {
                 _logger.LogInformation("Retrieving current resident records for unit ID: {UnitId}", unitId);
                 return await _context.UnitResidents
+                    .Include(ur => ur.Unit)
+                    .Include(ur => ur.Resident)
+                        .ThenInclude(r => r.Profile)
                     .Where(ur => ur.UnitId == unitId && 
                                 ur.IsActive && 
                                 ur.EndDate == null)
@@ -109,6 +121,9 @@ namespace starterkit.Infrastructure.Repositories.Tenant
             {
                 _logger.LogInformation("Retrieving primary resident record for unit ID: {UnitId}", unitId);
                 return await _context.UnitResidents
+                    .Include(ur => ur.Unit)
+                    .Include(ur => ur.Resident)
+                        .ThenInclude(r => r.Profile)
                     .Where(ur => ur.UnitId == unitId && 
                                 ur.IsActive && 
                                 ur.EndDate == null && 
@@ -129,6 +144,9 @@ namespace starterkit.Infrastructure.Repositories.Tenant
             {
                 _logger.LogInformation("Retrieving resident record with ID: {Id}", id);
                 return await _context.UnitResidents
+                    .Include(ur => ur.Unit)
+                    .Include(ur => ur.Resident)
+                        .ThenInclude(r => r.Profile)
                     .FirstOrDefaultAsync(ur => ur.Id == id && ur.IsActive);
             }
             catch (Exception ex)
@@ -276,8 +294,8 @@ namespace starterkit.Infrastructure.Repositories.Tenant
                 
                 var query = _context.UnitResidents
                     .Include(ur => ur.Unit)
-                        .ThenInclude(u => u.Floor)
-                            .ThenInclude(f => f.Block)
+                    .Include(ur => ur.Resident)
+                        .ThenInclude(r => r.Profile)
                     .Where(ur => ur.IsActive);
                 
                 var totalCount = await query.CountAsync();

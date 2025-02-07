@@ -108,5 +108,20 @@ namespace starterkit.API.Controllers.Modules.V1.Tenant.UserManagement
             var result = await _userService.ResetPasswordAsync(id, request);
             return Ok(result);
         }
+
+        /// <summary>
+        /// Gets users for dropdown/lookup controls
+        /// </summary>
+        /// <remarks>
+        /// Optimized endpoint for populating dropdown/lookup controls with user data.
+        /// Supports searching by name/email, filtering, and pagination.
+        /// </remarks>
+        [HttpGet("lookup")]
+        [ProducesResponseType(typeof(ApiResponse<LookupResponse<LookupDto>>), 200)]
+        public async Task<IActionResult> GetLookup([FromQuery] LookupRequest request)
+        {
+            var result = await _userService.GetLookupAsync(request);
+            return Ok(result);
+        }
     }
 } 

@@ -47,5 +47,10 @@ namespace starterkit.Application.Modules.Tenant.UserManagement.Interfaces
         /// Admin resets user password
         /// </summary>
         Task<ApiResponse<bool>> ResetPasswordAsync(Guid userId, ResetPasswordRequest request);
+
+        /// <summary>
+        /// Gets users data optimized for dropdown/lookup controls
+        /// </summary>
+        Task<ApiResponse<LookupResponse<LookupDto>>> GetLookupAsync(LookupRequest request);
     }
 } 
