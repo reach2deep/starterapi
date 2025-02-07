@@ -36,6 +36,8 @@ namespace starterkit.Infrastructure.Repositories.Tenant
             {
                 _logger.LogInformation("Retrieving all units");
                 return await _context.Units
+                    .Include(u => u.Floor)
+                        .ThenInclude(f => f.Block)
                     .Where(u => u.IsActive)
                     .ToListAsync();
             }
@@ -53,6 +55,8 @@ namespace starterkit.Infrastructure.Repositories.Tenant
             {
                 _logger.LogInformation("Retrieving units for floor ID: {FloorId}", floorId);
                 return await _context.Units
+                    .Include(u => u.Floor)
+                        .ThenInclude(f => f.Block)
                     .Where(u => u.FloorId == floorId && u.IsActive)
                     .ToListAsync();
             }
@@ -71,6 +75,7 @@ namespace starterkit.Infrastructure.Repositories.Tenant
                 _logger.LogInformation("Retrieving units for block ID: {BlockId}", blockId);
                 return await _context.Units
                     .Include(u => u.Floor)
+                        .ThenInclude(f => f.Block)
                     .Where(u => u.Floor.BlockId == blockId && u.IsActive)
                     .ToListAsync();
             }
@@ -107,6 +112,8 @@ namespace starterkit.Infrastructure.Repositories.Tenant
             {
                 _logger.LogInformation("Retrieving unit with ID: {Id}", id);
                 return await _context.Units
+                    .Include(u => u.Floor)
+                        .ThenInclude(f => f.Block)
                     .FirstOrDefaultAsync(u => u.Id == id && u.IsActive);
             }
             catch (Exception ex)
@@ -219,7 +226,11 @@ namespace starterkit.Infrastructure.Repositories.Tenant
             try
             {
                 _logger.LogInformation("Soft deleting unit with ID: {Id}", id);
-                var unit = await _context.Units.FindAsync(id);
+                var unit = await _context.Units
+                    .Include(u => u.Floor)
+                        .ThenInclude(f => f.Block)
+                    .FirstOrDefaultAsync(u => u.Id == id);
+                    
                 if (unit == null || !unit.IsActive)
                     return false;
 

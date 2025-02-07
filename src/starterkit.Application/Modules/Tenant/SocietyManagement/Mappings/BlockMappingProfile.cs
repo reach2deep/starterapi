@@ -15,7 +15,8 @@ namespace starterkit.Application.Modules.Tenant.SocietyManagement.Mappings
             // Block mappings
             CreateMap<CreateBlockRequest, Block>();
             CreateMap<UpdateBlockRequest, Block>();
-            CreateMap<Block, BlockResponse>();
+            CreateMap<Block, BlockResponse>()
+                .ForMember(dest => dest.SocietyName, opt => opt.MapFrom(src => src.Society.Name));
         }
     }
 } 

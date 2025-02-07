@@ -15,7 +15,8 @@ namespace starterkit.Application.Modules.Tenant.SocietyManagement.Mappings
             // Floor mappings
             CreateMap<CreateFloorRequest, Floor>();
             CreateMap<UpdateFloorRequest, Floor>();
-            CreateMap<Floor, FloorResponse>();
+            CreateMap<Floor, FloorResponse>()
+                .ForMember(dest => dest.BlockName, opt => opt.MapFrom(src => src.Block.Name));
         }
     }
 } 

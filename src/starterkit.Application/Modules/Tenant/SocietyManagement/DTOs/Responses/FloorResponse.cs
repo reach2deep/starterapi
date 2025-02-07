@@ -16,6 +16,11 @@ namespace starterkit.Application.Modules.Tenant.SocietyManagement.DTOs.Responses
         public Guid BlockId { get; set; }
 
         /// <summary>
+        /// Name of the block for display purposes in lookup controls
+        /// </summary>
+        public string BlockName { get; set; }
+
+        /// <summary>
         /// Floor number
         /// </summary>
         public int FloorNumber { get; set; }

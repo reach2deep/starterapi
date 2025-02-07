@@ -15,7 +15,10 @@ namespace starterkit.Application.Modules.Tenant.SocietyManagement.Mappings
             // Unit mappings
             CreateMap<CreateUnitRequest, Unit>();
             CreateMap<UpdateUnitRequest, Unit>();
-            CreateMap<Unit, UnitResponse>();
+            CreateMap<Unit, UnitResponse>()
+                .ForMember(dest => dest.FloorName, opt => opt.MapFrom(src => src.Floor.Name))
+                .ForMember(dest => dest.BlockId, opt => opt.MapFrom(src => src.Floor.BlockId))
+                .ForMember(dest => dest.BlockName, opt => opt.MapFrom(src => src.Floor.Block.Name));
         }
     }
 } 
