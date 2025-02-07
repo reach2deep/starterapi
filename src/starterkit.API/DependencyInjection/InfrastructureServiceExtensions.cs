@@ -12,6 +12,8 @@ using starterkit.Application.Modules.Global.TenantManagement.Interfaces;
 using starterkit.Infrastructure.Data.RootDb;
 using starterkit.Infrastructure.Data.TenantDb;
 using Microsoft.Extensions.Logging;
+using starterkit.Application.Modules.Tenant.UserManagement.Services;
+using starterkit.Application.Modules.Tenant.SocietyManagement.Validators;
 
 namespace starterkit.API.DependencyInjection;
 
@@ -57,9 +59,9 @@ public static class InfrastructureServiceExtensions
         services.AddScoped<ITenantDatabaseInitializer, TenantDatabaseInitializer>();
         services.AddScoped<IDataSeeder, RootDbSeeder>();
         
-        // Register AutoMapper and FluentValidation from infrastructure assembly
+        // Register AutoMapper and FluentValidation
         services.AddAutoMapper(typeof(RootDbContext).Assembly);
-        services.AddValidatorsFromAssembly(typeof(RootDbContext).Assembly);
+        services.AddValidatorsFromAssembly(typeof(UpdateUnitResidentRequestValidator).Assembly); // Register validators from Application assembly
 
         return services;
     }

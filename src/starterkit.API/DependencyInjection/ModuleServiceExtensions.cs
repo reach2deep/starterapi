@@ -46,9 +46,8 @@ public static class ModuleServiceExtensions
         // Register society management module
         AddSocietyManagementModule(services);
         
-        // Register AutoMapper and FluentValidation from application assembly
+        // Register AutoMapper
         services.AddAutoMapper(typeof(UserService).Assembly);
-        services.AddValidatorsFromAssembly(typeof(UserService).Assembly);
 
         return services;
     }
