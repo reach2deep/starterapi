@@ -163,9 +163,17 @@ namespace starterkit.Infrastructure.Repositories.Tenant
             {
                 _logger.LogInformation("Adding new resident record for unit: {UnitId} and resident: {ResidentId}", 
                     resident.UnitId, resident.ResidentId);
+                
+                // Add the resident record
                 await _context.UnitResidents.AddAsync(resident);
                 await _context.SaveChangesAsync();
-                return resident;
+
+                // Reload the entity with related data
+                return await _context.UnitResidents
+                    .Include(ur => ur.Unit)
+                    .Include(ur => ur.Resident)
+                        .ThenInclude(r => r.Profile)
+                    .FirstOrDefaultAsync(ur => ur.Id == resident.Id);
             }
             catch (Exception ex)
             {
@@ -180,9 +188,17 @@ namespace starterkit.Infrastructure.Repositories.Tenant
             try
             {
                 _logger.LogInformation("Updating resident record with ID: {Id}", resident.Id);
+                
+                // Update the resident record
                 _context.UnitResidents.Update(resident);
                 await _context.SaveChangesAsync();
-                return resident;
+
+                // Reload the entity with related data
+                return await _context.UnitResidents
+                    .Include(ur => ur.Unit)
+                    .Include(ur => ur.Resident)
+                        .ThenInclude(r => r.Profile)
+                    .FirstOrDefaultAsync(ur => ur.Id == resident.Id);
             }
             catch (Exception ex)
             {
@@ -276,6 +292,7 @@ namespace starterkit.Infrastructure.Repositories.Tenant
                             .ThenInclude(f => f.Block)
                                 .ThenInclude(b => b.Society)
                     .Include(ur => ur.Resident)
+                        .ThenInclude(r => r.Profile)
                     .FirstOrDefaultAsync(ur => ur.Id == id && ur.IsActive);
             }
             catch (Exception ex)

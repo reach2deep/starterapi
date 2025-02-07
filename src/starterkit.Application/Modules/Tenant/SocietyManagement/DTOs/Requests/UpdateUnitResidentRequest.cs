@@ -1,3 +1,5 @@
+using System;
+
 namespace starterkit.Application.Modules.Tenant.SocietyManagement.DTOs.Requests
 {
     /// <summary>
@@ -16,9 +18,9 @@ namespace starterkit.Application.Modules.Tenant.SocietyManagement.DTOs.Requests
         public Guid UnitId { get; set; }
 
         /// <summary>
-        /// Unit number/name for display purposes in lookup controls
+        /// Unit number/name for display purposes in lookup controls (nullable)
         /// </summary>
-        public string UnitName { get; set; }
+        public string? UnitName { get; set; }
 
         /// <summary>
         /// ID of the resident (User)
@@ -26,9 +28,9 @@ namespace starterkit.Application.Modules.Tenant.SocietyManagement.DTOs.Requests
         public Guid ResidentId { get; set; }
 
         /// <summary>
-        /// Resident's full name for display purposes in lookup controls
+        /// Resident's full name for display purposes in lookup controls (nullable)
         /// </summary>
-        public string ResidentName { get; set; }
+        public string? ResidentName { get; set; }
 
         /// <summary>
         /// Start date of residency
