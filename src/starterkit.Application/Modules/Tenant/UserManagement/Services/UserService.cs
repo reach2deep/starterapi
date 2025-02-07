@@ -440,6 +440,130 @@ namespace starterkit.Application.Modules.Tenant.UserManagement.Services
             return ApiResponse<bool>.CreateSuccess(true);
         }
 
+        /// <inheritdoc/>
+        public async Task<ApiResponse<LookupResponse<LookupDto>>> GetLookupAsync(LookupRequest request)
+        {
+            try
+            {
+                // Get all users with their profiles
+                var users = await _userRepository.GetAllAsync();
+                
+                // Start with base query
+                var filteredUsers = users.AsQueryable();
+
+                // Apply active filter unless specifically requested to include inactive
+                if (!request.IncludeInactive)
+                {
+                    filteredUsers = filteredUsers.Where(u => u.IsActive);
+                }
+
+                // Apply search if provided
+                if (!string.IsNullOrWhiteSpace(request.SearchTerm))
+                {
+                    var searchTerm = request.SearchTerm.ToLower();
+                    filteredUsers = filteredUsers.Where(u => 
+                        (u.Email != null && u.Email.ToLower().Contains(searchTerm)) ||
+                        (u.Profile != null && (
+                            (u.Profile.FirstName != null && u.Profile.FirstName.ToLower().Contains(searchTerm)) ||
+                            (u.Profile.LastName != null && u.Profile.LastName.ToLower().Contains(searchTerm))
+                        ))
+                    );
+                }
+
+                // Apply optional filters if provided
+                if (request.Filters?.Any() == true)
+                {
+                    foreach (var filter in request.Filters)
+                    {
+                        if (string.IsNullOrWhiteSpace(filter.Value)) continue;
+
+                        switch (filter.Key.ToLower())
+                        {
+                            case "email":
+                                filteredUsers = filteredUsers.Where(u => 
+                                    u.Email.ToLower().Contains(filter.Value.ToLower()));
+                                break;
+                            case "role":
+                                filteredUsers = filteredUsers.Where(u => 
+                                    u.UserRoles.Any(ur => 
+                                        ur.Role.Name.ToLower().Contains(filter.Value.ToLower())));
+                                break;
+                            case "city":
+                                filteredUsers = filteredUsers.Where(u => 
+                                    u.Profile != null && u.Profile.Address != null && 
+                                    u.Profile.Address.City.ToLower().Contains(filter.Value.ToLower()));
+                                break;
+                        }
+                    }
+                }
+
+                // Apply sorting if requested
+                if (!string.IsNullOrWhiteSpace(request.SortBy))
+                {
+                    var isAscending = string.IsNullOrWhiteSpace(request.SortDirection) || 
+                                    request.SortDirection.ToLower() == "asc";
+
+                    filteredUsers = request.SortBy.ToLower() switch
+                    {
+                        "name" => isAscending 
+                            ? filteredUsers.OrderBy(u => u.Profile.FirstName).ThenBy(u => u.Profile.LastName)
+                            : filteredUsers.OrderByDescending(u => u.Profile.FirstName).ThenByDescending(u => u.Profile.LastName),
+                        "email" => isAscending 
+                            ? filteredUsers.OrderBy(u => u.Email)
+                            : filteredUsers.OrderByDescending(u => u.Email),
+                        _ => filteredUsers.OrderBy(u => u.Profile.FirstName).ThenBy(u => u.Profile.LastName)
+                    };
+                }
+
+                // Convert to list for pagination
+                var usersList = filteredUsers.ToList();
+                var totalCount = usersList.Count;
+
+                // Apply pagination if requested
+                if (request.Page.HasValue && request.PageSize.HasValue)
+                {
+                    var pageNumber = Math.Max(1, request.Page.Value);
+                    var pageSize = Math.Max(1, request.PageSize.Value);
+                    usersList = usersList
+                        .Skip((pageNumber - 1) * pageSize)
+                        .Take(pageSize)
+                        .ToList();
+                }
+
+                // Map to lookup DTOs
+                var lookupItems = usersList.Select(u => new LookupDto
+                {
+                    Id = u.Id,
+                    Label = $"{u.Profile?.FirstName} {u.Profile?.LastName}".Trim(),
+                    Value = u.Id.ToString(),
+                    Group = u.UserRoles.FirstOrDefault()?.Role.Name, // Group by primary role
+                    AdditionalData = new Dictionary<string, string>
+                    {
+                        { "email", u.Email },
+                        { "firstName", u.Profile?.FirstName ?? "" },
+                        { "lastName", u.Profile?.LastName ?? "" },
+                        { "city", u.Profile?.Address?.City ?? "" },
+                        { "roles", string.Join(", ", u.UserRoles.Select(ur => ur.Role.Name)) }
+                    }
+                });
+
+                var response = new LookupResponse<LookupDto>
+                {
+                    Items = lookupItems,
+                    TotalCount = totalCount,
+                    Page = request.Page,
+                    PageSize = request.PageSize
+                };
+
+                return ApiResponse<LookupResponse<LookupDto>>.CreateSuccess(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while retrieving user lookup data");
+                return ApiResponse<LookupResponse<LookupDto>>.CreateError("Failed to retrieve user lookup data");
+            }
+        }
+
         private Guid GetCurrentUserId()
         {
             var userIdString = _httpContextAccessor.HttpContext?.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;

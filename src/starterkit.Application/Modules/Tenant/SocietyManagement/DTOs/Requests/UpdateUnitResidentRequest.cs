@@ -16,9 +16,19 @@ namespace starterkit.Application.Modules.Tenant.SocietyManagement.DTOs.Requests
         public Guid UnitId { get; set; }
 
         /// <summary>
+        /// Unit number/name for display purposes in lookup controls
+        /// </summary>
+        public string UnitName { get; set; }
+
+        /// <summary>
         /// ID of the resident (User)
         /// </summary>
         public Guid ResidentId { get; set; }
+
+        /// <summary>
+        /// Resident's full name for display purposes in lookup controls
+        /// </summary>
+        public string ResidentName { get; set; }
 
         /// <summary>
         /// Start date of residency

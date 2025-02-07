@@ -35,6 +35,9 @@ namespace starterkit.Infrastructure.Repositories.Tenant
             try
             {
                 return await _context.UnitOwnerships
+                    .Include(uo => uo.Unit)
+                    .Include(uo => uo.Owner)
+                        .ThenInclude(o => o.Profile)
                     .Where(uo => uo.IsActive)
                     .ToListAsync();
             }
@@ -51,6 +54,9 @@ namespace starterkit.Infrastructure.Repositories.Tenant
             try
             {
                 return await _context.UnitOwnerships
+                    .Include(uo => uo.Unit)
+                    .Include(uo => uo.Owner)
+                        .ThenInclude(o => o.Profile)
                     .Where(uo => uo.UnitId == unitId && uo.IsActive)
                     .OrderByDescending(uo => uo.StartDate)
                     .ToListAsync();
@@ -68,6 +74,9 @@ namespace starterkit.Infrastructure.Repositories.Tenant
             try
             {
                 return await _context.UnitOwnerships
+                    .Include(uo => uo.Unit)
+                    .Include(uo => uo.Owner)
+                        .ThenInclude(o => o.Profile)
                     .Where(uo => uo.OwnerId == ownerId && uo.IsActive)
                     .OrderByDescending(uo => uo.StartDate)
                     .ToListAsync();
@@ -85,6 +94,9 @@ namespace starterkit.Infrastructure.Repositories.Tenant
             try
             {
                 return await _context.UnitOwnerships
+                    .Include(uo => uo.Unit)
+                    .Include(uo => uo.Owner)
+                        .ThenInclude(o => o.Profile)
                     .Where(uo => uo.UnitId == unitId && 
                                 uo.IsActive && 
                                 uo.EndDate == null)
@@ -104,6 +116,9 @@ namespace starterkit.Infrastructure.Repositories.Tenant
             try
             {
                 return await _context.UnitOwnerships
+                    .Include(uo => uo.Unit)
+                    .Include(uo => uo.Owner)
+                        .ThenInclude(o => o.Profile)
                     .FirstOrDefaultAsync(uo => uo.Id == id && uo.IsActive);
             }
             catch (Exception ex)
@@ -228,6 +243,7 @@ namespace starterkit.Infrastructure.Repositories.Tenant
                     .Include(uo => uo.Unit)
                         .ThenInclude(u => u.Floor)
                             .ThenInclude(f => f.Block)
+                    .Include(uo => uo.Owner)
                     .Where(uo => uo.IsActive);
                 
                 var totalCount = await query.CountAsync();
