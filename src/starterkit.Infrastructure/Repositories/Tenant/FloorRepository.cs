@@ -36,6 +36,7 @@ namespace starterkit.Infrastructure.Repositories.Tenant
             {
                 _logger.LogInformation("Retrieving all floors");
                 return await _context.Floors
+                    .Include(f => f.Block)
                     .Where(f => f.IsActive)
                     .ToListAsync();
             }
@@ -53,6 +54,7 @@ namespace starterkit.Infrastructure.Repositories.Tenant
             {
                 _logger.LogInformation("Retrieving floors for block ID: {BlockId}", blockId);
                 return await _context.Floors
+                    .Include(f => f.Block)
                     .Where(f => f.BlockId == blockId && f.IsActive)
                     .OrderBy(f => f.FloorNumber)
                     .ToListAsync();
@@ -71,6 +73,7 @@ namespace starterkit.Infrastructure.Repositories.Tenant
             {
                 _logger.LogInformation("Retrieving floor with ID: {Id}", id);
                 return await _context.Floors
+                    .Include(f => f.Block)
                     .FirstOrDefaultAsync(f => f.Id == id && f.IsActive);
             }
             catch (Exception ex)
@@ -137,6 +140,7 @@ namespace starterkit.Infrastructure.Repositories.Tenant
             {
                 _logger.LogInformation("Checking if floor number {FloorNumber} is unique in block {BlockId}", floorNumber, blockId);
                 var query = _context.Floors
+                    .Include(f => f.Block)
                     .Where(f => f.BlockId == blockId && 
                                f.FloorNumber == floorNumber && 
                                f.IsActive);
@@ -161,7 +165,10 @@ namespace starterkit.Infrastructure.Repositories.Tenant
             try
             {
                 _logger.LogInformation("Soft deleting floor with ID: {Id}", id);
-                var floor = await _context.Floors.FindAsync(id);
+                var floor = await _context.Floors
+                    .Include(f => f.Block)
+                    .FirstOrDefaultAsync(f => f.Id == id);
+                    
                 if (floor == null || !floor.IsActive)
                     return false;
 
@@ -202,7 +209,10 @@ namespace starterkit.Infrastructure.Repositories.Tenant
             {
                 _logger.LogInformation("Retrieving paged floors. Page: {PageNumber}, Size: {PageSize}", pageNumber, pageSize);
                 
-                var query = _context.Floors.Where(f => f.IsActive);
+                var query = _context.Floors
+                    .Include(f => f.Block)
+                    .Where(f => f.IsActive);
+                
                 var totalCount = await query.CountAsync();
                 
                 var floors = await query

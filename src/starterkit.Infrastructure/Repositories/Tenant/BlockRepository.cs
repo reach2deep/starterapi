@@ -36,6 +36,7 @@ namespace starterkit.Infrastructure.Repositories.Tenant
             {
                 _logger.LogInformation("Retrieving all blocks");
                 return await _context.Blocks
+                    .Include(b => b.Society)
                     .Where(b => b.IsActive)
                     .ToListAsync();
             }
@@ -53,6 +54,7 @@ namespace starterkit.Infrastructure.Repositories.Tenant
             {
                 _logger.LogInformation("Retrieving blocks for society ID: {SocietyId}", societyId);
                 return await _context.Blocks
+                    .Include(b => b.Society)
                     .Where(b => b.SocietyId == societyId && b.IsActive)
                     .ToListAsync();
             }
@@ -70,6 +72,7 @@ namespace starterkit.Infrastructure.Repositories.Tenant
             {
                 _logger.LogInformation("Retrieving block with ID: {Id}", id);
                 return await _context.Blocks
+                    .Include(b => b.Society)
                     .FirstOrDefaultAsync(b => b.Id == id && b.IsActive);
             }
             catch (Exception ex)
@@ -201,7 +204,10 @@ namespace starterkit.Infrastructure.Repositories.Tenant
             {
                 _logger.LogInformation("Retrieving paged blocks. Page: {PageNumber}, Size: {PageSize}", pageNumber, pageSize);
                 
-                var query = _context.Blocks.Where(b => b.IsActive);
+                var query = _context.Blocks
+                    .Include(b => b.Society)
+                    .Where(b => b.IsActive);
+                
                 var totalCount = await query.CountAsync();
                 
                 var blocks = await query

@@ -16,6 +16,11 @@ namespace starterkit.Application.Modules.Tenant.SocietyManagement.DTOs.Responses
         public Guid SocietyId { get; set; }
 
         /// <summary>
+        /// Name of the society for display purposes in lookup controls
+        /// </summary>
+        public string SocietyName { get; set; }
+
+        /// <summary>
         /// Name/identifier of the block
         /// </summary>
         public string Name { get; set; }
