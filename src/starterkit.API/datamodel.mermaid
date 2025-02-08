@@ -1,0 +1,356 @@
+
+erDiagram
+    %% User Management (Existing)
+    User {
+        Guid Id PK
+        string Email
+        string FullName
+        string MobileNumber
+        string PasswordHash
+        int Status
+        bool IsActive
+        DateTime CreatedAt
+        DateTime UpdatedAt
+        Guid CreatedBy
+        Guid UpdatedBy
+    }
+    
+    UserProfile {
+        Guid Id PK
+        Guid UserId FK
+        Guid AddressId FK
+        string FirstName
+        string LastName
+        DateTime DateOfBirth
+        string ProfilePictureUrl
+        bool IsActive
+        DateTime CreatedAt
+        DateTime UpdatedAt
+        Guid CreatedBy
+        Guid UpdatedBy
+    }
+    
+    Address {
+        Guid Id PK
+        string StreetAddress
+        string City
+        string State
+        string Country
+        string PostalCode
+        bool IsActive
+        DateTime CreatedAt
+        DateTime UpdatedAt
+        Guid CreatedBy
+        Guid UpdatedBy
+    }
+    
+    Role {
+        Guid Id PK
+        string Name
+        string Description
+        bool IsDefault
+        bool IsActive
+        DateTime CreatedAt
+        DateTime UpdatedAt
+        Guid CreatedBy
+        Guid UpdatedBy
+    }
+    
+    Permission {
+        Guid Id PK
+        string Name
+        string Description
+        string Module
+        string Action
+        string Parent
+        bool IsDefault
+        bool IsActive
+        DateTime CreatedAt
+        DateTime UpdatedAt
+        Guid CreatedBy
+        Guid UpdatedBy
+    }
+    
+    UserRole {
+        Guid Id PK
+        Guid UserId FK
+        Guid RoleId FK
+        bool IsActive
+        DateTime CreatedAt
+        DateTime UpdatedAt
+        Guid CreatedBy
+        Guid UpdatedBy
+    }
+    
+    RolePermission {
+        Guid Id PK
+        Guid RoleId FK
+        Guid PermissionId FK
+        bool IsActive
+        DateTime CreatedAt
+        DateTime UpdatedAt
+        Guid CreatedBy
+        Guid UpdatedBy
+    }
+    
+    RefreshToken {
+        Guid Id PK
+        Guid UserId FK
+        string Token
+        DateTime ExpiresAt
+        bool IsRevoked
+        string RevokedReason
+        string ReplacedByToken
+        bool IsActive
+        DateTime CreatedAt
+        DateTime UpdatedAt
+        Guid CreatedBy
+        Guid UpdatedBy
+    }
+
+    %% Society Management
+    Society {
+        Guid Id PK
+        string Name
+        string RegistrationNumber
+        Guid AddressId FK
+        string ContactEmail
+        string ContactPhone
+        int TotalBlocks
+        bool IsActive
+        DateTime CreatedAt
+        DateTime UpdatedAt
+        Guid CreatedBy
+        Guid UpdatedBy
+    }
+
+    Block {
+        Guid Id PK
+        Guid SocietyId FK
+        string Name
+        string Description
+        int TotalFloors
+        bool IsActive
+        DateTime CreatedAt
+        DateTime UpdatedAt
+        Guid CreatedBy
+        Guid UpdatedBy
+    }
+
+    Floor {
+        Guid Id PK
+        Guid BlockId FK
+        int FloorNumber
+        string Name
+        int TotalUnits
+        bool IsActive
+        DateTime CreatedAt
+        DateTime UpdatedAt
+        Guid CreatedBy
+        Guid UpdatedBy
+    }
+
+    Unit {
+        Guid Id PK
+        Guid FloorId FK
+        string UnitNumber
+        int SquareFeet
+        string Type
+        bool IsActive
+        DateTime CreatedAt
+        DateTime UpdatedAt
+        Guid CreatedBy
+        Guid UpdatedBy
+    }
+
+    %% Ownership and Residency
+    UnitOwnership {
+        Guid Id PK
+        Guid UnitId FK
+        Guid OwnerId FK
+        DateTime StartDate
+        DateTime EndDate
+        string Status
+        bool IsActive
+        DateTime CreatedAt
+        DateTime UpdatedAt
+        Guid CreatedBy
+        Guid UpdatedBy
+    }
+
+    UnitResident {
+        Guid Id PK
+        Guid UnitId FK
+        Guid ResidentId FK
+        string RelationType
+        DateTime StartDate
+        DateTime EndDate
+        bool IsPrimary
+        bool IsActive
+        DateTime CreatedAt
+        DateTime UpdatedAt
+        Guid CreatedBy
+        Guid UpdatedBy
+    }
+
+    %% Lease Management
+    LeaseAgreement {
+        Guid Id PK
+        Guid UnitId FK
+        Guid OwnerId FK
+        Guid TenantId FK
+        DateTime StartDate
+        DateTime EndDate
+        decimal RentAmount
+        decimal SecurityDeposit
+        string PaymentFrequency
+        int NoticePeriodDays
+        string Status
+        bool IsActive
+        DateTime CreatedAt
+        DateTime UpdatedAt
+        Guid CreatedBy
+        Guid UpdatedBy
+    }
+
+    RentPayment {
+        Guid Id PK
+        Guid LeaseAgreementId FK
+        decimal Amount
+        DateTime DueDate
+        DateTime PaidDate
+        string PaymentMode
+        string TransactionReference
+        string Status
+        bool IsActive
+        DateTime CreatedAt
+        DateTime UpdatedAt
+        Guid CreatedBy
+        Guid UpdatedBy
+    }
+
+    %% Subscription Management
+    SocietySubscription {
+        Guid Id PK
+        Guid SocietyId FK
+        string PlanType
+        DateTime StartDate
+        DateTime EndDate
+        decimal Amount
+        string Status
+        bool IsActive
+        DateTime CreatedAt
+        DateTime UpdatedAt
+        Guid CreatedBy
+        Guid UpdatedBy
+    }
+
+    FeatureAccess {
+        Guid Id PK
+        Guid SocietyId FK
+        string FeatureKey
+        bool IsEnabled
+        DateTime ValidUntil
+        bool IsActive
+        DateTime CreatedAt
+        DateTime UpdatedAt
+        Guid CreatedBy
+        Guid UpdatedBy
+    }
+
+    %% Media Management
+    MediaStorage {
+        Guid Id PK
+        string EntityType
+        Guid EntityId FK
+        string Type
+        string Category
+        string Title
+        string Description
+        bool IsPrimary
+        int DisplayOrder
+        string ContentType
+        string OriginalFileName
+        long FileSize
+        string StoragePath
+        string ThumbnailPath
+        string MediumSizePath
+        string Status
+        bool IsActive
+        DateTime CreatedAt
+        DateTime UpdatedAt
+        Guid CreatedBy
+        Guid UpdatedBy
+    }
+
+    %% Visitor Management
+    VisitorPass {
+        Guid Id PK
+        Guid UnitId FK
+        Guid RequestedBy FK
+        string VisitorType
+        string Name
+        string Phone
+        int ExpectedVisitors
+        DateTime ValidFrom
+        DateTime ValidTill
+        string Purpose
+        string Status
+        bool IsActive
+        DateTime CreatedAt
+        DateTime UpdatedAt
+        Guid CreatedBy
+        Guid UpdatedBy
+    }
+
+    VisitorEntry {
+        Guid Id PK
+        Guid PassId FK
+        Guid UnitId FK
+        string VisitorName
+        string Phone
+        int NumberOfVisitors
+        string VehicleNumber
+        DateTime EntryTime
+        DateTime ExitTime
+        string Status
+        bool IsActive
+        DateTime CreatedAt
+        DateTime UpdatedAt
+        Guid CreatedBy
+        Guid UpdatedBy
+    }
+
+    %% Base Relationships
+    User ||--|| UserProfile : has
+    UserProfile ||--o| Address : has
+    User ||--o{ UserRole : has
+    Role ||--o{ UserRole : has
+    Role ||--o{ RolePermission : has
+    Permission ||--o{ RolePermission : has
+    User ||--o{ RefreshToken : has
+
+    %% Society Relationships
+    Society ||--o{ Block : contains
+    Block ||--o{ Floor : contains
+    Floor ||--o{ Unit : contains
+    Unit ||--o{ UnitOwnership : has
+    Unit ||--o{ UnitResident : has
+    Unit ||--o{ LeaseAgreement : has
+    Society ||--o{ SocietySubscription : has
+    Society ||--o{ FeatureAccess : has
+    User ||--o{ UnitOwnership : isOwner
+    User ||--o{ UnitResident : isResident
+    Society ||--o| Address : located
+
+    %% Lease Relationships
+    LeaseAgreement ||--o{ RentPayment : has
+    Unit ||--o{ VisitorPass : issues
+    Unit ||--o{ VisitorEntry : receives
+    VisitorPass ||--o{ VisitorEntry : enables
+
+    %% Media Relationships
+    Unit ||--o{ MediaStorage : has
+    Block ||--o{ MediaStorage : has
+    Society ||--o{ MediaStorage : has
+

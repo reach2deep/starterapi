@@ -385,6 +385,137 @@ namespace starterkit.Infrastructure.Migrations
                     b.ToTable("Floors");
                 });
 
+            modelBuilder.Entity("starterkit.Core.Modules.Tenant.SocietyManagement.Entities.LeaseAgreement", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("NoticePeriodDays")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("PaymentFrequency")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<decimal>("RentAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("SecurityDeposit")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("UnitId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OwnerId");
+
+                    b.HasIndex("Status");
+
+                    b.HasIndex("TenantId");
+
+                    b.HasIndex("UnitId");
+
+                    b.ToTable("LeaseAgreements", (string)null);
+                });
+
+            modelBuilder.Entity("starterkit.Core.Modules.Tenant.SocietyManagement.Entities.RentPayment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("DueDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("LeaseAgreementId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("PaidDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("PaymentMode")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("TransactionReference")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DueDate");
+
+                    b.HasIndex("LeaseAgreementId");
+
+                    b.HasIndex("Status");
+
+                    b.HasIndex("TransactionReference")
+                        .IsUnique()
+                        .HasFilter("[TransactionReference] IS NOT NULL");
+
+                    b.ToTable("RentPayments", (string)null);
+                });
+
             modelBuilder.Entity("starterkit.Core.Modules.Tenant.SocietyManagement.Entities.Society", b =>
                 {
                     b.Property<Guid>("Id")
@@ -834,6 +965,44 @@ namespace starterkit.Infrastructure.Migrations
                     b.Navigation("Block");
                 });
 
+            modelBuilder.Entity("starterkit.Core.Modules.Tenant.SocietyManagement.Entities.LeaseAgreement", b =>
+                {
+                    b.HasOne("starterkit.Core.Modules.Tenant.User", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("starterkit.Core.Modules.Tenant.User", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("starterkit.Core.Modules.Tenant.SocietyManagement.Entities.Unit", "Unit")
+                        .WithMany()
+                        .HasForeignKey("UnitId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Owner");
+
+                    b.Navigation("Tenant");
+
+                    b.Navigation("Unit");
+                });
+
+            modelBuilder.Entity("starterkit.Core.Modules.Tenant.SocietyManagement.Entities.RentPayment", b =>
+                {
+                    b.HasOne("starterkit.Core.Modules.Tenant.SocietyManagement.Entities.LeaseAgreement", "LeaseAgreement")
+                        .WithMany("RentPayments")
+                        .HasForeignKey("LeaseAgreementId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("LeaseAgreement");
+                });
+
             modelBuilder.Entity("starterkit.Core.Modules.Tenant.SocietyManagement.Entities.Society", b =>
                 {
                     b.HasOne("starterkit.Core.Modules.Tenant.Address", "Address")
@@ -957,6 +1126,11 @@ namespace starterkit.Infrastructure.Migrations
             modelBuilder.Entity("starterkit.Core.Modules.Tenant.SocietyManagement.Entities.Floor", b =>
                 {
                     b.Navigation("Units");
+                });
+
+            modelBuilder.Entity("starterkit.Core.Modules.Tenant.SocietyManagement.Entities.LeaseAgreement", b =>
+                {
+                    b.Navigation("RentPayments");
                 });
 
             modelBuilder.Entity("starterkit.Core.Modules.Tenant.SocietyManagement.Entities.Society", b =>

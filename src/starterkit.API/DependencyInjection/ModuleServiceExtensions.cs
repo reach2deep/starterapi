@@ -46,6 +46,9 @@ public static class ModuleServiceExtensions
         // Register society management module
         AddSocietyManagementModule(services);
         
+        // Register lease management module
+        AddLeaseManagementModule(services);
+        
         // Register AutoMapper
         services.AddAutoMapper(typeof(UserService).Assembly);
 
@@ -95,6 +98,19 @@ public static class ModuleServiceExtensions
         services.AddScoped<IUnitService, UnitService>();
         services.AddScoped<IUnitOwnershipService, UnitOwnershipService>();
         services.AddScoped<IUnitResidentService, UnitResidentService>();
+
+        return services;
+    }
+
+    private static IServiceCollection AddLeaseManagementModule(this IServiceCollection services)
+    {
+        // Register repositories
+        services.AddScoped<ILeaseAgreementRepository, LeaseAgreementRepository>();
+        services.AddScoped<IRentPaymentRepository, RentPaymentRepository>();
+
+        // Register services
+        services.AddScoped<ILeaseAgreementService, LeaseAgreementService>();
+        services.AddScoped<IRentPaymentService, RentPaymentService>();
 
         return services;
     }

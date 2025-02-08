@@ -208,7 +208,7 @@ namespace starterkit.Infrastructure.Data.TenantDb
                     
                     // Society Permissions
                     new Permission { Name = "Society", Module = "Society", Action = "Module", IsDefault = true, Description = "Allows managing societies", Parent = "SocietyManagement" },  
-                    new Permission { Name = "View Societies", Module = "Society", Action = "View", IsDefault = true, Description = "Allows viewing the list of societies and their details", Parent = "Society" },
+                    new Permission { Name = "View Society", Module = "Society", Action = "View", IsDefault = true, Description = "Allows viewing the list of societies and their details", Parent = "Society" },
                     new Permission { Name = "Create Society", Module = "Society", Action = "Create", IsDefault = true, Description = "Allows creating new societies", Parent = "Society" },
                     new Permission { Name = "Edit Society", Module = "Society", Action = "Edit", IsDefault = true, Description = "Allows editing existing society information", Parent = "Society" },   
                     new Permission { Name = "Delete Society", Module = "Society", Action = "Delete", IsDefault = true, Description = "Allows deleting societies", Parent = "Society" },
@@ -233,6 +233,24 @@ namespace starterkit.Infrastructure.Data.TenantDb
                     new Permission { Name = "Create Unit", Module = "Units", Action = "Create", IsDefault = true, Description = "Allows creating new units in floors", Parent = "Units" },
                     new Permission { Name = "Edit Unit", Module = "Units", Action = "Edit", IsDefault = true, Description = "Allows editing existing unit information", Parent = "Units" },
                     new Permission { Name = "Delete Unit", Module = "Units", Action = "Delete", IsDefault = true, Description = "Allows deleting units", Parent = "Units" },
+
+                    // Lease Management Module
+                    new Permission { Name = "Lease Management", Module = "LeaseManagement", Action = "Module", IsDefault = true, Description = "Allows managing lease agreements and rent payments", Parent = null },
+                    
+                    // Lease Agreement Permissions
+                    new Permission { Name = "Lease Agreements", Module = "LeaseAgreements", Action = "Module", IsDefault = true, Description = "Allows managing lease agreements", Parent = "LeaseManagement" },
+                    new Permission { Name = "View Lease Agreements", Module = "LeaseAgreements", Action = "View", IsDefault = true, Description = "Allows viewing lease agreements", Parent = "LeaseAgreements" },
+                    new Permission { Name = "Create Lease Agreement", Module = "LeaseAgreements", Action = "Create", IsDefault = true, Description = "Allows creating new lease agreements", Parent = "LeaseAgreements" },
+                    new Permission { Name = "Edit Lease Agreement", Module = "LeaseAgreements", Action = "Edit", IsDefault = true, Description = "Allows editing lease agreements", Parent = "LeaseAgreements" },
+                    new Permission { Name = "Delete Lease Agreement", Module = "LeaseAgreements", Action = "Delete", IsDefault = true, Description = "Allows deleting lease agreements", Parent = "LeaseAgreements" },
+                    
+                    // Rent Payment Permissions
+                    new Permission { Name = "Rent Payments", Module = "RentPayments", Action = "Module", IsDefault = true, Description = "Allows managing rent payments", Parent = "LeaseManagement" },
+                    new Permission { Name = "View Rent Payments", Module = "RentPayments", Action = "View", IsDefault = true, Description = "Allows viewing rent payments", Parent = "RentPayments" },
+                    new Permission { Name = "Create Rent Payment", Module = "RentPayments", Action = "Create", IsDefault = true, Description = "Allows creating new rent payments", Parent = "RentPayments" },
+                    new Permission { Name = "Edit Rent Payment", Module = "RentPayments", Action = "Edit", IsDefault = true, Description = "Allows editing rent payments", Parent = "RentPayments" },
+                    new Permission { Name = "Delete Rent Payment", Module = "RentPayments", Action = "Delete", IsDefault = true, Description = "Allows deleting rent payments", Parent = "RentPayments" },
+                    new Permission { Name = "View Overdue Payments", Module = "RentPayments", Action = "ViewOverdue", IsDefault = true, Description = "Allows viewing overdue rent payments", Parent = "RentPayments" },
 
                     // Unit Ownership Permissions
                     new Permission { Name = "Unit Ownerships", Module = "UnitOwnerships", Action = "Module", IsDefault = true, Description = "Allows managing unit ownership records", Parent = "SocietyManagement" }, 
