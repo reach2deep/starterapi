@@ -93,13 +93,14 @@ namespace starterkit.Infrastructure.Repositories.Tenant
         {
             try
             {
+                _logger.LogInformation("Retrieving current ownership for unit ID: {UnitId}", unitId);
                 return await _context.UnitOwnerships
                     .Include(uo => uo.Unit)
                     .Include(uo => uo.Owner)
                         .ThenInclude(o => o.Profile)
                     .Where(uo => uo.UnitId == unitId && 
                                 uo.IsActive && 
-                                uo.EndDate == null)
+                                uo.Status == "Active")
                     .OrderByDescending(uo => uo.StartDate)
                     .FirstOrDefaultAsync();
             }

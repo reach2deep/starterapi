@@ -5,12 +5,15 @@ using System.Threading.Tasks;
 using AutoMapper;
 using FluentValidation;
 using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore.Storage;
 using starterkit.Core.Modules.Common;
 using starterkit.Core.Modules.Tenant.SocietyManagement.Entities;
 using starterkit.Core.Modules.Tenant.SocietyManagement.Interfaces.Repositories;
+using starterkit.Core.Modules.Tenant.UserManagement.Interfaces.Repositories;
 using starterkit.Application.Modules.Tenant.SocietyManagement.DTOs.Requests;
 using starterkit.Application.Modules.Tenant.SocietyManagement.DTOs.Responses;
 using starterkit.Application.Modules.Tenant.SocietyManagement.Interfaces.Services;
+using starterkit.Application.Persistence;
 
 namespace starterkit.Application.Modules.Tenant.SocietyManagement.Services
 {
@@ -20,6 +23,11 @@ namespace starterkit.Application.Modules.Tenant.SocietyManagement.Services
     public class LeaseAgreementService : ILeaseAgreementService
     {
         private readonly ILeaseAgreementRepository _leaseAgreementRepository;
+        private readonly IUnitResidentRepository _unitResidentRepository;
+        private readonly IUnitRepository _unitRepository;
+        private readonly IUnitOwnershipRepository _unitOwnershipRepository;
+        private readonly IUserRepository _userRepository;
+        private readonly ITenantDbContext _dbContext;
         private readonly IMapper _mapper;
         private readonly IValidator<CreateLeaseAgreementRequest> _createValidator;
         private readonly IValidator<UpdateLeaseAgreementRequest> _updateValidator;
@@ -27,12 +35,22 @@ namespace starterkit.Application.Modules.Tenant.SocietyManagement.Services
 
         public LeaseAgreementService(
             ILeaseAgreementRepository leaseAgreementRepository,
+            IUnitResidentRepository unitResidentRepository,
+            IUnitRepository unitRepository,
+            IUnitOwnershipRepository unitOwnershipRepository,
+            IUserRepository userRepository,
+            ITenantDbContext dbContext,
             IMapper mapper,
             IValidator<CreateLeaseAgreementRequest> createValidator,
             IValidator<UpdateLeaseAgreementRequest> updateValidator,
             ILogger<LeaseAgreementService> logger)
         {
             _leaseAgreementRepository = leaseAgreementRepository;
+            _unitResidentRepository = unitResidentRepository;
+            _unitRepository = unitRepository;
+            _unitOwnershipRepository = unitOwnershipRepository;
+            _userRepository = userRepository;
+            _dbContext = dbContext;
             _mapper = mapper;
             _createValidator = createValidator;
             _updateValidator = updateValidator;
@@ -155,25 +173,107 @@ namespace starterkit.Application.Modules.Tenant.SocietyManagement.Services
         {
             try
             {
+                // 1. Request Validation
                 var validationResult = await _createValidator.ValidateAsync(request);
                 if (!validationResult.IsValid)
                     return ApiResponse<LeaseAgreementResponse>.CreateError(validationResult.Errors.First().ErrorMessage);
 
-                // Check if there's already an active lease for the unit
+                // 2. Unit Validation
+                var unit = await _unitRepository.GetByIdAsync(request.UnitId);
+                if (unit == null)
+                    return ApiResponse<LeaseAgreementResponse>.CreateError("Unit not found");
+
+                if (!unit.IsActive)
+                    return ApiResponse<LeaseAgreementResponse>.CreateError("Unit is not active");
+
+                // 3. Owner Validation
+                var currentOwnership = await _unitOwnershipRepository.GetCurrentOwnershipAsync(request.UnitId);
+                _logger.LogInformation(
+                    "Owner Validation - UnitId: {UnitId}, RequestOwnerId: {RequestOwnerId}, " +
+                    "CurrentOwnership: {CurrentOwnership}, OwnershipActive: {OwnershipActive}, CurrentOwnerId: {CurrentOwnerId}",
+                    request.UnitId,
+                    request.OwnerId,
+                    currentOwnership != null,
+                    currentOwnership?.IsActive,
+                    currentOwnership?.OwnerId);
+
+                // Check if there is a current ownership record
+                if (currentOwnership == null)
+                    return ApiResponse<LeaseAgreementResponse>.CreateError("No ownership record found for this unit");
+
+                // Check if the ownership is active
+                if (!currentOwnership.IsActive)
+                    return ApiResponse<LeaseAgreementResponse>.CreateError("No active ownership record found for this unit");
+
+                // Check if the requester is the current owner
+                if (currentOwnership.OwnerId != request.OwnerId)
+                    return ApiResponse<LeaseAgreementResponse>.CreateError("The specified user is not the current owner of this unit");
+
+                // 4. Tenant Validation
+                var tenant = await _userRepository.GetByIdAsync(request.TenantId);
+                if (tenant == null)
+                    return ApiResponse<LeaseAgreementResponse>.CreateError("Tenant not found");
+
+                if (!tenant.IsActive)
+                    return ApiResponse<LeaseAgreementResponse>.CreateError("Tenant account is not active");
+
+                // 5. Check for existing active lease
                 var existingLease = await _leaseAgreementRepository.GetActiveLeaseForUnitAsync(request.UnitId);
                 if (existingLease != null)
                     return ApiResponse<LeaseAgreementResponse>.CreateError("An active lease agreement already exists for this unit");
 
-                var leaseAgreement = _mapper.Map<LeaseAgreement>(request);
-                var created = await _leaseAgreementRepository.AddAsync(leaseAgreement);
-                var response = _mapper.Map<LeaseAgreementResponse>(created);
+                // 6. Check if tenant has other active leases
+                var tenantActiveLeases = await _leaseAgreementRepository.GetByTenantIdAsync(request.TenantId);
+                if (tenantActiveLeases.Any(l => l.Status == "Active" && l.EndDate > DateTime.UtcNow))
+                    return ApiResponse<LeaseAgreementResponse>.CreateError("Tenant already has an active lease agreement");
 
-                return ApiResponse<LeaseAgreementResponse>.CreateSuccess(response);
+                // 7. Check for existing resident record
+                var existingResident = await _unitResidentRepository.GetCurrentResidentsAsync(request.UnitId);
+                if (existingResident.Any(r => r.ResidentId == request.TenantId))
+                    return ApiResponse<LeaseAgreementResponse>.CreateError("Tenant is already a resident of this unit");
+
+                // 8. Validate dates
+                if (request.StartDate < DateTime.UtcNow.Date)
+                    return ApiResponse<LeaseAgreementResponse>.CreateError("Lease start date cannot be in the past");
+
+                if (request.EndDate <= request.StartDate)
+                    return ApiResponse<LeaseAgreementResponse>.CreateError("Lease end date must be after start date");
+
+                try
+                {
+                    // Create lease agreement
+                    var leaseAgreement = _mapper.Map<LeaseAgreement>(request);
+                    leaseAgreement.Status = "Active";
+                    var created = await _leaseAgreementRepository.AddAsync(leaseAgreement);
+
+                    // Create unit resident record
+                    var unitResident = new UnitResident
+                    {
+                        UnitId = request.UnitId,
+                        ResidentId = request.TenantId,
+                        StartDate = request.StartDate,
+                        EndDate = request.EndDate,
+                        IsPrimary = true,
+                        IsActive = true,
+                        RelationType = "Tenant",
+                        CreatedBy = created.CreatedBy
+                    };
+                    await _unitResidentRepository.AddAsync(unitResident);
+
+                    var response = _mapper.Map<LeaseAgreementResponse>(created);
+                    return ApiResponse<LeaseAgreementResponse>.CreateSuccess(response);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error during lease agreement creation");
+                    throw;
+                }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error creating lease agreement");
-                return ApiResponse<LeaseAgreementResponse>.CreateError("Error creating lease agreement");
+                _logger.LogError(ex, "Error creating lease agreement for unit {UnitId} and tenant {TenantId}", 
+                    request.UnitId, request.TenantId);
+                return ApiResponse<LeaseAgreementResponse>.CreateError("Error creating lease agreement. Please try again later.");
             }
         }
 

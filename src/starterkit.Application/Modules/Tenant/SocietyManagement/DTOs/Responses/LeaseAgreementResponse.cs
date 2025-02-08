@@ -99,6 +99,36 @@ namespace starterkit.Application.Modules.Tenant.SocietyManagement.DTOs.Responses
         public Guid? UpdatedBy { get; set; }
 
         /// <summary>
+        /// Indicates if the lease is nearing its end date (within 30 days)
+        /// </summary>
+        public bool IsExpiringSoon { get; set; }
+
+        /// <summary>
+        /// Number of days remaining until the lease expires
+        /// </summary>
+        public int DaysUntilExpiry { get; set; }
+
+        /// <summary>
+        /// Total amount of rent paid so far under this lease
+        /// </summary>
+        public decimal TotalPaidAmount { get; set; }
+
+        /// <summary>
+        /// Total pending rent amount for this lease
+        /// </summary>
+        public decimal PendingAmount { get; set; }
+
+        /// <summary>
+        /// Date of the last rent payment made
+        /// </summary>
+        public DateTime? LastPaymentDate { get; set; }
+
+        /// <summary>
+        /// Status of the last rent payment
+        /// </summary>
+        public string LastPaymentStatus { get; set; }
+
+        /// <summary>
         /// List of rent payments associated with this lease
         /// </summary>
         public ICollection<RentPaymentResponse> RentPayments { get; set; }
