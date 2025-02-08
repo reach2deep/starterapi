@@ -23,6 +23,8 @@ namespace starterkit.Application.Persistence
         DbSet<UnitResident> UnitResidents { get; set; }
         DbSet<SocietySubscription> SocietySubscriptions { get; set; }
         DbSet<FeatureAccess> FeatureAccesses { get; set; }
+        DbSet<LeaseAgreement> LeaseAgreements { get; set; }
+        DbSet<RentPayment> RentPayments { get; set; }
 
         DbSet<TEntity> Set<TEntity>() where TEntity : class;
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);

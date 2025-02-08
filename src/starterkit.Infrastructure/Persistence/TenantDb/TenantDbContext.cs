@@ -32,12 +32,8 @@ namespace starterkit.Infrastructure.Persistence.TenantDb
         public DbSet<SocietySubscription> SocietySubscriptions { get; set; }
         public DbSet<FeatureAccess> FeatureAccesses { get; set; }
         public DbSet<UnitResident> UnitResidents { get; set; }
-
-    
-        
-
-
-        
+        public DbSet<LeaseAgreement> LeaseAgreements { get; set; }
+        public DbSet<RentPayment> RentPayments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -52,6 +48,8 @@ namespace starterkit.Infrastructure.Persistence.TenantDb
             modelBuilder.ApplyConfiguration(new PermissionConfiguration());
             modelBuilder.ApplyConfiguration(new UserRoleConfiguration());
             modelBuilder.ApplyConfiguration(new RolePermissionConfiguration());
+            modelBuilder.ApplyConfiguration(new LeaseAgreementConfiguration());
+            modelBuilder.ApplyConfiguration(new RentPaymentConfiguration());
         }
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
