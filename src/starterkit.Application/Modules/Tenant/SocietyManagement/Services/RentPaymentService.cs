@@ -159,15 +159,43 @@ namespace starterkit.Application.Modules.Tenant.SocietyManagement.Services
                 if (!validationResult.IsValid)
                     return ApiResponse<RentPaymentResponse>.CreateError(validationResult.Errors.First().ErrorMessage);
 
-                // Verify lease agreement exists and is active
-                var leaseAgreement = await _leaseAgreementRepository.GetByIdAsync(request.LeaseAgreementId);
+                // 1. Verify lease agreement exists and is active
+                var leaseAgreement = await _leaseAgreementRepository.GetByIdWithDetailsAsync(request.LeaseAgreementId);
                 if (leaseAgreement == null)
                     return ApiResponse<RentPaymentResponse>.CreateError("Lease agreement not found");
 
                 if (leaseAgreement.Status != "Active")
                     return ApiResponse<RentPaymentResponse>.CreateError("Cannot create payment for inactive lease agreement");
 
+                // 2. Verify payment amount matches lease agreement
+                if (request.Amount != leaseAgreement.RentAmount)
+                    return ApiResponse<RentPaymentResponse>.CreateError($"Payment amount must match lease agreement amount: {leaseAgreement.RentAmount}");
+
+                // 3. Check for existing payments with same due date
+                var existingPayments = await _rentPaymentRepository.GetByLeaseAgreementIdAsync(request.LeaseAgreementId);
+                if (existingPayments.Any(p => p.DueDate.Date == request.DueDate.Date))
+                    return ApiResponse<RentPaymentResponse>.CreateError("A payment for this due date already exists");
+
+                // 4. Verify payment dates are within lease period
+                if (request.DueDate.Date < leaseAgreement.StartDate.Date || request.DueDate.Date > leaseAgreement.EndDate.Date)
+                    return ApiResponse<RentPaymentResponse>.CreateError("Payment due date must be within the lease period");
+
+                if (request.PaidDate.HasValue && 
+                    (request.PaidDate.Value.Date < leaseAgreement.StartDate.Date || request.PaidDate.Value.Date > leaseAgreement.EndDate.Date))
+                    return ApiResponse<RentPaymentResponse>.CreateError("Payment paid date must be within the lease period");
+
+                // 5. Verify transaction reference is unique if provided
+                if (!string.IsNullOrEmpty(request.TransactionReference))
+                {
+                    var existingPaymentWithRef = existingPayments.FirstOrDefault(p => 
+                        p.TransactionReference == request.TransactionReference);
+                    if (existingPaymentWithRef != null)
+                        return ApiResponse<RentPaymentResponse>.CreateError("Transaction reference must be unique");
+                }
+
                 var rentPayment = _mapper.Map<RentPayment>(request);
+                rentPayment.Status = request.PaidDate.HasValue ? "Paid" : "Pending";
+                
                 var created = await _rentPaymentRepository.AddAsync(rentPayment);
                 var response = _mapper.Map<RentPaymentResponse>(created);
 
@@ -188,7 +216,7 @@ namespace starterkit.Application.Modules.Tenant.SocietyManagement.Services
                 if (!validationResult.IsValid)
                     return ApiResponse<RentPaymentResponse>.CreateError(validationResult.Errors.First().ErrorMessage);
 
-                var existing = await _rentPaymentRepository.GetByIdAsync(request.Id);
+                var existing = await _rentPaymentRepository.GetByIdWithDetailsAsync(request.Id);
                 if (existing == null)
                     return ApiResponse<RentPaymentResponse>.CreateError("Rent payment not found");
 
@@ -321,6 +349,81 @@ namespace starterkit.Application.Modules.Tenant.SocietyManagement.Services
             {
                 _logger.LogError(ex, "Error getting rent payment lookup data");
                 return ApiResponse<LookupResponse<LookupDto>>.CreateError("Error retrieving rent payment lookup data");
+            }
+        }
+
+        public async Task<ApiResponse<RentPaymentResponse>> CreateByUnitIdAsync(Guid unitId, CreateRentPaymentByUnitRequest request)
+        {
+            try
+            {
+                // 1. Get active lease for the unit
+                var leaseAgreement = await _leaseAgreementRepository.GetActiveLeaseForUnitAsync(unitId);
+                if (leaseAgreement == null)
+                    return ApiResponse<RentPaymentResponse>.CreateError("No active lease found for this unit");
+
+                // 2. Create rent payment request
+                var rentPaymentRequest = new CreateRentPaymentRequest
+                {
+                    LeaseAgreementId = leaseAgreement.Id,
+                    Amount = request.Amount,
+                    DueDate = request.DueDate,
+                    PaidDate = request.PaidDate,
+                    PaymentMode = request.PaymentMode,
+                    TransactionReference = request.TransactionReference
+                };
+
+                // 3. Validate request
+                var validationResult = await _createValidator.ValidateAsync(rentPaymentRequest);
+                if (!validationResult.IsValid)
+                    return ApiResponse<RentPaymentResponse>.CreateError(validationResult.Errors.First().ErrorMessage);
+
+                // 4. Verify payment amount matches lease agreement
+                if (request.Amount != leaseAgreement.RentAmount)
+                    return ApiResponse<RentPaymentResponse>.CreateError($"Payment amount must match lease agreement amount: {leaseAgreement.RentAmount}");
+
+                // 5. Check for existing payments with same due date
+                var existingPayments = await _rentPaymentRepository.GetByLeaseAgreementIdAsync(leaseAgreement.Id);
+                if (existingPayments.Any(p => p.DueDate.Date == request.DueDate.Date))
+                    return ApiResponse<RentPaymentResponse>.CreateError("A payment for this due date already exists");
+
+                // 6. Verify payment dates are within lease period
+                if (request.DueDate.Date < leaseAgreement.StartDate.Date || request.DueDate.Date > leaseAgreement.EndDate.Date)
+                    return ApiResponse<RentPaymentResponse>.CreateError("Payment due date must be within the lease period");
+
+                if (request.PaidDate.HasValue && 
+                    (request.PaidDate.Value.Date < leaseAgreement.StartDate.Date || request.PaidDate.Value.Date > leaseAgreement.EndDate.Date))
+                    return ApiResponse<RentPaymentResponse>.CreateError("Payment paid date must be within the lease period");
+
+                // 7. Verify transaction reference is unique if provided
+                if (!string.IsNullOrEmpty(request.TransactionReference))
+                {
+                    var existingPaymentWithRef = existingPayments.FirstOrDefault(p => 
+                        p.TransactionReference == request.TransactionReference);
+                    if (existingPaymentWithRef != null)
+                        return ApiResponse<RentPaymentResponse>.CreateError("Transaction reference must be unique");
+                }
+
+                var rentPayment = new RentPayment
+                {
+                    LeaseAgreementId = leaseAgreement.Id,
+                    Amount = request.Amount,
+                    DueDate = request.DueDate,
+                    PaidDate = request.PaidDate,
+                    PaymentMode = request.PaymentMode,
+                    TransactionReference = request.TransactionReference,
+                    Status = request.PaidDate.HasValue ? "Paid" : "Pending",
+                    IsActive = true
+                };
+
+                var created = await _rentPaymentRepository.AddAsync(rentPayment);
+                var response = _mapper.Map<RentPaymentResponse>(created);
+
+                return ApiResponse<RentPaymentResponse>.CreateSuccess(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating rent payment for unit {UnitId}", unitId);
+                return ApiResponse<RentPaymentResponse>.CreateError("Error creating rent payment");
             }
         }
     }
