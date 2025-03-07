@@ -53,6 +53,11 @@ namespace starterkit.Application.Modules.Tenant.SocietyManagement.Interfaces.Ser
         Task<ApiResponse<RentPaymentResponse>> CreateAsync(CreateRentPaymentRequest request);
 
         /// <summary>
+        /// Creates a new rent payment for a specific unit's active lease
+        /// </summary>
+        Task<ApiResponse<RentPaymentResponse>> CreateByUnitIdAsync(Guid unitId, CreateRentPaymentByUnitRequest request);
+
+        /// <summary>
         /// Updates an existing rent payment
         /// </summary>
         Task<ApiResponse<RentPaymentResponse>> UpdateAsync(UpdateRentPaymentRequest request);

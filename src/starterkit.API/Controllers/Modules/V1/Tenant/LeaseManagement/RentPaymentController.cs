@@ -21,10 +21,12 @@ namespace starterkit.API.Controllers.Modules.V1.Tenant.LeaseManagement
     public class RentPaymentController : BaseApiController
     {
         private readonly IRentPaymentService _rentPaymentService;
+        private readonly ILeaseAgreementService _leaseAgreementService;
 
-        public RentPaymentController(IRentPaymentService rentPaymentService)
+        public RentPaymentController(IRentPaymentService rentPaymentService, ILeaseAgreementService leaseAgreementService)
         {
             _rentPaymentService = rentPaymentService;
+            _leaseAgreementService = leaseAgreementService;
         }
 
         /// <summary>
@@ -136,6 +138,25 @@ namespace starterkit.API.Controllers.Modules.V1.Tenant.LeaseManagement
         public async Task<IActionResult> Create([FromBody] CreateRentPaymentRequest request)
         {
             var result = await _rentPaymentService.CreateAsync(request);
+            if (!result.Success)
+                return BadRequest(result);
+
+            return CreatedAtAction(nameof(GetById), new { id = result.Data.Id }, result);
+        }
+
+        /// <summary>
+        /// Creates a new rent payment for a specific unit's active lease
+        /// </summary>
+        /// <param name="unitId">The ID of the unit</param>
+        /// <param name="request">The rent payment details</param>
+        /// <returns>The created rent payment</returns>
+        [HttpPost("by-unit/{unitId}")]
+        [ProducesResponseType(typeof(ApiResponse<RentPaymentResponse>), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> CreateByUnitId(Guid unitId, [FromBody] CreateRentPaymentByUnitRequest request)
+        {
+            var result = await _rentPaymentService.CreateByUnitIdAsync(unitId, request);
             if (!result.Success)
                 return BadRequest(result);
 

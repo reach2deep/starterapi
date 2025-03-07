@@ -67,7 +67,14 @@ namespace starterkit.Infrastructure.Repositories.Tenant
 
         public async Task<(IEnumerable<RentPayment> Items, int TotalCount)> GetPagedAsync(int pageNumber, int pageSize)
         {
-            var query = _context.RentPayments.Where(x => x.IsActive);
+            var query = _context.RentPayments
+                .Include(x => x.LeaseAgreement)
+                    .ThenInclude(x => x.Unit)
+                .Include(x => x.LeaseAgreement)
+                    .ThenInclude(x => x.Tenant)
+                        .ThenInclude(t => t.Profile)
+                .Where(x => x.IsActive);
+
             var totalCount = await query.CountAsync();
             var items = await query
                 .Skip((pageNumber - 1) * pageSize)
