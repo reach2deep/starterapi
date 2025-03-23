@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using starterkit.Application.Persistence;
+using starterkit.Core.Modules.Common.Documents.Entities;
 using starterkit.Core.Modules.Tenant;
 using starterkit.Core.Modules.Tenant.SocietyManagement.Entities;
 using starterkit.Infrastructure.Data.TenantDb.Configurations;
@@ -34,6 +35,9 @@ namespace starterkit.Infrastructure.Persistence.TenantDb
         public DbSet<UnitResident> UnitResidents { get; set; }
         public DbSet<LeaseAgreement> LeaseAgreements { get; set; }
         public DbSet<RentPayment> RentPayments { get; set; }
+        // Document management entities
+        public DbSet<Document> Documents { get; set; }
+        public DbSet<DocumentAccessLog> DocumentAccessLogs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -50,6 +54,10 @@ namespace starterkit.Infrastructure.Persistence.TenantDb
             modelBuilder.ApplyConfiguration(new RolePermissionConfiguration());
             modelBuilder.ApplyConfiguration(new LeaseAgreementConfiguration());
             modelBuilder.ApplyConfiguration(new RentPaymentConfiguration());
+            
+            // Document management configurations
+            modelBuilder.ApplyConfiguration(new DocumentConfiguration());
+            modelBuilder.ApplyConfiguration(new DocumentAccessLogConfiguration());
         }
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
