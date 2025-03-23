@@ -14,6 +14,7 @@ using starterkit.Infrastructure.Data.TenantDb;
 using Microsoft.Extensions.Logging;
 using starterkit.Application.Modules.Tenant.UserManagement.Services;
 using starterkit.Application.Modules.Tenant.SocietyManagement.Validators;
+using Microsoft.AspNetCore.Http;
 
 namespace starterkit.API.DependencyInjection;
 
@@ -59,10 +60,46 @@ public static class InfrastructureServiceExtensions
         services.AddScoped<ITenantDatabaseInitializer, TenantDatabaseInitializer>();
         services.AddScoped<IDataSeeder, RootDbSeeder>();
         
+        // Register document management services
+        services.AddDocumentManagementModule(configuration);
+        
         // Register AutoMapper and FluentValidation
         services.AddAutoMapper(typeof(RootDbContext).Assembly);
         services.AddValidatorsFromAssembly(typeof(UpdateUnitResidentRequestValidator).Assembly); // Register validators from Application assembly
 
+        return services;
+    }
+    
+    /// <summary>
+    /// Registers document management services
+    /// </summary>
+    private static IServiceCollection AddDocumentManagementModule(this IServiceCollection services, IConfiguration configuration)
+    {
+        // Register Azure Blob Storage service
+        services.AddScoped<IBlobStorageService, BlobStorageService>();
+        
+        // Register document service with tenant context
+        services.AddScoped<IDocumentService>(sp =>
+        {
+            var blobStorageService = sp.GetRequiredService<IBlobStorageService>();
+            var httpContextAccessor = sp.GetRequiredService<IHttpContextAccessor>();
+            var logger = sp.GetRequiredService<ILogger<DocumentService>>();
+            
+            // Get the current tenant ID from HttpContext
+            var tenantId = httpContextAccessor.HttpContext?.Items["Tenant"]?.ToString();
+            if (string.IsNullOrEmpty(tenantId))
+                throw new InvalidOperationException("Tenant ID not found in HTTP context");
+                
+            var dbContext = sp.GetRequiredService<Func<string, ITenantDbContext>>()(tenantId);
+            
+            return new DocumentService(
+                blobStorageService,
+                dbContext,
+                logger,
+                tenantId,
+                configuration);
+        });
+        
         return services;
     }
 }

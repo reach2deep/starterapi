@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using starterkit.Core.Modules.Common.Documents.Entities;
 using starterkit.Core.Modules.Tenant;
 using starterkit.Core.Modules.Tenant.SocietyManagement.Entities;
 
@@ -25,6 +26,9 @@ namespace starterkit.Application.Persistence
         DbSet<FeatureAccess> FeatureAccesses { get; set; }
         DbSet<LeaseAgreement> LeaseAgreements { get; set; }
         DbSet<RentPayment> RentPayments { get; set; }
+        // Document management entities
+        DbSet<Document> Documents { get; set; }
+        DbSet<DocumentAccessLog> DocumentAccessLogs { get; set; }
 
         DbSet<TEntity> Set<TEntity>() where TEntity : class;
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
